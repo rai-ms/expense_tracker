@@ -279,7 +279,7 @@ class _RiveTransactionsPainter extends CustomPainter {
 }
 
 // ==========================================
-// 3. KHATABOOK: 3D Opening Ledger Book & Bookmark Ribbon
+// 3. KHATABOOK: Iconic Bahi-Khata Ledger with ₹ Coin & Dual Entry Columns
 // ==========================================
 class _RiveKhataPainter extends CustomPainter {
   final double progress;
@@ -307,58 +307,100 @@ class _RiveKhataPainter extends CustomPainter {
 
     final w = size.width;
     final h = size.height;
-    final curve = Curves.easeOutBack.transform(progress.clamp(0.0, 1.0));
+    final curve = Curves.elasticOut.transform(progress.clamp(0.0, 1.0));
 
-    // Book Spine (Left vertical edge)
+    // Ledger Outer Notebook Body with rounded corners
+    final ledgerRect = RRect.fromRectAndRadius(
+      Rect.fromLTWH(3.5, 3.0, w - 7.0, h - 6.0),
+      const Radius.circular(5.0),
+    );
+    canvas.drawRRect(ledgerRect, strokePaint);
+
+    // Left Spine Border (Bahi-Khata Binding Band)
     canvas.drawLine(
-      const Offset(4, 3),
-      Offset(4, h - 3),
-      strokePaint..strokeWidth = 2.5,
+      const Offset(8.5, 3.0),
+      Offset(8.5, h - 3.0),
+      strokePaint..strokeWidth = 1.6,
     );
 
-    // Base Cover / Pages Backing
-    final bookPath = Path()
-      ..moveTo(4, 4)
-      ..lineTo(w - 4, 4)
-      ..lineTo(w - 4, h - 4)
-      ..lineTo(4, h - 4);
-    canvas.drawPath(bookPath, strokePaint..strokeWidth = 1.8);
+    // 2 Spine Stitches / Binding Rivets
+    canvas.drawCircle(const Offset(6.0, 8.0), 1.0, fillPaint);
+    canvas.drawCircle(Offset(6.0, h - 8.0), 1.0, fillPaint);
 
-    // Front Cover Flip Opening Animation
     if (progress > 0.05) {
-      // 3D Angle flip
-      final openOffset = curve * 7.0;
-      final flipCoverPath = Path()
-        ..moveTo(4, 4)
-        ..quadraticBezierTo(w / 2 - openOffset, 2 - openOffset * 0.4, w - 4 - openOffset, 4 - openOffset * 0.5)
-        ..lineTo(w - 4 - openOffset, h - 4 - openOffset * 0.5)
-        ..quadraticBezierTo(w / 2 - openOffset, h - 2 - openOffset * 0.4, 4, h - 4);
+      // Active State: Split Balance Columns (Red "Maine Diye" & Green "Mujhe Mile")
+      final middleX = (w + 8.5) / 2;
+      canvas.drawLine(
+        Offset(middleX, 7.0),
+        Offset(middleX, h - 7.0),
+        strokePaint..strokeWidth = 1.2..color = color.withValues(alpha: 0.5),
+      );
 
-      final pagePaint = Paint()
-        ..color = activeColor.withValues(alpha: 0.3 + progress * 0.4)
+      // Left Column (Gave / Debit Red Tick)
+      final leftLineY = 10.0 + (curve * 2.0);
+      final redPaint = Paint()
+        ..color = Color.lerp(color, AppColors.debitRed, progress)!
         ..style = PaintingStyle.stroke
-        ..strokeWidth = 1.5;
-      canvas.drawPath(flipCoverPath, pagePaint);
-
-      // Ledger Entry Lines inside the book
-      final linePaint = Paint()
-        ..color = activeColor.withValues(alpha: progress)
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 1.4
+        ..strokeWidth = 1.8
         ..strokeCap = StrokeCap.round;
+      canvas.drawLine(Offset(11.5, leftLineY), Offset(middleX - 2.5, leftLineY), redPaint);
+      canvas.drawLine(Offset(11.5, leftLineY + 4), Offset(middleX - 3.5, leftLineY + 4), redPaint);
 
-      canvas.drawLine(Offset(8, 9), Offset(w - 8, 9), linePaint);
-      canvas.drawLine(Offset(8, 14), Offset(w - 11, 14), linePaint);
-      canvas.drawLine(Offset(8, 19), Offset(w - 7, 19), linePaint);
+      // Right Column (Got / Credit Green Tick)
+      final greenPaint = Paint()
+        ..color = Color.lerp(color, AppColors.creditGreen, progress)!
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.8
+        ..strokeCap = StrokeCap.round;
+      canvas.drawLine(Offset(middleX + 2.5, leftLineY), Offset(w - 6.5, leftLineY), greenPaint);
+      canvas.drawLine(Offset(middleX + 2.5, leftLineY + 4), Offset(w - 7.5, leftLineY + 4), greenPaint);
+
+      // Floating Spring ₹ Coin Badge in the center bottom
+      final coinRadius = 3.8 * curve.clamp(0.6, 1.2);
+      final coinCenter = Offset(w - 7.0, h - 7.0);
+      final coinBg = Paint()
+        ..color = activeColor
+        ..style = PaintingStyle.fill;
+      canvas.drawCircle(coinCenter, coinRadius, coinBg);
+
+      // White tick/plus inside coin
+      final tickPaint = Paint()
+        ..color = Colors.white
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.2
+        ..strokeCap = StrokeCap.round;
+      canvas.drawLine(
+        Offset(coinCenter.dx - 1.8, coinCenter.dy),
+        Offset(coinCenter.dx + 1.8, coinCenter.dy),
+        tickPaint,
+      );
+      canvas.drawLine(
+        Offset(coinCenter.dx, coinCenter.dy - 1.8),
+        Offset(coinCenter.dx, coinCenter.dy + 1.8),
+        tickPaint,
+      );
     } else {
-      // Bookmark Ribbon hanging down
+      // Inactive Resting State: Center Rupee Emblem & Ribbon Tag
+      // Top Ribbon Tag
       final ribbonPath = Path()
-        ..moveTo(10, 4)
-        ..lineTo(10, 14)
-        ..lineTo(13, 11)
-        ..lineTo(16, 14)
-        ..lineTo(16, 4);
+        ..moveTo(w - 9.0, 3.0)
+        ..lineTo(w - 9.0, 10.0)
+        ..lineTo(w - 7.0, 8.5)
+        ..lineTo(w - 5.0, 10.0)
+        ..lineTo(w - 5.0, 3.0);
       canvas.drawPath(ribbonPath, fillPaint);
+
+      // Center Ledger Lines
+      canvas.drawLine(
+        const Offset(12.0, 14.0),
+        Offset(w - 8.0, 14.0),
+        strokePaint..strokeWidth = 1.5,
+      );
+      canvas.drawLine(
+        const Offset(12.0, 18.0),
+        Offset(w - 11.0, 18.0),
+        strokePaint..strokeWidth = 1.5,
+      );
     }
   }
 
