@@ -48,22 +48,23 @@ class AnimatedBottomNavBar extends StatelessWidget {
           ),
         ],
       ),
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: List.generate(items.length, (index) {
           final item = items[index];
           final isSelected = selectedIndex == index;
 
-          return _AnimatedNavItem(
-            data: item,
-            isSelected: isSelected,
-            onTap: () {
-              if (!isSelected) {
-                HapticFeedback.selectionClick();
-                onItemSelected(index);
-              }
-            },
+          return Expanded(
+            child: _AnimatedNavItem(
+              data: item,
+              isSelected: isSelected,
+              onTap: () {
+                if (!isSelected) {
+                  HapticFeedback.selectionClick();
+                  onItemSelected(index);
+                }
+              },
+            ),
           );
         }),
       ),
@@ -90,27 +91,29 @@ class _AnimatedNavItem extends StatelessWidget {
         ? AppColors.textTertiaryDark
         : AppColors.textTertiaryLight;
 
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(20),
-      splashColor: AppColors.primary.withValues(alpha: 0.12),
-      highlightColor: Colors.transparent,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeOutCubic,
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-        decoration: BoxDecoration(
-          color: isSelected
-              ? AppColors.primary.withValues(alpha: 0.14)
-              : Colors.transparent,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
+    return Center(
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(18),
+        splashColor: AppColors.primary.withValues(alpha: 0.12),
+        highlightColor: Colors.transparent,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOutCubic,
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 6),
+          decoration: BoxDecoration(
             color: isSelected
-                ? AppColors.primaryLight.withValues(alpha: 0.3)
+                ? AppColors.primary.withValues(alpha: 0.14)
                 : Colors.transparent,
-            width: 1.0,
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(
+              color: isSelected
+                  ? AppColors.primaryLight.withValues(alpha: 0.3)
+                  : Colors.transparent,
+              width: 1.0,
+            ),
           ),
-        ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -170,6 +173,7 @@ class _AnimatedNavItem extends StatelessWidget {
           ],
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 }
