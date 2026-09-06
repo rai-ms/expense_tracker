@@ -5,13 +5,14 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('TransactionFilterCriteria Tests', () {
-    test('default criteria has 0 activeFilterCount and isDefault is true', () {
+    test('default criteria has 0 activeFilterCount and isDefault is true with flexible mode', () {
       const criteria = TransactionFilterCriteria();
       expect(criteria.activeFilterCount, 0);
       expect(criteria.isDefault, true);
+      expect(criteria.matchMode, FilterMatchMode.flexible);
     });
 
-    test('activeFilterCount correctly increments for each active filter dimension', () {
+    test('activeFilterCount correctly increments for each active filter dimension and strict mode', () {
       var criteria = const TransactionFilterCriteria(
         dateFilter: TransactionDateFilter.today,
         types: {'debit', 'credit'},
@@ -20,11 +21,13 @@ void main() {
         minAmount: 100,
         maxAmount: 500,
         sortBy: TransactionSortBy.amountHighToLow,
+        matchMode: FilterMatchMode.strict,
       );
 
-      // 1 (date) + 2 (types) + 2 (categories) + 1 (platform) + 1 (amount) + 1 (sort) = 8
-      expect(criteria.activeFilterCount, 8);
+      // 1 (date) + 2 (types) + 2 (categories) + 1 (platform) + 1 (amount) + 1 (sort) + 1 (strict mode) = 9
+      expect(criteria.activeFilterCount, 9);
       expect(criteria.isDefault, false);
+      expect(criteria.matchMode, FilterMatchMode.strict);
     });
 
     test('copyWith updates fields and clears amounts when requested', () {
@@ -37,21 +40,24 @@ void main() {
       var updated = criteria.copyWith(
         clearMinAmount: true,
         types: {'debit', 'credit'},
+        matchMode: FilterMatchMode.strict,
       );
 
       expect(updated.minAmount, isNull);
       expect(updated.maxAmount, 500);
       expect(updated.types, {'debit', 'credit'});
+      expect(updated.matchMode, FilterMatchMode.strict);
 
       var cleared = updated.copyWith(clearMaxAmount: true);
       expect(cleared.maxAmount, isNull);
     });
 
-    test('SavedFilterPreset serialization and deserialization works accurately', () {
+    test('SavedFilterPreset serialization and deserialization works accurately with matchMode', () {
       final criteria = const TransactionFilterCriteria(
         types: {'debit'},
         categories: {'Food & Dining'},
         minAmount: 200,
+        matchMode: FilterMatchMode.flexible,
       );
 
       final preset = SavedFilterPreset(
@@ -69,6 +75,7 @@ void main() {
       expect(decoded.criteria.types, {'debit'});
       expect(decoded.criteria.categories, {'Food & Dining'});
       expect(decoded.criteria.minAmount, 200);
+      expect(decoded.criteria.matchMode, FilterMatchMode.flexible);
     });
 
     test('AppConstants returns category details for standard categories', () {

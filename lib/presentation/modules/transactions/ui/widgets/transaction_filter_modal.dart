@@ -30,6 +30,7 @@ class TransactionFilterModal extends StatefulWidget {
 
 enum _FilterTab {
   saved,
+  rule,
   date,
   type,
   category,
@@ -50,6 +51,7 @@ class _TransactionFilterModalState extends State<TransactionFilterModal> {
   double? _minAmount;
   double? _maxAmount;
   late TransactionSortBy _sortBy;
+  late FilterMatchMode _matchMode;
 
   final TextEditingController _minAmountController = TextEditingController();
   final TextEditingController _maxAmountController = TextEditingController();
@@ -70,6 +72,7 @@ class _TransactionFilterModalState extends State<TransactionFilterModal> {
     _minAmount = widget.initialCriteria.minAmount;
     _maxAmount = widget.initialCriteria.maxAmount;
     _sortBy = widget.initialCriteria.sortBy;
+    _matchMode = widget.initialCriteria.matchMode;
 
     if (_minAmount != null) {
       _minAmountController.text = _minAmount!.toInt().toString();
@@ -103,6 +106,7 @@ class _TransactionFilterModalState extends State<TransactionFilterModal> {
     if (_platforms.isNotEmpty) count += _platforms.length;
     if (_minAmount != null || _maxAmount != null) count++;
     if (_sortBy != TransactionSortBy.dateNewest) count++;
+    if (_matchMode != FilterMatchMode.flexible) count++;
     return count;
   }
 
@@ -110,6 +114,8 @@ class _TransactionFilterModalState extends State<TransactionFilterModal> {
     switch (tab) {
       case _FilterTab.saved:
         return _savedPresets.length;
+      case _FilterTab.rule:
+        return _matchMode != FilterMatchMode.flexible ? 1 : 0;
       case _FilterTab.date:
         return _dateFilter != TransactionDateFilter.thisMonth ? 1 : 0;
       case _FilterTab.type:
@@ -136,6 +142,7 @@ class _TransactionFilterModalState extends State<TransactionFilterModal> {
       _minAmount = null;
       _maxAmount = null;
       _sortBy = TransactionSortBy.dateNewest;
+      _matchMode = FilterMatchMode.flexible;
       _minAmountController.clear();
       _maxAmountController.clear();
       _categorySearchController.clear();
@@ -159,6 +166,7 @@ class _TransactionFilterModalState extends State<TransactionFilterModal> {
       maxAmount: max,
       sortBy: _sortBy,
       searchQuery: widget.initialCriteria.searchQuery,
+      matchMode: _matchMode,
     );
   }
 
@@ -179,6 +187,7 @@ class _TransactionFilterModalState extends State<TransactionFilterModal> {
       _minAmount = preset.criteria.minAmount;
       _maxAmount = preset.criteria.maxAmount;
       _sortBy = preset.criteria.sortBy;
+      _matchMode = preset.criteria.matchMode;
 
       _minAmountController.text = _minAmount?.toInt().toString() ?? '';
       _maxAmountController.text = _maxAmount?.toInt().toString() ?? '';
@@ -376,6 +385,11 @@ class _TransactionFilterModalState extends State<TransactionFilterModal> {
                         Icons.bookmark_rounded,
                         isAccent: true,
                       ),
+                      _buildTabItem(
+                        _FilterTab.rule,
+                        'Match Rule',
+                        Icons.tune_rounded,
+                      ),
                       _buildTabItem(_FilterTab.date, 'Date Range', Icons.calendar_month_outlined),
                       _buildTabItem(_FilterTab.type, 'Type', Icons.swap_horiz_rounded),
                       _buildTabItem(_FilterTab.category, 'Category', Icons.category_outlined),
@@ -549,6 +563,8 @@ class _TransactionFilterModalState extends State<TransactionFilterModal> {
     switch (_selectedTab) {
       case _FilterTab.saved:
         return _buildSavedFiltersTab();
+      case _FilterTab.rule:
+        return _buildRuleTab();
       case _FilterTab.date:
         return _buildDateTab();
       case _FilterTab.type:
@@ -710,6 +726,40 @@ class _TransactionFilterModalState extends State<TransactionFilterModal> {
               ),
             );
           }),
+      ],
+    );
+  }
+
+  // --- 0.5 Filter Rule Mode Tab ---
+  Widget _buildRuleTab() {
+    return ListView(
+      physics: const BouncingScrollPhysics(),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      children: [
+        const Text(
+          'Filter Matching Logic',
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+        ),
+        const SizedBox(height: 6),
+        const Text(
+          'Choose how multiple filters are evaluated when combined together.',
+          style: TextStyle(fontSize: 12, color: AppColors.textTertiaryDark),
+        ),
+        const SizedBox(height: 14),
+        _buildRadioOption<FilterMatchMode>(
+          title: 'Flexible Match (Any Filter - OR)',
+          subtitle: 'Shows items matching ANY selected category, bank, type, or amount (Default)',
+          value: FilterMatchMode.flexible,
+          groupValue: _matchMode,
+          onChanged: (val) => setState(() => _matchMode = val!),
+        ),
+        _buildRadioOption<FilterMatchMode>(
+          title: 'Strict Match (All Filters - AND)',
+          subtitle: 'Transaction must satisfy ALL selected filters simultaneously',
+          value: FilterMatchMode.strict,
+          groupValue: _matchMode,
+          onChanged: (val) => setState(() => _matchMode = val!),
+        ),
       ],
     );
   }

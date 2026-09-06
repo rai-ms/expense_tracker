@@ -1,5 +1,3 @@
-
-
 enum TransactionDateFilter {
   thisMonth,
   today,
@@ -16,6 +14,11 @@ enum TransactionSortBy {
   amountLowToHigh,
 }
 
+enum FilterMatchMode {
+  flexible, // Match Any selected filter (OR) - DEFAULT
+  strict, // Match All selected filters (AND)
+}
+
 class TransactionFilterCriteria {
   final TransactionDateFilter dateFilter;
   final DateTime? customStartDate;
@@ -27,6 +30,7 @@ class TransactionFilterCriteria {
   final double? maxAmount;
   final TransactionSortBy sortBy;
   final String? searchQuery;
+  final FilterMatchMode matchMode;
 
   const TransactionFilterCriteria({
     this.dateFilter = TransactionDateFilter.thisMonth,
@@ -39,6 +43,7 @@ class TransactionFilterCriteria {
     this.maxAmount,
     this.sortBy = TransactionSortBy.dateNewest,
     this.searchQuery,
+    this.matchMode = FilterMatchMode.flexible,
   });
 
   /// Total count of active non-default filters
@@ -50,6 +55,7 @@ class TransactionFilterCriteria {
     if (platforms.isNotEmpty) count += platforms.length;
     if (minAmount != null || maxAmount != null) count++;
     if (sortBy != TransactionSortBy.dateNewest) count++;
+    if (matchMode != FilterMatchMode.flexible) count++;
     return count;
   }
 
@@ -67,6 +73,7 @@ class TransactionFilterCriteria {
     double? maxAmount,
     TransactionSortBy? sortBy,
     String? searchQuery,
+    FilterMatchMode? matchMode,
     bool clearMinAmount = false,
     bool clearMaxAmount = false,
   }) {
@@ -81,6 +88,7 @@ class TransactionFilterCriteria {
       maxAmount: clearMaxAmount ? null : (maxAmount ?? this.maxAmount),
       sortBy: sortBy ?? this.sortBy,
       searchQuery: searchQuery ?? this.searchQuery,
+      matchMode: matchMode ?? this.matchMode,
     );
   }
 
@@ -96,6 +104,7 @@ class TransactionFilterCriteria {
       'maxAmount': maxAmount,
       'sortBy': sortBy.name,
       'searchQuery': searchQuery,
+      'matchMode': matchMode.name,
     };
   }
 
@@ -116,6 +125,14 @@ class TransactionFilterCriteria {
       }
     }
 
+    FilterMatchMode mm = FilterMatchMode.flexible;
+    for (final val in FilterMatchMode.values) {
+      if (val.name == json['matchMode']) {
+        mm = val;
+        break;
+      }
+    }
+
     return TransactionFilterCriteria(
       dateFilter: df,
       customStartDate: json['customStartDate'] != null
@@ -131,6 +148,7 @@ class TransactionFilterCriteria {
       maxAmount: (json['maxAmount'] as num?)?.toDouble(),
       sortBy: sb,
       searchQuery: json['searchQuery'] as String?,
+      matchMode: mm,
     );
   }
 }

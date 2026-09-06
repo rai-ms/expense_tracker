@@ -86,49 +86,72 @@ class TransactionsBloc extends BaseBloc<TransactionsEvent, TransactionsData> {
 
       var filtered = List<TransactionEntity>.from(all);
 
-      // 1. Filter by Types (Multi-select)
-      if (_currentCriteria.types.isNotEmpty) {
-        final typesLower = _currentCriteria.types.map((t) => t.toLowerCase()).toSet();
-        final includesIgnored = typesLower.contains('ignored') || typesLower.contains('notifications');
-        final includesDebit = typesLower.contains('debit');
-        final includesCredit = typesLower.contains('credit');
+      final hasTypeFilter = _currentCriteria.types.isNotEmpty;
+      final hasCategoryFilter = _currentCriteria.categories.isNotEmpty;
+      final hasPlatformFilter = _currentCriteria.platforms.isNotEmpty;
+      final hasAmountFilter = _currentCriteria.minAmount != null || _currentCriteria.maxAmount != null;
 
-        filtered = filtered.where((t) {
-          if (t.isIgnored) {
-            return includesIgnored;
-          } else {
-            if (includesDebit && t.isDebit) return true;
-            if (includesCredit && t.isCredit) return true;
-            if (!includesDebit && !includesCredit && includesIgnored) return false;
-            return false;
-          }
-        }).toList();
-      } else {
+      final typesLower = _currentCriteria.types.map((t) => t.toLowerCase()).toSet();
+      final includesIgnored = typesLower.contains('ignored') || typesLower.contains('notifications');
+      final includesDebit = typesLower.contains('debit');
+      final includesCredit = typesLower.contains('credit');
+
+      final catSet = _currentCriteria.categories.map((c) => c.toLowerCase()).toSet();
+      final platSet = _currentCriteria.platforms.map((p) => p.toLowerCase()).toSet();
+
+      bool checkMatchesType(TransactionEntity t) {
+        if (!hasTypeFilter) return !t.isIgnored;
+        if (t.isIgnored) return includesIgnored;
+        if (includesDebit && t.isDebit) return true;
+        if (includesCredit && t.isCredit) return true;
+        return false;
+      }
+
+      bool checkMatchesCategory(TransactionEntity t) {
+        if (!hasCategoryFilter) return true;
+        return catSet.contains(t.category.toLowerCase());
+      }
+
+      bool checkMatchesPlatform(TransactionEntity t) {
+        if (!hasPlatformFilter) return true;
+        if (t.platform == null) return false;
+        return platSet.contains(t.platform!.toLowerCase());
+      }
+
+      bool checkMatchesAmount(TransactionEntity t) {
+        if (!hasAmountFilter) return true;
+        if (_currentCriteria.minAmount != null && t.amount < _currentCriteria.minAmount!) return false;
+        if (_currentCriteria.maxAmount != null && t.amount > _currentCriteria.maxAmount!) return false;
+        return true;
+      }
+
+      final hasActiveDimensionFilters =
+          hasTypeFilter || hasCategoryFilter || hasPlatformFilter || hasAmountFilter;
+
+      if (!hasActiveDimensionFilters) {
         // Default: only active valid transactions (exclude ignored notifications)
         filtered = filtered.where((t) => !t.isIgnored).toList();
-      }
-
-      // 2. Filter by Categories (Multi-select)
-      if (_currentCriteria.categories.isNotEmpty) {
-        final catSet = _currentCriteria.categories.map((c) => c.toLowerCase()).toSet();
-        filtered = filtered.where((t) => catSet.contains(t.category.toLowerCase())).toList();
-      }
-
-      // 3. Filter by Platforms / Banks (Multi-select)
-      if (_currentCriteria.platforms.isNotEmpty) {
-        final platSet = _currentCriteria.platforms.map((p) => p.toLowerCase()).toSet();
+      } else if (_currentCriteria.matchMode == FilterMatchMode.flexible) {
+        // 🟢 Flexible Mode (Match ANY selected filter - OR) - DEFAULT
         filtered = filtered.where((t) {
-          if (t.platform == null) return false;
-          return platSet.contains(t.platform!.toLowerCase());
+          if (t.isIgnored) {
+            return hasTypeFilter && checkMatchesType(t);
+          }
+          final typeMatch = hasTypeFilter && checkMatchesType(t);
+          final catMatch = hasCategoryFilter && checkMatchesCategory(t);
+          final platMatch = hasPlatformFilter && checkMatchesPlatform(t);
+          final amtMatch = hasAmountFilter && checkMatchesAmount(t);
+          return typeMatch || catMatch || platMatch || amtMatch;
         }).toList();
-      }
-
-      // 4. Filter by Amount Range
-      if (_currentCriteria.minAmount != null) {
-        filtered = filtered.where((t) => t.amount >= _currentCriteria.minAmount!).toList();
-      }
-      if (_currentCriteria.maxAmount != null) {
-        filtered = filtered.where((t) => t.amount <= _currentCriteria.maxAmount!).toList();
+      } else {
+        // 🎯 Strict Mode (Match ALL selected filters - AND)
+        filtered = filtered.where((t) {
+          if (!checkMatchesType(t)) return false;
+          if (!checkMatchesCategory(t)) return false;
+          if (!checkMatchesPlatform(t)) return false;
+          if (!checkMatchesAmount(t)) return false;
+          return true;
+        }).toList();
       }
 
       // 5. Filter by Search Query

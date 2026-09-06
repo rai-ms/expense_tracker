@@ -248,6 +248,16 @@ class TransactionsView
                           ),
                           const SizedBox(width: 8),
                         ],
+
+                        // Strict Match Rule Pill (if not default flexible)
+                        if (criteria.matchMode == FilterMatchMode.strict) ...[
+                          _buildActiveFilterTag(
+                            label: 'Strict (Match All)',
+                            icon: Icons.tune_rounded,
+                            onRemove: () => ctr.onRemoveFilterTag('mode'),
+                          ),
+                          const SizedBox(width: 8),
+                        ],
                       ],
                     ),
                   ),

@@ -132,6 +132,9 @@ mixin _TransactionsMixin on State<TransactionsController> {
       case 'sort':
         updated = current.copyWith(sortBy: TransactionSortBy.dateNewest);
         break;
+      case 'mode':
+        updated = current.copyWith(matchMode: FilterMatchMode.flexible);
+        break;
     }
 
     _state.bloc.add(LoadTransactionsEvent(criteria: updated));
