@@ -73,8 +73,8 @@ class _RiveNavIconState extends State<RiveNavIcon>
         final color = Color.lerp(widget.inactiveColor, widget.activeColor, progress)!;
 
         return SizedBox(
-          width: 22,
-          height: 22,
+          width: 25,
+          height: 25,
           child: CustomPaint(
             painter: _getRivePainter(widget.tab, progress, color, widget.activeColor),
           ),
