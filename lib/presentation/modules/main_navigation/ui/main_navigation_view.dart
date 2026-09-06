@@ -9,6 +9,7 @@ import '../../reminders/controller/reminders_controller.dart';
 import '../../transactions/controller/transactions_controller.dart';
 import '../controller/main_navigation_controller.dart';
 import 'widgets/animated_bottom_nav_bar.dart';
+import 'widgets/rive_animated_icons.dart';
 
 class MainNavigationView
     extends WidgetView<MainNavigationView, MainNavigationControllerState> {
@@ -36,28 +37,23 @@ class MainNavigationView
           onItemSelected: ctr.onTabSelected,
           items: [
             AnimatedNavItemData(
-              icon: Icons.dashboard_outlined,
-              activeIcon: Icons.dashboard_rounded,
+              tab: RiveNavTab.dashboard,
               label: context.tr('dashboard'),
             ),
             AnimatedNavItemData(
-              icon: Icons.receipt_long_outlined,
-              activeIcon: Icons.receipt_long_rounded,
+              tab: RiveNavTab.transactions,
               label: context.tr('transactions'),
             ),
             AnimatedNavItemData(
-              icon: Icons.menu_book_outlined,
-              activeIcon: Icons.menu_book_rounded,
+              tab: RiveNavTab.khata,
               label: context.tr('khata'),
             ),
             AnimatedNavItemData(
-              icon: Icons.pie_chart_outline_rounded,
-              activeIcon: Icons.pie_chart_rounded,
+              tab: RiveNavTab.analytics,
               label: context.tr('analytics'),
             ),
             AnimatedNavItemData(
-              icon: Icons.notifications_none_rounded,
-              activeIcon: Icons.notifications_rounded,
+              tab: RiveNavTab.reminders,
               label: context.tr('reminders'),
             ),
           ],
@@ -66,3 +62,4 @@ class MainNavigationView
     );
   }
 }
+

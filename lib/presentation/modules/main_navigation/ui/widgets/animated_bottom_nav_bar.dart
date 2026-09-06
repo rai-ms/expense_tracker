@@ -2,15 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../../../../core/constants/app_colors.dart';
+import 'rive_animated_icons.dart';
 
 class AnimatedNavItemData {
-  final IconData icon;
-  final IconData activeIcon;
+  final RiveNavTab tab;
   final String label;
 
   const AnimatedNavItemData({
-    required this.icon,
-    required this.activeIcon,
+    required this.tab,
     required this.label,
   });
 }
@@ -43,13 +42,13 @@ class AnimatedBottomNavBar extends StatelessWidget {
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.06),
-            blurRadius: 16,
-            offset: const Offset(0, -4),
+            color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.08),
+            blurRadius: 20,
+            offset: const Offset(0, -5),
           ),
         ],
       ),
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: List.generate(items.length, (index) {
@@ -72,7 +71,7 @@ class AnimatedBottomNavBar extends StatelessWidget {
   }
 }
 
-class _AnimatedNavItem extends StatefulWidget {
+class _AnimatedNavItem extends StatelessWidget {
   final AnimatedNavItemData data;
   final bool isSelected;
   final VoidCallback onTap;
@@ -84,155 +83,75 @@ class _AnimatedNavItem extends StatefulWidget {
   });
 
   @override
-  State<_AnimatedNavItem> createState() => _AnimatedNavItemState();
-}
-
-class _AnimatedNavItemState extends State<_AnimatedNavItem>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _controller;
-  late final Animation<double> _scaleAnimation;
-  late final Animation<double> _rotationAnimation;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 350),
-    );
-
-    _scaleAnimation = TweenSequence<double>([
-      TweenSequenceItem(
-        tween: Tween<double>(begin: 1.0, end: 1.25)
-            .chain(CurveTween(curve: Curves.easeOutCubic)),
-        weight: 40,
-      ),
-      TweenSequenceItem(
-        tween: Tween<double>(begin: 1.25, end: 1.08)
-            .chain(CurveTween(curve: Curves.elasticOut)),
-        weight: 60,
-      ),
-    ]).animate(_controller);
-
-    _rotationAnimation = TweenSequence<double>([
-      TweenSequenceItem(
-        tween: Tween<double>(begin: 0.0, end: -0.06)
-            .chain(CurveTween(curve: Curves.easeOut)),
-        weight: 30,
-      ),
-      TweenSequenceItem(
-        tween: Tween<double>(begin: -0.06, end: 0.06)
-            .chain(CurveTween(curve: Curves.easeInOut)),
-        weight: 40,
-      ),
-      TweenSequenceItem(
-        tween: Tween<double>(begin: 0.06, end: 0.0)
-            .chain(CurveTween(curve: Curves.easeIn)),
-        weight: 30,
-      ),
-    ]).animate(_controller);
-
-    if (widget.isSelected) {
-      _controller.value = 1.0;
-    }
-  }
-
-  @override
-  void didUpdateWidget(covariant _AnimatedNavItem oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (widget.isSelected && !oldWidget.isSelected) {
-      _controller.forward(from: 0.0);
-    } else if (!widget.isSelected && oldWidget.isSelected) {
-      _controller.reverse();
-    }
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final activeColor = AppColors.primaryLight;
-    final inactiveColor = Theme.of(context).brightness == Brightness.dark
+    final inactiveColor = isDark
         ? AppColors.textTertiaryDark
         : AppColors.textTertiaryLight;
 
     return InkWell(
-      onTap: widget.onTap,
-      borderRadius: BorderRadius.circular(18),
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(20),
       splashColor: AppColors.primary.withValues(alpha: 0.12),
       highlightColor: Colors.transparent,
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 250),
-        curve: Curves.easeInOut,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeOutCubic,
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
         decoration: BoxDecoration(
-          color: widget.isSelected
+          color: isSelected
               ? AppColors.primary.withValues(alpha: 0.14)
               : Colors.transparent,
-          borderRadius: BorderRadius.circular(18),
+          borderRadius: BorderRadius.circular(20),
+          border: isSelected
+              ? Border.all(
+                  color: AppColors.primaryLight.withValues(alpha: 0.3),
+                  width: 1.0,
+                )
+              : null,
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            AnimatedBuilder(
-              animation: _controller,
-              builder: (context, child) {
-                final scale = widget.isSelected
-                    ? _scaleAnimation.value
-                    : 1.0;
-                final rotation = widget.isSelected
-                    ? _rotationAnimation.value
-                    : 0.0;
-
-                return Transform.scale(
-                  scale: scale,
-                  child: Transform.rotate(
-                    angle: rotation,
-                    child: Icon(
-                      widget.isSelected
-                          ? widget.data.activeIcon
-                          : widget.data.icon,
-                      color: widget.isSelected ? activeColor : inactiveColor,
-                      size: 24,
-                    ),
-                  ),
-                );
-              },
+            // Rive-style Dynamic Animated Micro-Vector Icon
+            RiveNavIcon(
+              tab: data.tab,
+              isSelected: isSelected,
+              activeColor: activeColor,
+              inactiveColor: inactiveColor,
             ),
             const SizedBox(height: 4),
             AnimatedDefaultTextStyle(
-              duration: const Duration(milliseconds: 200),
+              duration: const Duration(milliseconds: 250),
+              curve: Curves.easeInOut,
               style: TextStyle(
                 fontSize: 11,
-                fontWeight:
-                    widget.isSelected ? FontWeight.bold : FontWeight.w500,
-                color: widget.isSelected ? activeColor : inactiveColor,
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                color: isSelected ? activeColor : inactiveColor,
                 fontFamily: 'Roboto',
               ),
               child: Text(
-                widget.data.label,
+                data.label,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
             ),
             const SizedBox(height: 2),
-            // Animated indicator dot
+            // Glowing neon indicator dot
             AnimatedContainer(
-              duration: const Duration(milliseconds: 250),
-              width: widget.isSelected ? 5 : 0,
-              height: widget.isSelected ? 5 : 0,
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeOutBack,
+              width: isSelected ? 6 : 0,
+              height: isSelected ? 6 : 0,
               decoration: BoxDecoration(
                 color: activeColor,
                 shape: BoxShape.circle,
-                boxShadow: widget.isSelected
+                boxShadow: isSelected
                     ? [
                         BoxShadow(
-                          color: activeColor.withValues(alpha: 0.8),
-                          blurRadius: 4,
+                          color: activeColor.withValues(alpha: 0.9),
+                          blurRadius: 6,
                           spreadRadius: 1,
                         ),
                       ]
