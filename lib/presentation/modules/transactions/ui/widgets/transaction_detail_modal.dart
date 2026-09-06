@@ -8,6 +8,7 @@ import '../../../../../core/services/event_bus/app_events.dart';
 import '../../../../../core/services/sms_parser_service/ignored_rule_service.dart';
 import '../../../../../data/models/transaction_entity.dart';
 import '../../../../../domain/repositories/i_transaction_repository.dart';
+import 'change_category_modal.dart';
 import 'move_to_khata_modal.dart';
 
 class TransactionDetailModal extends StatelessWidget {
@@ -86,13 +87,21 @@ class TransactionDetailModal extends StatelessWidget {
 
             Row(
               children: [
-                Container(
-                  padding: const EdgeInsets.all(14),
-                  decoration: BoxDecoration(
-                    color: catColor.withValues(alpha: 0.15),
-                    borderRadius: BorderRadius.circular(18),
+                InkWell(
+                  onTap: () => ChangeCategoryModal.show(
+                    context: context,
+                    transaction: transaction,
                   ),
-                  child: Icon(catIcon, color: catColor, size: 28),
+                  borderRadius: BorderRadius.circular(18),
+                  child: Container(
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      color: catColor.withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(18),
+                      border: Border.all(color: catColor.withValues(alpha: 0.3), width: 1),
+                    ),
+                    child: Icon(catIcon, color: catColor, size: 28),
+                  ),
                 ),
                 const SizedBox(width: 16),
                 Expanded(
@@ -106,12 +115,34 @@ class TransactionDetailModal extends StatelessWidget {
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      const SizedBox(height: 2),
-                      Text(
-                        transaction.category,
-                        style: const TextStyle(
-                          fontSize: 13,
-                          color: AppColors.textSecondaryDark,
+                      const SizedBox(height: 4),
+                      InkWell(
+                        onTap: () => ChangeCategoryModal.show(
+                          context: context,
+                          transaction: transaction,
+                        ),
+                        borderRadius: BorderRadius.circular(8),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                          decoration: BoxDecoration(
+                            color: catColor.withValues(alpha: 0.15),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                transaction.category,
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                  color: catColor,
+                                ),
+                              ),
+                              const SizedBox(width: 4),
+                              Icon(Icons.edit_rounded, size: 12, color: catColor),
+                            ],
+                          ),
                         ),
                       ),
                     ],
@@ -167,6 +198,55 @@ class TransactionDetailModal extends StatelessWidget {
 
             const SizedBox(height: 20),
 
+            // Action Row 1: Move to Khata & Change Category
+            Row(
+              children: [
+                Expanded(
+                  child: ElevatedButton.icon(
+                    onPressed: () {
+                      showModalBottomSheet(
+                        context: context,
+                        isScrollControlled: true,
+                        backgroundColor: Theme.of(context).cardTheme.color,
+                        shape: const RoundedRectangleBorder(
+                          borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+                        ),
+                        builder: (_) => MoveToKhataModal(transaction: transaction),
+                      );
+                    },
+                    icon: const Icon(Icons.menu_book_rounded, size: 18),
+                    label: const Text('Move to Khata'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.khataBook,
+                      padding: const EdgeInsets.symmetric(vertical: 13),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: ElevatedButton.icon(
+                    onPressed: () => ChangeCategoryModal.show(
+                      context: context,
+                      transaction: transaction,
+                    ),
+                    icon: const Icon(Icons.category_rounded, size: 18),
+                    label: const Text('Category'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      padding: const EdgeInsets.symmetric(vertical: 13),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+
             // Action: Mark as Notification / Ignore SMS
             SizedBox(
               width: double.infinity,
@@ -216,58 +296,31 @@ class TransactionDetailModal extends StatelessWidget {
                   side: BorderSide(
                     color: transaction.isIgnored ? AppColors.creditGreen : AppColors.warningAmber,
                   ),
-                  padding: const EdgeInsets.symmetric(vertical: 13),
+                  padding: const EdgeInsets.symmetric(vertical: 12),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                 ),
               ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 10),
 
-            Row(
-              children: [
-                Expanded(
-                  child: ElevatedButton.icon(
-                    onPressed: () {
-                      showModalBottomSheet(
-                        context: context,
-                        isScrollControlled: true,
-                        backgroundColor: Theme.of(context).cardTheme.color,
-                        shape: const RoundedRectangleBorder(
-                          borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
-                        ),
-                        builder: (_) => MoveToKhataModal(transaction: transaction),
-                      );
-                    },
-                    icon: const Icon(Icons.menu_book_rounded, size: 18),
-                    label: const Text('Move to Khata'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.khataBook,
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                    ),
-                  ),
+            // Delete Action
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                onPressed: () {
+                  Navigator.pop(context);
+                  onDelete();
+                },
+                icon: const Icon(Icons.delete_outline_rounded, color: AppColors.debitRed, size: 18),
+                label: const Text('Delete Transaction', style: TextStyle(color: AppColors.debitRed)),
+                style: OutlinedButton.styleFrom(
+                  side: const BorderSide(color: AppColors.debitRed),
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: () {
-                      Navigator.pop(context);
-                      onDelete();
-                    },
-                    icon: const Icon(Icons.delete_outline_rounded, color: AppColors.debitRed, size: 18),
-                    label: const Text('Delete', style: TextStyle(color: AppColors.debitRed)),
-                    style: OutlinedButton.styleFrom(
-                      side: const BorderSide(color: AppColors.debitRed),
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                    ),
-                  ),
-                ),
-              ],
+              ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 10),
           ],
         ),
       ),

@@ -1,6 +1,7 @@
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
+import '../../../data/models/app_setting_entity.dart';
 import '../../../data/models/bill_reminder_entity.dart';
 import '../../../data/models/khata_contact_entity.dart';
 import '../../../data/models/khata_entry_entity.dart';
@@ -56,6 +57,50 @@ class ObjectBoxService extends BaseService<Future<void>, void> {
   Box<KhataContactEntity> get khataContactBox => store.box<KhataContactEntity>();
   Box<KhataEntryEntity> get khataEntryBox => store.box<KhataEntryEntity>();
   Box<BillReminderEntity> get billReminderBox => store.box<BillReminderEntity>();
+  Box<AppSettingEntity> get settingBox => store.box<AppSettingEntity>();
+
+  // ===========================================================================
+  // ⚡ Synchronous Key-Value Preferences stored natively in ObjectBox
+  // ===========================================================================
+  String? getSetting(String key, {String? defaultValue}) {
+    final query = settingBox.query(AppSettingEntity_.key.equals(key)).build();
+    final item = query.findFirst();
+    query.close();
+    return item?.value ?? defaultValue;
+  }
+
+  void setSetting(String key, String value) {
+    final query = settingBox.query(AppSettingEntity_.key.equals(key)).build();
+    final item = query.findFirst();
+    query.close();
+
+    if (item != null) {
+      item.value = value;
+      settingBox.put(item);
+    } else {
+      settingBox.put(AppSettingEntity(key: key, value: value));
+    }
+  }
+
+  double getDoubleSetting(String key, {double defaultValue = 0.0}) {
+    final str = getSetting(key);
+    if (str == null) return defaultValue;
+    return double.tryParse(str) ?? defaultValue;
+  }
+
+  void setDoubleSetting(String key, double value) {
+    setSetting(key, value.toString());
+  }
+
+  List<String> getStringListSetting(String key) {
+    final str = getSetting(key);
+    if (str == null || str.isEmpty) return [];
+    return str.split('|||');
+  }
+
+  void setStringListSetting(String key, List<String> list) {
+    setSetting(key, list.join('|||'));
+  }
 
   @override
   void dispose() {

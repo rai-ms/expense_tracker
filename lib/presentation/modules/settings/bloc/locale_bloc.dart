@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:injectable/injectable.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../../core/base/bloc_base/base_bloc.dart';
 import '../../../../core/base/bloc_base/bloc_event.dart';
 import '../../../../core/localization/app_language.dart';
+import '../../../../core/services/objectbox_service/objectbox_service.dart';
 
 part 'locale_event.dart';
 part 'locale_state.dart';
@@ -23,8 +23,7 @@ class LocaleBloc extends BaseBloc<LocaleEvent, LocaleData> {
     dynamic emit,
   ) async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final savedCode = prefs.getString(_prefLanguageKey) ?? 'en';
+      final savedCode = ObjectBoxService.instance.getSetting(_prefLanguageKey, defaultValue: 'en') ?? 'en';
       final language = AppLanguage.fromCode(savedCode);
       emitSuccess(data: LocaleData(currentLanguage: language));
     } catch (e) {
@@ -38,8 +37,7 @@ class LocaleBloc extends BaseBloc<LocaleEvent, LocaleData> {
   ) async {
     try {
       final language = AppLanguage.fromCode(event.languageCode);
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString(_prefLanguageKey, event.languageCode);
+      ObjectBoxService.instance.setSetting(_prefLanguageKey, event.languageCode);
       emitSuccess(data: LocaleData(currentLanguage: language));
     } catch (e) {
       final language = AppLanguage.fromCode(event.languageCode);

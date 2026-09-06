@@ -58,13 +58,6 @@
 -keep class androidx.core.app.NotificationCompat** { *; }
 
 # ------------------------------------------------------------------------------
-# 4. Flutter Secure Storage & Crypto
-# ------------------------------------------------------------------------------
--keep class com.it_nomads.fluttersecurestorage.** { *; }
--dontwarn com.it_nomads.fluttersecurestorage.**
--keep class androidx.security.crypto.** { *; }
-
-# ------------------------------------------------------------------------------
 # 5. Native Contact Picker & Permissions
 # ------------------------------------------------------------------------------
 -keep class com.baseflow.permissionhandler.** { *; }

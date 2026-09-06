@@ -14,6 +14,7 @@ import 'package:objectbox/internal.dart'
 import 'package:objectbox/objectbox.dart' as obx;
 import 'package:objectbox_flutter_libs/objectbox_flutter_libs.dart';
 
+import 'data/models/app_setting_entity.dart';
 import 'data/models/bill_reminder_entity.dart';
 import 'data/models/khata_contact_entity.dart';
 import 'data/models/khata_entry_entity.dart';
@@ -331,6 +332,35 @@ final _entities = <obx_int.ModelEntity>[
     relations: <obx_int.ModelRelation>[],
     backlinks: <obx_int.ModelBacklink>[],
   ),
+  obx_int.ModelEntity(
+    id: const obx_int.IdUid(5, 4428729137688253300),
+    name: 'AppSettingEntity',
+    lastPropertyId: const obx_int.IdUid(3, 6050237961683151311),
+    flags: 0,
+    properties: <obx_int.ModelProperty>[
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(1, 6607417577973974692),
+        name: 'id',
+        type: 6,
+        flags: 1,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(2, 545892116628955912),
+        name: 'key',
+        type: 9,
+        flags: 2048,
+        indexId: const obx_int.IdUid(16, 8174359078345522723),
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(3, 6050237961683151311),
+        name: 'value',
+        type: 9,
+        flags: 0,
+      ),
+    ],
+    relations: <obx_int.ModelRelation>[],
+    backlinks: <obx_int.ModelBacklink>[],
+  ),
 ];
 
 /// Shortcut for [obx.Store.new] that passes [getObjectBoxModel] and for Flutter
@@ -376,8 +406,8 @@ obx_int.ModelDefinition getObjectBoxModel() {
     // Typically, this is done with `dart run build_runner build`.
     generatorVersion: obx_int.GeneratorVersion.v2025_12_16,
     entities: _entities,
-    lastEntityId: const obx_int.IdUid(4, 5354481342646244362),
-    lastIndexId: const obx_int.IdUid(15, 8882575473084078892),
+    lastEntityId: const obx_int.IdUid(5, 4428729137688253300),
+    lastIndexId: const obx_int.IdUid(16, 8174359078345522723),
     lastRelationId: const obx_int.IdUid(0, 0),
     lastSequenceId: const obx_int.IdUid(0, 0),
     retiredEntityUids: const [],
@@ -795,6 +825,48 @@ obx_int.ModelDefinition getObjectBoxModel() {
         return object;
       },
     ),
+    AppSettingEntity: obx_int.EntityDefinition<AppSettingEntity>(
+      model: _entities[4],
+      toOneRelations: (AppSettingEntity object) => [],
+      toManyRelations: (AppSettingEntity object) => {},
+      getId: (AppSettingEntity object) => object.id,
+      setId: (AppSettingEntity object, int id) {
+        object.id = id;
+      },
+      objectToFB: (AppSettingEntity object, fb.Builder fbb) {
+        final keyOffset = fbb.writeString(object.key);
+        final valueOffset = fbb.writeString(object.value);
+        fbb.startTable(4);
+        fbb.addInt64(0, object.id);
+        fbb.addOffset(1, keyOffset);
+        fbb.addOffset(2, valueOffset);
+        fbb.finish(fbb.endTable());
+        return object.id;
+      },
+      objectFromFB: (obx.Store store, ByteData fbData) {
+        final buffer = fb.BufferContext(fbData);
+        final rootOffset = buffer.derefObject(0);
+        final idParam = const fb.Int64Reader().vTableGet(
+          buffer,
+          rootOffset,
+          4,
+          0,
+        );
+        final keyParam = const fb.StringReader(
+          asciiOptimization: true,
+        ).vTableGet(buffer, rootOffset, 6, '');
+        final valueParam = const fb.StringReader(
+          asciiOptimization: true,
+        ).vTableGet(buffer, rootOffset, 8, '');
+        final object = AppSettingEntity(
+          id: idParam,
+          key: keyParam,
+          value: valueParam,
+        );
+
+        return object;
+      },
+    ),
   };
 
   return obx_int.ModelDefinition(model, bindings);
@@ -1021,5 +1093,23 @@ class TransactionEntity_ {
   /// See [TransactionEntity.isIgnored].
   static final isIgnored = obx.QueryBooleanProperty<TransactionEntity>(
     _entities[3].properties[14],
+  );
+}
+
+/// [AppSettingEntity] entity fields to define ObjectBox queries.
+class AppSettingEntity_ {
+  /// See [AppSettingEntity.id].
+  static final id = obx.QueryIntegerProperty<AppSettingEntity>(
+    _entities[4].properties[0],
+  );
+
+  /// See [AppSettingEntity.key].
+  static final key = obx.QueryStringProperty<AppSettingEntity>(
+    _entities[4].properties[1],
+  );
+
+  /// See [AppSettingEntity.value].
+  static final value = obx.QueryStringProperty<AppSettingEntity>(
+    _entities[4].properties[2],
   );
 }

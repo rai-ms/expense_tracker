@@ -274,10 +274,36 @@
         }
       ],
       "relations": []
+    },
+    {
+      "id": "5:4428729137688253300",
+      "lastPropertyId": "3:6050237961683151311",
+      "name": "AppSettingEntity",
+      "properties": [
+        {
+          "id": "1:6607417577973974692",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:545892116628955912",
+          "name": "key",
+          "indexId": "16:8174359078345522723",
+          "type": 9,
+          "flags": 2048
+        },
+        {
+          "id": "3:6050237961683151311",
+          "name": "value",
+          "type": 9
+        }
+      ],
+      "relations": []
     }
   ],
-  "lastEntityId": "4:5354481342646244362",
-  "lastIndexId": "15:8882575473084078892",
+  "lastEntityId": "5:4428729137688253300",
+  "lastIndexId": "16:8174359078345522723",
   "lastRelationId": "0:0",
   "lastSequenceId": "0:0",
   "modelVersion": 5,

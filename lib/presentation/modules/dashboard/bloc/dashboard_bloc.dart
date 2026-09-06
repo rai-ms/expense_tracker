@@ -1,10 +1,10 @@
 import 'package:injectable/injectable.dart';
 import 'package:intl/intl.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../../core/base/bloc_base/base_bloc.dart';
 import '../../../../core/base/bloc_base/bloc_event.dart';
 import '../../../../core/services/event_bus/app_events.dart';
+import '../../../../core/services/objectbox_service/objectbox_service.dart';
 import '../../../../core/services/sms_sync_service/sms_sync_service.dart';
 import '../../../../data/models/transaction_entity.dart';
 import '../../../../domain/repositories/i_transaction_repository.dart';
@@ -92,8 +92,7 @@ class DashboardBloc extends BaseBloc<DashboardEvent, DashboardData> {
 
       final categoryBreakdown = _transactionRepository.getCategoryBreakdown(start: startDate, end: endDate);
 
-      final prefs = await SharedPreferences.getInstance();
-      final monthlyBudget = prefs.getDouble(_prefMonthlyBudgetKey) ?? 50000.0;
+      final monthlyBudget = ObjectBoxService.instance.getDoubleSetting(_prefMonthlyBudgetKey, defaultValue: 50000.0);
 
       emitSuccess(
         data: DashboardData(
@@ -189,8 +188,7 @@ class DashboardBloc extends BaseBloc<DashboardEvent, DashboardData> {
     dynamic emit,
   ) async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setDouble(_prefMonthlyBudgetKey, event.newBudget);
+      ObjectBoxService.instance.setDoubleSetting(_prefMonthlyBudgetKey, event.newBudget);
       add(LoadDashboardDataEvent(
         filter: _currentFilter,
         customStartDate: _customStart,

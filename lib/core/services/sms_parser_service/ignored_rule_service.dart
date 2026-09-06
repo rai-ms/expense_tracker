@@ -1,7 +1,7 @@
 import 'package:injectable/injectable.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../base/logger/app_logger.dart';
+import '../objectbox_service/objectbox_service.dart';
 
 /// Service to persist and evaluate user-defined rules for ignoring notification SMS
 @singleton
@@ -20,9 +20,8 @@ class IgnoredRuleService {
   Future<void> init() async {
     if (_isInitialized) return;
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final keywordsList = prefs.getStringList(_keyIgnoredKeywords) ?? [];
-      final sendersList = prefs.getStringList(_keyIgnoredSenders) ?? [];
+      final keywordsList = ObjectBoxService.instance.getStringListSetting(_keyIgnoredKeywords);
+      final sendersList = ObjectBoxService.instance.getStringListSetting(_keyIgnoredSenders);
 
       _ignoredKeywords.addAll(keywordsList.map((k) => k.toLowerCase().trim()));
       _ignoredSenders.addAll(sendersList.map((s) => s.toLowerCase().trim()));
@@ -60,8 +59,7 @@ class IgnoredRuleService {
     if (cleaned.isEmpty) return;
 
     _ignoredKeywords.add(cleaned);
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setStringList(_keyIgnoredKeywords, _ignoredKeywords.toList());
+    ObjectBoxService.instance.setStringListSetting(_keyIgnoredKeywords, _ignoredKeywords.toList());
   }
 
   /// Add a sender address to ignore (e.g. 'AX-PROMO', 'VK-ALERTS')
@@ -70,22 +68,19 @@ class IgnoredRuleService {
     if (cleaned.isEmpty) return;
 
     _ignoredSenders.add(cleaned);
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setStringList(_keyIgnoredSenders, _ignoredSenders.toList());
+    ObjectBoxService.instance.setStringListSetting(_keyIgnoredSenders, _ignoredSenders.toList());
   }
 
   /// Remove an ignored keyword
   Future<void> removeIgnoredKeyword(String keyword) async {
     _ignoredKeywords.remove(keyword.toLowerCase().trim());
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setStringList(_keyIgnoredKeywords, _ignoredKeywords.toList());
+    ObjectBoxService.instance.setStringListSetting(_keyIgnoredKeywords, _ignoredKeywords.toList());
   }
 
   /// Remove an ignored sender
   Future<void> removeIgnoredSender(String sender) async {
     _ignoredSenders.remove(sender.toLowerCase().trim());
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setStringList(_keyIgnoredSenders, _ignoredSenders.toList());
+    ObjectBoxService.instance.setStringListSetting(_keyIgnoredSenders, _ignoredSenders.toList());
   }
 
   List<String> get ignoredKeywords => _ignoredKeywords.toList();
