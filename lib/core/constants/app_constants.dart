@@ -78,6 +78,52 @@ class AppConstants {
   static const String customCategoriesKey = 'user_custom_categories_list';
   static const String customCategoriesRichKey = 'user_custom_categories_rich_json';
 
+  static const Map<String, IconData> categoryIconLibrary = {
+    'label': Icons.label_rounded,
+    'fitness': Icons.fitness_center_rounded,
+    'pets': Icons.pets_rounded,
+    'gaming': Icons.sports_esports_rounded,
+    'cafe': Icons.local_cafe_rounded,
+    'fastfood': Icons.fastfood_rounded,
+    'books': Icons.menu_book_rounded,
+    'music': Icons.headphones_rounded,
+    'celebration': Icons.celebration_rounded,
+    'gift': Icons.card_giftcard_rounded,
+    'flight': Icons.flight_takeoff_rounded,
+    'repair': Icons.home_repair_service_rounded,
+    'home': Icons.home_rounded,
+    'apartment': Icons.apartment_rounded,
+    'salon': Icons.cut_rounded,
+    'subscription': Icons.subscriptions_rounded,
+    'school': Icons.school_rounded,
+    'work': Icons.work_rounded,
+    'car': Icons.car_rental_rounded,
+    'child': Icons.child_care_rounded,
+    'park': Icons.park_rounded,
+    'laptop': Icons.laptop_mac_rounded,
+    'gas': Icons.local_gas_station_rounded,
+    'wifi': Icons.wifi_rounded,
+    'shopping': Icons.shopping_bag_rounded,
+    'restaurant': Icons.restaurant_rounded,
+    'medical': Icons.medical_services_rounded,
+    'bank': Icons.account_balance_wallet_rounded,
+    'trending': Icons.trending_up_rounded,
+    'basket': Icons.shopping_basket_rounded,
+    'bills': Icons.receipt_long_rounded,
+    'movie': Icons.movie_rounded,
+    'directions_car': Icons.directions_car_rounded,
+    'category': Icons.category_rounded,
+  };
+
+  /// Safely resolve category icon using compile-time const IconData instances
+  static IconData resolveCategoryIcon(int? codePoint) {
+    if (codePoint == null) return Icons.label_rounded;
+    for (final icon in categoryIconLibrary.values) {
+      if (icon.codePoint == codePoint) return icon;
+    }
+    return Icons.label_rounded;
+  }
+
   /// Get all categories (Standard + dynamic user custom categories from ObjectBox)
   static List<Map<String, dynamic>> getAllCategories() {
     final List<Map<String, dynamic>> all = List.from(categories);
@@ -95,14 +141,12 @@ class AppConstants {
             if (name.isNotEmpty &&
                 !all.any((c) => (c['name'] as String).toLowerCase() == name.toLowerCase())) {
               final iconCode = map['iconCode'] as int? ?? Icons.label_rounded.codePoint;
-              final iconFont = map['iconFont'] as String? ?? 'MaterialIcons';
               final colorVal = map['color'] as int? ?? AppColors.primaryLight.toARGB32();
 
               all.insert(all.length - 1, {
                 'id': name.toLowerCase().replaceAll(' ', '_'),
                 'name': name,
-                // ignore: non_const_argument_for_const_parameter
-                'icon': IconData(iconCode, fontFamily: iconFont),
+                'icon': resolveCategoryIcon(iconCode),
                 'color': Color(colorVal),
                 'isCustom': true,
               });
