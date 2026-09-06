@@ -1,0 +1,57 @@
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// dart format width=80
+
+// **************************************************************************
+// InjectableConfigGenerator
+// **************************************************************************
+
+// ignore_for_file: type=lint
+// coverage:ignore-file
+
+// ignore_for_file: no_leading_underscores_for_library_prefixes
+
+import 'package:get_it/get_it.dart' as _i174;
+import 'package:injectable/injectable.dart' as _i526;
+
+import '../../../data/repositories/khata_repository_impl.dart' as _i497;
+import '../../../data/repositories/reminder_repository_impl.dart' as _i36;
+import '../../../data/repositories/transaction_repository_impl.dart' as _i597;
+import '../../../domain/repositories/i_khata_repository.dart' as _i904;
+import '../../../domain/repositories/i_reminder_repository.dart' as _i654;
+import '../../../domain/repositories/i_transaction_repository.dart' as _i545;
+import '../notification_service/notification_service.dart' as _i333;
+import '../objectbox_service/objectbox_service.dart' as _i1038;
+import '../sms_sync_service/sms_sync_service.dart' as _i206;
+import 'register_module.dart' as _i291;
+
+extension GetItInjectableX on _i174.GetIt {
+  // initializes the registration of main-scope dependencies inside of GetIt
+  Future<_i174.GetIt> init({
+    String? environment,
+    _i526.EnvironmentFilter? environmentFilter,
+  }) async {
+    final gh = _i526.GetItHelper(this, environment, environmentFilter);
+    final registerModule = _$RegisterModule();
+    await gh.singletonAsync<_i1038.ObjectBoxService>(
+      () => registerModule.objectBoxService,
+      preResolve: true,
+    );
+    await gh.singletonAsync<_i333.NotificationService>(
+      () => registerModule.notificationService,
+      preResolve: true,
+    );
+    gh.lazySingleton<_i206.SmsSyncService>(() => _i206.SmsSyncService());
+    gh.lazySingleton<_i545.ITransactionRepository>(
+      () => _i597.TransactionRepositoryImpl(gh<_i1038.ObjectBoxService>()),
+    );
+    gh.lazySingleton<_i654.IReminderRepository>(
+      () => _i36.ReminderRepositoryImpl(gh<_i1038.ObjectBoxService>()),
+    );
+    gh.lazySingleton<_i904.IKhataRepository>(
+      () => _i497.KhataRepositoryImpl(gh<_i1038.ObjectBoxService>()),
+    );
+    return this;
+  }
+}
+
+class _$RegisterModule extends _i291.RegisterModule {}

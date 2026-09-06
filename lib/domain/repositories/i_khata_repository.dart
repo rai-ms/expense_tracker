@@ -2,6 +2,8 @@ import '../../data/models/khata_contact_entity.dart';
 import '../../data/models/khata_entry_entity.dart';
 
 abstract class IKhataRepository {
+  const IKhataRepository();
+
   List<KhataContactEntity> getAllContacts();
   KhataContactEntity? getContactById(int id);
   KhataContactEntity? getContactByUid(String uid);

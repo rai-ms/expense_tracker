@@ -1,13 +1,15 @@
+import 'package:injectable/injectable.dart' hide Order;
 import 'package:intl/intl.dart';
 import '../../core/services/objectbox_service/objectbox_service.dart';
 import '../../domain/repositories/i_transaction_repository.dart';
 import '../../objectbox.g.dart';
 import '../models/transaction_entity.dart';
 
+@LazySingleton(as: ITransactionRepository)
 class TransactionRepositoryImpl implements ITransactionRepository {
   final ObjectBoxService _boxService;
 
-  TransactionRepositoryImpl(this._boxService);
+  const TransactionRepositoryImpl(this._boxService);
 
   @override
   List<TransactionEntity> getAllTransactions() {

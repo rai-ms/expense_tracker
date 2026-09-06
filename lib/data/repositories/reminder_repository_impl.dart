@@ -1,8 +1,10 @@
+import 'package:injectable/injectable.dart';
 import '../../core/services/objectbox_service/objectbox_service.dart';
 import '../../domain/repositories/i_reminder_repository.dart';
 import '../../objectbox.g.dart';
 import '../models/bill_reminder_entity.dart';
 
+@LazySingleton(as: IReminderRepository)
 class ReminderRepositoryImpl implements IReminderRepository {
   final ObjectBoxService _boxService;
 

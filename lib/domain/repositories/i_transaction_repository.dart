@@ -1,6 +1,8 @@
 import '../../data/models/transaction_entity.dart';
 
 abstract class ITransactionRepository {
+  const ITransactionRepository();
+
   List<TransactionEntity> getAllTransactions();
   List<TransactionEntity> getTransactionsByDateRange(DateTime start, DateTime end);
   List<TransactionEntity> getRecentTransactions({int limit = 10});

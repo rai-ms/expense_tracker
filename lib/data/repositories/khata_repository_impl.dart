@@ -1,13 +1,15 @@
+import 'package:injectable/injectable.dart';
 import '../../core/services/objectbox_service/objectbox_service.dart';
 import '../../domain/repositories/i_khata_repository.dart';
 import '../../objectbox.g.dart';
 import '../models/khata_contact_entity.dart';
 import '../models/khata_entry_entity.dart';
 
+@LazySingleton(as: IKhataRepository)
 class KhataRepositoryImpl implements IKhataRepository {
   final ObjectBoxService _boxService;
 
-  KhataRepositoryImpl(this._boxService);
+  const KhataRepositoryImpl(this._boxService);
 
   @override
   List<KhataContactEntity> getAllContacts() {

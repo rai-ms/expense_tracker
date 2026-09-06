@@ -1,13 +1,17 @@
 import 'dart:io';
 import 'package:flutter_sms_inbox/flutter_sms_inbox.dart';
+import 'package:injectable/injectable.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import '../../base/logger/app_logger.dart';
 import '../sms_parser_service/sms_parser_service.dart';
 
 /// SMS sync service for scanning device SMS with custom date range support
+@lazySingleton
 class SmsSyncService {
   final SmsQuery _query = SmsQuery();
+
+  SmsSyncService();
 
   /// Check if SMS permission is granted
   Future<bool> hasSmsPermission() async {
