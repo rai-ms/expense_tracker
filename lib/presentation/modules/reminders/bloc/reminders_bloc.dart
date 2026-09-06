@@ -1,55 +1,15 @@
-import '../../../core/base/bloc_base/base_bloc.dart';
-import '../../../core/base/bloc_base/bloc_event.dart';
-import '../../../core/services/event_bus/app_events.dart';
-import '../../../data/models/bill_reminder_entity.dart';
-import '../../../domain/repositories/i_reminder_repository.dart';
+import 'package:injectable/injectable.dart';
 
-// Reminders Events
-abstract class RemindersEvent extends BlocEvent {
-  const RemindersEvent();
-}
+import '../../../../core/base/bloc_base/base_bloc.dart';
+import '../../../../core/base/bloc_base/bloc_event.dart';
+import '../../../../core/services/event_bus/app_events.dart';
+import '../../../../data/models/bill_reminder_entity.dart';
+import '../../../../domain/repositories/i_reminder_repository.dart';
 
-class LoadRemindersEvent extends RemindersEvent {}
+part 'reminders_event.dart';
+part 'reminders_state.dart';
 
-class AddReminderEvent extends RemindersEvent {
-  final BillReminderEntity reminder;
-  const AddReminderEvent(this.reminder);
-
-  @override
-  List<Object?> get props => [reminder];
-}
-
-class ToggleReminderPaidEvent extends RemindersEvent {
-  final int reminderId;
-  final bool isPaid;
-  const ToggleReminderPaidEvent(this.reminderId, this.isPaid);
-
-  @override
-  List<Object?> get props => [reminderId, isPaid];
-}
-
-class DeleteReminderEvent extends RemindersEvent {
-  final int reminderId;
-  const DeleteReminderEvent(this.reminderId);
-
-  @override
-  List<Object?> get props => [reminderId];
-}
-
-// Reminders State Data
-class RemindersData {
-  final List<BillReminderEntity> reminders;
-  final List<BillReminderEntity> upcoming;
-  final List<BillReminderEntity> overdue;
-
-  const RemindersData({
-    required this.reminders,
-    required this.upcoming,
-    required this.overdue,
-  });
-}
-
-// Reminders BLoC
+@injectable
 class RemindersBloc extends BaseBloc<RemindersEvent, RemindersData> {
   final IReminderRepository _reminderRepository;
 

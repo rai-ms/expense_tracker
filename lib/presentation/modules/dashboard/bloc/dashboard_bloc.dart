@@ -1,120 +1,17 @@
+import 'package:injectable/injectable.dart';
 import 'package:intl/intl.dart';
 
-import '../../../core/base/bloc_base/base_bloc.dart';
-import '../../../core/base/bloc_base/bloc_event.dart';
-import '../../../core/services/event_bus/app_events.dart';
-import '../../../core/services/sms_sync_service/sms_sync_service.dart';
-import '../../../data/models/transaction_entity.dart';
-import '../../../domain/repositories/i_transaction_repository.dart';
+import '../../../../core/base/bloc_base/base_bloc.dart';
+import '../../../../core/base/bloc_base/bloc_event.dart';
+import '../../../../core/services/event_bus/app_events.dart';
+import '../../../../core/services/sms_sync_service/sms_sync_service.dart';
+import '../../../../data/models/transaction_entity.dart';
+import '../../../../domain/repositories/i_transaction_repository.dart';
 
-enum DashboardDateFilter {
-  thisMonth,
-  lastMonth,
-  allTime,
-  custom,
-}
+part 'dashboard_event.dart';
+part 'dashboard_state.dart';
 
-// Dashboard Events
-abstract class DashboardEvent extends BlocEvent {
-  const DashboardEvent();
-}
-
-class LoadDashboardDataEvent extends DashboardEvent {
-  final DashboardDateFilter filter;
-  final DateTime? customStartDate;
-  final DateTime? customEndDate;
-
-  const LoadDashboardDataEvent({
-    this.filter = DashboardDateFilter.thisMonth,
-    this.customStartDate,
-    this.customEndDate,
-  });
-
-  @override
-  List<Object?> get props => [filter, customStartDate, customEndDate];
-}
-
-class SyncSmsEvent extends DashboardEvent {
-  final DateTime? fromDate;
-  final DateTime? toDate;
-  final int limit;
-
-  const SyncSmsEvent({
-    this.fromDate,
-    this.toDate,
-    this.limit = 500,
-  });
-
-  @override
-  List<Object?> get props => [fromDate, toDate, limit];
-}
-
-class AddQuickTransactionEvent extends DashboardEvent {
-  final TransactionEntity transaction;
-  const AddQuickTransactionEvent(this.transaction);
-
-  @override
-  List<Object?> get props => [transaction];
-}
-
-// Dashboard State Data
-class DashboardData {
-  final double totalBalance;
-  final double totalIncome;
-  final double totalExpense;
-  final double todaySpend;
-  final double monthlyBudget;
-  final List<TransactionEntity> recentTransactions;
-  final Map<String, double> categoryBreakdown;
-  final DashboardDateFilter activeFilter;
-  final DateTime? filterStartDate;
-  final DateTime? filterEndDate;
-  final String filterLabel;
-
-  const DashboardData({
-    required this.totalBalance,
-    required this.totalIncome,
-    required this.totalExpense,
-    required this.todaySpend,
-    required this.monthlyBudget,
-    required this.recentTransactions,
-    required this.categoryBreakdown,
-    this.activeFilter = DashboardDateFilter.thisMonth,
-    this.filterStartDate,
-    this.filterEndDate,
-    this.filterLabel = 'This Month',
-  });
-
-  DashboardData copyWith({
-    double? totalBalance,
-    double? totalIncome,
-    double? totalExpense,
-    double? todaySpend,
-    double? monthlyBudget,
-    List<TransactionEntity>? recentTransactions,
-    Map<String, double>? categoryBreakdown,
-    DashboardDateFilter? activeFilter,
-    DateTime? filterStartDate,
-    DateTime? filterEndDate,
-    String? filterLabel,
-  }) {
-    return DashboardData(
-      totalBalance: totalBalance ?? this.totalBalance,
-      totalIncome: totalIncome ?? this.totalIncome,
-      totalExpense: totalExpense ?? this.totalExpense,
-      todaySpend: todaySpend ?? this.todaySpend,
-      monthlyBudget: monthlyBudget ?? this.monthlyBudget,
-      recentTransactions: recentTransactions ?? this.recentTransactions,
-      categoryBreakdown: categoryBreakdown ?? this.categoryBreakdown,
-      activeFilter: activeFilter ?? this.activeFilter,
-      filterStartDate: filterStartDate ?? this.filterStartDate,
-      filterEndDate: filterEndDate ?? this.filterEndDate,
-      filterLabel: filterLabel ?? this.filterLabel,
-    );
-  }
-}
-
-// Dashboard BLoC
+@injectable
 class DashboardBloc extends BaseBloc<DashboardEvent, DashboardData> {
   final ITransactionRepository _transactionRepository;
   final SmsSyncService _smsSyncService;

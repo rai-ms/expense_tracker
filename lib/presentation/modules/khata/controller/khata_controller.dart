@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/services/di/injection.dart';
 import '../../../../data/models/khata_contact_entity.dart';
 import '../../../../domain/repositories/i_khata_repository.dart';
-import '../../../blocs/khata/khata_bloc.dart';
+import '../bloc/khata_bloc.dart';
 import '../../khata_detail/controller/khata_detail_controller.dart';
 import '../../../../core/services/event_bus/app_events.dart';
 import '../ui/khata_view.dart';

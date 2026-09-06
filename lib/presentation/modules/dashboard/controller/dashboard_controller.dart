@@ -7,7 +7,7 @@ import '../../../../core/services/di/injection.dart';
 import '../../../../core/services/sms_sync_service/sms_sync_service.dart';
 import '../../../../data/models/transaction_entity.dart';
 import '../../../../domain/repositories/i_transaction_repository.dart';
-import '../../../blocs/dashboard/dashboard_bloc.dart';
+import '../bloc/dashboard_bloc.dart';
 import '../../transactions/ui/widgets/add_transaction_modal.dart';
 import '../../transactions/ui/widgets/transaction_detail_modal.dart';
 import '../../../../core/services/event_bus/app_events.dart';

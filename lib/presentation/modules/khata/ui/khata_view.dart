@@ -5,8 +5,9 @@ import 'package:intl/intl.dart';
 import '../../../../core/base/base_controller/widget_view.dart';
 import '../../../../core/base/bloc_base/bloc_event_state.dart';
 import '../../../../core/constants/app_colors.dart';
-import '../../../blocs/khata/khata_bloc.dart';
+import '../bloc/khata_bloc.dart';
 import '../controller/khata_controller.dart';
+import '../../settings/ui/language_selection_modal.dart';
 
 class KhataView extends WidgetView<KhataView, KhataControllerState> {
   const KhataView(super.ctr, {super.key});
@@ -23,6 +24,11 @@ class KhataView extends WidgetView<KhataView, KhataControllerState> {
           style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
         ),
         actions: [
+          IconButton(
+            onPressed: () => LanguageSelectionModal.show(context),
+            icon: const Icon(Icons.translate_rounded, color: AppColors.primaryLight),
+            tooltip: 'Change Language / भाषा बदलें',
+          ),
           IconButton(
             onPressed: ctr.onAddNewContact,
             icon: const Icon(Icons.person_add_alt_1_rounded),

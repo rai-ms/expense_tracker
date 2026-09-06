@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/services/di/injection.dart';
 import '../../../../domain/repositories/i_transaction_repository.dart';
-import '../../../blocs/analytics/analytics_bloc.dart';
+import '../bloc/analytics_bloc.dart';
 import '../../../../core/services/event_bus/app_events.dart';
 import '../ui/analytics_view.dart';
 

@@ -6,7 +6,7 @@ import '../../../../core/base/base_controller/widget_view.dart';
 import '../../../../core/base/bloc_base/bloc_event_state.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_constants.dart';
-import '../../../blocs/transactions/transactions_bloc.dart';
+import '../bloc/transactions_bloc.dart';
 import '../controller/transactions_controller.dart';
 
 class TransactionsView

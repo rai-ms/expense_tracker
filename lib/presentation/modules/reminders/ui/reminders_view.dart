@@ -6,7 +6,7 @@ import '../../../../core/base/base_controller/widget_view.dart';
 import '../../../../core/base/bloc_base/bloc_event_state.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_constants.dart';
-import '../../../blocs/reminders/reminders_bloc.dart';
+import '../bloc/reminders_bloc.dart';
 import '../controller/reminders_controller.dart';
 
 class RemindersView extends WidgetView<RemindersView, RemindersControllerState> {

@@ -19,6 +19,16 @@ import '../../../data/repositories/transaction_repository_impl.dart' as _i597;
 import '../../../domain/repositories/i_khata_repository.dart' as _i904;
 import '../../../domain/repositories/i_reminder_repository.dart' as _i654;
 import '../../../domain/repositories/i_transaction_repository.dart' as _i545;
+import '../../../presentation/modules/analytics/bloc/analytics_bloc.dart'
+    as _i61;
+import '../../../presentation/modules/dashboard/bloc/dashboard_bloc.dart'
+    as _i896;
+import '../../../presentation/modules/khata/bloc/khata_bloc.dart' as _i433;
+import '../../../presentation/modules/reminders/bloc/reminders_bloc.dart'
+    as _i459;
+import '../../../presentation/modules/settings/bloc/locale_bloc.dart' as _i834;
+import '../../../presentation/modules/transactions/bloc/transactions_bloc.dart'
+    as _i900;
 import '../notification_service/notification_service.dart' as _i333;
 import '../objectbox_service/objectbox_service.dart' as _i1038;
 import '../sms_sync_service/sms_sync_service.dart' as _i206;
@@ -40,6 +50,7 @@ extension GetItInjectableX on _i174.GetIt {
       () => registerModule.notificationService,
       preResolve: true,
     );
+    gh.singleton<_i834.LocaleBloc>(() => _i834.LocaleBloc());
     gh.lazySingleton<_i206.SmsSyncService>(() => _i206.SmsSyncService());
     gh.lazySingleton<_i545.ITransactionRepository>(
       () => _i597.TransactionRepositoryImpl(gh<_i1038.ObjectBoxService>()),
@@ -49,6 +60,24 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i904.IKhataRepository>(
       () => _i497.KhataRepositoryImpl(gh<_i1038.ObjectBoxService>()),
+    );
+    gh.factory<_i896.DashboardBloc>(
+      () => _i896.DashboardBloc(
+        gh<_i545.ITransactionRepository>(),
+        gh<_i206.SmsSyncService>(),
+      ),
+    );
+    gh.factory<_i61.AnalyticsBloc>(
+      () => _i61.AnalyticsBloc(gh<_i545.ITransactionRepository>()),
+    );
+    gh.factory<_i900.TransactionsBloc>(
+      () => _i900.TransactionsBloc(gh<_i545.ITransactionRepository>()),
+    );
+    gh.factory<_i433.KhataBloc>(
+      () => _i433.KhataBloc(gh<_i904.IKhataRepository>()),
+    );
+    gh.factory<_i459.RemindersBloc>(
+      () => _i459.RemindersBloc(gh<_i654.IReminderRepository>()),
     );
     return this;
   }

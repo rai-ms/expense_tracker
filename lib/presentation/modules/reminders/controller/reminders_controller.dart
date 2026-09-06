@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/services/di/injection.dart';
 import '../../../../data/models/bill_reminder_entity.dart';
 import '../../../../domain/repositories/i_reminder_repository.dart';
-import '../../../blocs/reminders/reminders_bloc.dart';
+import '../bloc/reminders_bloc.dart';
 import '../../../../core/services/event_bus/app_events.dart';
 import '../ui/reminders_view.dart';
 import '../ui/widgets/add_reminder_modal.dart';

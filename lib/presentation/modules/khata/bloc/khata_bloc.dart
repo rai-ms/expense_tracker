@@ -1,73 +1,18 @@
+import 'package:injectable/injectable.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../../../core/base/bloc_base/base_bloc.dart';
-import '../../../core/base/bloc_base/bloc_event.dart';
-import '../../../core/base/logger/app_logger.dart';
-import '../../../core/services/event_bus/app_events.dart';
-import '../../../data/models/khata_contact_entity.dart';
-import '../../../data/models/khata_entry_entity.dart';
-import '../../../domain/repositories/i_khata_repository.dart';
 
-// Khata Events
-abstract class KhataEvent extends BlocEvent {
-  const KhataEvent();
-}
+import '../../../../core/base/bloc_base/base_bloc.dart';
+import '../../../../core/base/bloc_base/bloc_event.dart';
+import '../../../../core/base/logger/app_logger.dart';
+import '../../../../core/services/event_bus/app_events.dart';
+import '../../../../data/models/khata_contact_entity.dart';
+import '../../../../data/models/khata_entry_entity.dart';
+import '../../../../domain/repositories/i_khata_repository.dart';
 
-class LoadKhataDataEvent extends KhataEvent {}
+part 'khata_event.dart';
+part 'khata_state.dart';
 
-class AddKhataContactEvent extends KhataEvent {
-  final KhataContactEntity contact;
-  const AddKhataContactEvent(this.contact);
-
-  @override
-  List<Object?> get props => [contact];
-}
-
-class AddKhataEntryEvent extends KhataEvent {
-  final int contactId;
-  final KhataEntryEntity entry;
-  const AddKhataEntryEvent(this.contactId, this.entry);
-
-  @override
-  List<Object?> get props => [contactId, entry];
-}
-
-class SettleKhataContactEvent extends KhataEvent {
-  final int contactId;
-  const SettleKhataContactEvent(this.contactId);
-
-  @override
-  List<Object?> get props => [contactId];
-}
-
-class SendWhatsAppReminderEvent extends KhataEvent {
-  final KhataContactEntity contact;
-  final double amount;
-  final String? upiId;
-
-  const SendWhatsAppReminderEvent({
-    required this.contact,
-    required this.amount,
-    this.upiId,
-  });
-
-  @override
-  List<Object?> get props => [contact, amount, upiId];
-}
-
-// Khata State Data
-class KhataData {
-  final List<KhataContactEntity> contacts;
-  final double totalWillReceive;
-  final double totalWillGive;
-
-  const KhataData({
-    required this.contacts,
-    required this.totalWillReceive,
-    required this.totalWillGive,
-  });
-}
-
-// Khata BLoC
+@injectable
 class KhataBloc extends BaseBloc<KhataEvent, KhataData> {
   final IKhataRepository _khataRepository;
 

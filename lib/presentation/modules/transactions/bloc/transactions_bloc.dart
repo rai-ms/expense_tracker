@@ -1,102 +1,16 @@
+import 'package:injectable/injectable.dart';
 import 'package:intl/intl.dart';
 
-import '../../../core/base/bloc_base/base_bloc.dart';
-import '../../../core/base/bloc_base/bloc_event.dart';
-import '../../../core/services/event_bus/app_events.dart';
-import '../../../data/models/transaction_entity.dart';
-import '../../../domain/repositories/i_transaction_repository.dart';
+import '../../../../core/base/bloc_base/base_bloc.dart';
+import '../../../../core/base/bloc_base/bloc_event.dart';
+import '../../../../core/services/event_bus/app_events.dart';
+import '../../../../data/models/transaction_entity.dart';
+import '../../../../domain/repositories/i_transaction_repository.dart';
 
-enum TransactionDateFilter {
-  thisMonth,
-  lastMonth,
-  allTime,
-  custom,
-}
+part 'transactions_event.dart';
+part 'transactions_state.dart';
 
-// Transactions Events
-abstract class TransactionsEvent extends BlocEvent {
-  const TransactionsEvent();
-}
-
-class LoadTransactionsEvent extends TransactionsEvent {
-  final String? searchQuery;
-  final String? selectedCategory;
-  final String? selectedType; // 'all', 'debit', 'credit'
-  final String? selectedPlatform;
-  final TransactionDateFilter dateFilter;
-  final DateTime? customStartDate;
-  final DateTime? customEndDate;
-
-  const LoadTransactionsEvent({
-    this.searchQuery,
-    this.selectedCategory,
-    this.selectedType = 'all',
-    this.selectedPlatform,
-    this.dateFilter = TransactionDateFilter.thisMonth,
-    this.customStartDate,
-    this.customEndDate,
-  });
-
-  @override
-  List<Object?> get props => [
-        searchQuery,
-        selectedCategory,
-        selectedType,
-        selectedPlatform,
-        dateFilter,
-        customStartDate,
-        customEndDate,
-      ];
-}
-
-class DeleteTransactionEvent extends TransactionsEvent {
-  final int transactionId;
-  const DeleteTransactionEvent(this.transactionId);
-
-  @override
-  List<Object?> get props => [transactionId];
-}
-
-class AddTransactionEvent extends TransactionsEvent {
-  final TransactionEntity transaction;
-  const AddTransactionEvent(this.transaction);
-
-  @override
-  List<Object?> get props => [transaction];
-}
-
-// Transactions State Data
-class TransactionsData {
-  final List<TransactionEntity> transactions;
-  final String? searchQuery;
-  final String? selectedCategory;
-  final String selectedType;
-  final String? selectedPlatform;
-  final TransactionDateFilter dateFilter;
-  final DateTime? startDate;
-  final DateTime? endDate;
-  final String dateFilterLabel;
-  final double totalIncome;
-  final double totalExpense;
-  final double netBalance;
-
-  const TransactionsData({
-    required this.transactions,
-    this.searchQuery,
-    this.selectedCategory,
-    this.selectedType = 'all',
-    this.selectedPlatform,
-    this.dateFilter = TransactionDateFilter.thisMonth,
-    this.startDate,
-    this.endDate,
-    this.dateFilterLabel = 'This Month',
-    this.totalIncome = 0.0,
-    this.totalExpense = 0.0,
-    this.netBalance = 0.0,
-  });
-}
-
-// Transactions BLoC
+@injectable
 class TransactionsBloc extends BaseBloc<TransactionsEvent, TransactionsData> {
   final ITransactionRepository _transactionRepository;
 

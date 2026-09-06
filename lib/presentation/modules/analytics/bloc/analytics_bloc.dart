@@ -1,52 +1,13 @@
-import '../../../core/base/bloc_base/base_bloc.dart';
-import '../../../core/base/bloc_base/bloc_event.dart';
-import '../../../domain/repositories/i_transaction_repository.dart';
+import 'package:injectable/injectable.dart';
 
-// Analytics Events
-abstract class AnalyticsEvent extends BlocEvent {
-  const AnalyticsEvent();
-}
+import '../../../../core/base/bloc_base/base_bloc.dart';
+import '../../../../core/base/bloc_base/bloc_event.dart';
+import '../../../../domain/repositories/i_transaction_repository.dart';
 
-enum AnalyticsTimeRange {
-  thisWeek,
-  thisMonth,
-  last3Months,
-  thisYear,
-  allTime,
-}
+part 'analytics_event.dart';
+part 'analytics_state.dart';
 
-class LoadAnalyticsEvent extends AnalyticsEvent {
-  final AnalyticsTimeRange timeRange;
-  const LoadAnalyticsEvent({this.timeRange = AnalyticsTimeRange.thisMonth});
-
-  @override
-  List<Object?> get props => [timeRange];
-}
-
-// Analytics State Data
-class AnalyticsData {
-  final AnalyticsTimeRange timeRange;
-  final double totalIncome;
-  final double totalExpense;
-  final Map<String, double> categoryBreakdown;
-  final Map<String, double> monthlySpendTrend;
-  final Map<String, double> topMerchants;
-  final DateTime startDate;
-  final DateTime endDate;
-
-  const AnalyticsData({
-    required this.timeRange,
-    required this.totalIncome,
-    required this.totalExpense,
-    required this.categoryBreakdown,
-    required this.monthlySpendTrend,
-    required this.topMerchants,
-    required this.startDate,
-    required this.endDate,
-  });
-}
-
-// Analytics BLoC
+@injectable
 class AnalyticsBloc extends BaseBloc<AnalyticsEvent, AnalyticsData> {
   final ITransactionRepository _transactionRepository;
 

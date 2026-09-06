@@ -4,8 +4,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/base/base_controller/widget_view.dart';
 import '../../../../core/base/bloc_base/bloc_event_state.dart';
 import '../../../../core/constants/app_colors.dart';
-import '../../../blocs/dashboard/dashboard_bloc.dart';
+import '../bloc/dashboard_bloc.dart';
 import '../controller/dashboard_controller.dart';
+import '../../settings/ui/language_selection_modal.dart';
 import 'widgets/balance_card.dart';
 import 'widgets/quick_action_bar.dart';
 import 'widgets/recent_transactions_list.dart';
@@ -57,6 +58,11 @@ class DashboardView extends WidgetView<DashboardView, DashboardControllerState> 
           ],
         ),
         actions: [
+          IconButton(
+            onPressed: () => LanguageSelectionModal.show(context),
+            icon: const Icon(Icons.translate_rounded, color: AppColors.primaryLight),
+            tooltip: 'Change Language / भाषा बदलें',
+          ),
           IconButton(
             onPressed: ctr.onSmsSimulator,
             icon: const Icon(Icons.science_outlined, color: AppColors.warningAmber),

@@ -5,7 +5,7 @@ import 'package:intl/intl.dart';
 import '../../../../core/base/base_controller/widget_view.dart';
 import '../../../../core/base/bloc_base/bloc_event_state.dart';
 import '../../../../core/constants/app_colors.dart';
-import '../../../blocs/analytics/analytics_bloc.dart';
+import '../bloc/analytics_bloc.dart';
 import '../controller/analytics_controller.dart';
 import 'widgets/category_pie_chart.dart';
 import 'widgets/spend_trend_line_chart.dart';

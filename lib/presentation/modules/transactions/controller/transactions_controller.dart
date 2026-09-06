@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/services/di/injection.dart';
 import '../../../../data/models/transaction_entity.dart';
 import '../../../../domain/repositories/i_transaction_repository.dart';
-import '../../../blocs/transactions/transactions_bloc.dart';
+import '../bloc/transactions_bloc.dart';
 import '../../../../core/services/event_bus/app_events.dart';
 import '../ui/transactions_view.dart';
 import '../ui/widgets/add_transaction_modal.dart';
