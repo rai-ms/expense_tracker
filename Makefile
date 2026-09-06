@@ -42,9 +42,9 @@ build-apk-release: ## Build release APK with icon tree-shaking
 	flutter build apk --release --tree-shake-icons
 	@echo "✅ APK generated at: build/app/outputs/flutter-apk/app-release.apk"
 
-build-apk-split: ## Build split-per-ABI APKs (~20MB each) for faster install
-	@echo "🚀 Building Split-per-ABI APKs (arm64, arm32, x86_64)..."
-	flutter build apk --release --split-per-abi --tree-shake-icons
+build-apk-split: ## Build split-per-ABI APKs (~20MB each) with obfuscation and symbol stripping
+	@echo "🚀 Building Obfuscated Split-per-ABI APKs (arm64, arm32, x86_64)..."
+	flutter build apk --release --split-per-abi --tree-shake-icons --obfuscate --split-debug-info=build/app/outputs/symbols
 	@echo "✅ Split APKs generated at: build/app/outputs/flutter-apk/"
 
 build-apk-obfuscate: ## Build production obfuscated release APK
