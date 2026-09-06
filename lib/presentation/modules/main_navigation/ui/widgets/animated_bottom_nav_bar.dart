@@ -122,37 +122,49 @@ class _AnimatedNavItem extends StatelessWidget {
               inactiveColor: inactiveColor,
             ),
             const SizedBox(height: 4),
-            AnimatedDefaultTextStyle(
-              duration: const Duration(milliseconds: 250),
-              curve: Curves.easeInOut,
-              style: TextStyle(
-                fontSize: 11,
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                color: isSelected ? activeColor : inactiveColor,
-                fontFamily: 'Roboto',
-              ),
-              child: Text(
-                data.label,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-            const SizedBox(height: 2),
-            // Glowing neon indicator dot
-            AnimatedOpacity(
-              duration: const Duration(milliseconds: 250),
-              opacity: isSelected ? 1.0 : 0.0,
-              child: AnimatedScale(
+            // Smoothly switch: Text label for unselected tabs, glowing neon dot for selected tab
+            SizedBox(
+              height: 16,
+              child: AnimatedSwitcher(
                 duration: const Duration(milliseconds: 250),
-                scale: isSelected ? 1.0 : 0.0,
-                child: Container(
-                  width: 5,
-                  height: 5,
-                  decoration: BoxDecoration(
-                    color: activeColor,
-                    shape: BoxShape.circle,
-                  ),
-                ),
+                transitionBuilder: (child, animation) {
+                  return FadeTransition(
+                    opacity: animation,
+                    child: ScaleTransition(
+                      scale: animation,
+                      child: child,
+                    ),
+                  );
+                },
+                child: isSelected
+                    ? Container(
+                        key: const ValueKey('indicator_dot'),
+                        width: 6,
+                        height: 6,
+                        decoration: BoxDecoration(
+                          color: activeColor,
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: activeColor.withValues(alpha: 0.8),
+                              blurRadius: 6,
+                              spreadRadius: 1,
+                            ),
+                          ],
+                        ),
+                      )
+                    : Text(
+                        data.label,
+                        key: ValueKey('label_${data.label}'),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w500,
+                          color: inactiveColor,
+                          fontFamily: 'Roboto',
+                        ),
+                      ),
               ),
             ),
           ],
