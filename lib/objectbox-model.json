@@ -179,7 +179,7 @@
     },
     {
       "id": "4:5354481342646244362",
-      "lastPropertyId": "14:5688478110731555722",
+      "lastPropertyId": "15:3852618108970050335",
       "name": "TransactionEntity",
       "properties": [
         {
@@ -264,13 +264,20 @@
           "id": "14:5688478110731555722",
           "name": "isAutomated",
           "type": 1
+        },
+        {
+          "id": "15:3852618108970050335",
+          "name": "isIgnored",
+          "indexId": "15:8882575473084078892",
+          "type": 1,
+          "flags": 8
         }
       ],
       "relations": []
     }
   ],
   "lastEntityId": "4:5354481342646244362",
-  "lastIndexId": "14:8189672903923528940",
+  "lastIndexId": "15:8882575473084078892",
   "lastRelationId": "0:0",
   "lastSequenceId": "0:0",
   "modelVersion": 5,

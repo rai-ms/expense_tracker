@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import '../../../../core/base/bloc_base/base_bloc.dart';
 import '../../../../core/base/bloc_base/bloc_event.dart';
 import '../../../../core/services/event_bus/app_events.dart';
+import '../../../../core/services/sms_parser_service/ignored_rule_service.dart';
 import '../../../../data/models/transaction_entity.dart';
 import '../../../../domain/repositories/i_transaction_repository.dart';
 
@@ -13,6 +14,7 @@ part 'transactions_state.dart';
 @injectable
 class TransactionsBloc extends BaseBloc<TransactionsEvent, TransactionsData> {
   final ITransactionRepository _transactionRepository;
+  final IgnoredRuleService _ignoredRuleService;
 
   TransactionDateFilter _currentDateFilter = TransactionDateFilter.thisMonth;
   DateTime? _customStart;
@@ -22,10 +24,11 @@ class TransactionsBloc extends BaseBloc<TransactionsEvent, TransactionsData> {
   String? _currentPlatform;
   String? _currentSearch;
 
-  TransactionsBloc(this._transactionRepository) {
+  TransactionsBloc(this._transactionRepository, this._ignoredRuleService) {
     on<LoadTransactionsEvent>(_onLoadTransactions);
     on<DeleteTransactionEvent>(_onDeleteTransaction);
     on<AddTransactionEvent>(_onAddTransaction);
+    on<ToggleIgnoreTransactionEvent>(_onToggleIgnoreTransaction);
   }
 
   void _onLoadTransactions(
@@ -83,9 +86,17 @@ class TransactionsBloc extends BaseBloc<TransactionsEvent, TransactionsData> {
 
       // Filter by type
       if (event.selectedType != null && event.selectedType != 'all') {
-        filtered = filtered
-            .where((t) => t.type.toLowerCase() == event.selectedType!.toLowerCase())
-            .toList();
+        final typeLower = event.selectedType!.toLowerCase();
+        if (typeLower == 'ignored' || typeLower == 'notifications') {
+          filtered = filtered.where((t) => t.isIgnored).toList();
+        } else {
+          filtered = filtered
+              .where((t) => !t.isIgnored && t.type.toLowerCase() == typeLower)
+              .toList();
+        }
+      } else {
+        // By default 'all' shows active valid transactions
+        filtered = filtered.where((t) => !t.isIgnored).toList();
       }
 
       // Filter by category
@@ -116,14 +127,16 @@ class TransactionsBloc extends BaseBloc<TransactionsEvent, TransactionsData> {
         }).toList();
       }
 
-      // Calculate totals for this filtered slice
+      // Calculate totals for active non-ignored transactions
       double income = 0;
       double expense = 0;
       for (final t in filtered) {
-        if (t.isCredit) {
-          income += t.amount;
-        } else {
-          expense += t.amount;
+        if (!t.isIgnored) {
+          if (t.isCredit) {
+            income += t.amount;
+          } else {
+            expense += t.amount;
+          }
         }
       }
 
@@ -168,6 +181,37 @@ class TransactionsBloc extends BaseBloc<TransactionsEvent, TransactionsData> {
       );
     } catch (e) {
       emitFailed(message: 'Failed to delete transaction: $e');
+    }
+  }
+
+  Future<void> _onToggleIgnoreTransaction(
+    ToggleIgnoreTransactionEvent event,
+    dynamic emit,
+  ) async {
+    try {
+      _transactionRepository.toggleIgnoredStatus(event.transactionId, event.isIgnored);
+
+      if (event.isIgnored && event.ruleKeyword != null && event.ruleKeyword!.isNotEmpty) {
+        await _ignoredRuleService.addIgnoredKeyword(event.ruleKeyword!);
+      }
+      if (event.isIgnored && event.ruleSender != null && event.ruleSender!.isNotEmpty) {
+        await _ignoredRuleService.addIgnoredSender(event.ruleSender!);
+      }
+
+      AppEvents.notifyDataChanged();
+      add(
+        LoadTransactionsEvent(
+          searchQuery: _currentSearch,
+          selectedCategory: _currentCategory,
+          selectedType: _currentType,
+          selectedPlatform: _currentPlatform,
+          dateFilter: _currentDateFilter,
+          customStartDate: _customStart,
+          customEndDate: _customEnd,
+        ),
+      );
+    } catch (e) {
+      emitFailed(message: 'Failed to update transaction ignore status: $e');
     }
   }
 

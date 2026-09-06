@@ -61,3 +61,21 @@ class AddTransactionEvent extends TransactionsEvent {
   @override
   List<Object?> get props => [transaction];
 }
+
+/// Event to mark/unmark a transaction as ignored notification
+class ToggleIgnoreTransactionEvent extends TransactionsEvent {
+  final int transactionId;
+  final bool isIgnored;
+  final String? ruleKeyword;
+  final String? ruleSender;
+
+  const ToggleIgnoreTransactionEvent(
+    this.transactionId,
+    this.isIgnored, {
+    this.ruleKeyword,
+    this.ruleSender,
+  });
+
+  @override
+  List<Object?> get props => [transactionId, isIgnored, ruleKeyword, ruleSender];
+}

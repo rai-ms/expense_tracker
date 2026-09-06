@@ -227,7 +227,7 @@ final _entities = <obx_int.ModelEntity>[
   obx_int.ModelEntity(
     id: const obx_int.IdUid(4, 5354481342646244362),
     name: 'TransactionEntity',
-    lastPropertyId: const obx_int.IdUid(14, 5688478110731555722),
+    lastPropertyId: const obx_int.IdUid(15, 3852618108970050335),
     flags: 0,
     properties: <obx_int.ModelProperty>[
       obx_int.ModelProperty(
@@ -320,6 +320,13 @@ final _entities = <obx_int.ModelEntity>[
         type: 1,
         flags: 0,
       ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(15, 3852618108970050335),
+        name: 'isIgnored',
+        type: 1,
+        flags: 8,
+        indexId: const obx_int.IdUid(15, 8882575473084078892),
+      ),
     ],
     relations: <obx_int.ModelRelation>[],
     backlinks: <obx_int.ModelBacklink>[],
@@ -370,7 +377,7 @@ obx_int.ModelDefinition getObjectBoxModel() {
     generatorVersion: obx_int.GeneratorVersion.v2025_12_16,
     entities: _entities,
     lastEntityId: const obx_int.IdUid(4, 5354481342646244362),
-    lastIndexId: const obx_int.IdUid(14, 8189672903923528940),
+    lastIndexId: const obx_int.IdUid(15, 8882575473084078892),
     lastRelationId: const obx_int.IdUid(0, 0),
     lastSequenceId: const obx_int.IdUid(0, 0),
     retiredEntityUids: const [],
@@ -683,7 +690,7 @@ obx_int.ModelDefinition getObjectBoxModel() {
         final notesOffset = object.notes == null
             ? null
             : fbb.writeString(object.notes!);
-        fbb.startTable(15);
+        fbb.startTable(16);
         fbb.addInt64(0, object.id);
         fbb.addOffset(1, uidOffset);
         fbb.addFloat64(2, object.amount);
@@ -698,6 +705,7 @@ obx_int.ModelDefinition getObjectBoxModel() {
         fbb.addFloat64(11, object.balanceAfter);
         fbb.addOffset(12, notesOffset);
         fbb.addBool(13, object.isAutomated);
+        fbb.addBool(14, object.isIgnored);
         fbb.finish(fbb.endTable());
         return object.id;
       },
@@ -760,6 +768,12 @@ obx_int.ModelDefinition getObjectBoxModel() {
           30,
           false,
         );
+        final isIgnoredParam = const fb.BoolReader().vTableGet(
+          buffer,
+          rootOffset,
+          32,
+          false,
+        );
         final object = TransactionEntity(
           id: idParam,
           uid: uidParam,
@@ -775,6 +789,7 @@ obx_int.ModelDefinition getObjectBoxModel() {
           balanceAfter: balanceAfterParam,
           notes: notesParam,
           isAutomated: isAutomatedParam,
+          isIgnored: isIgnoredParam,
         );
 
         return object;
@@ -1001,5 +1016,10 @@ class TransactionEntity_ {
   /// See [TransactionEntity.isAutomated].
   static final isAutomated = obx.QueryBooleanProperty<TransactionEntity>(
     _entities[3].properties[13],
+  );
+
+  /// See [TransactionEntity.isIgnored].
+  static final isIgnored = obx.QueryBooleanProperty<TransactionEntity>(
+    _entities[3].properties[14],
   );
 }

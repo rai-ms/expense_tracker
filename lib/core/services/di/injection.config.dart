@@ -31,6 +31,7 @@ import '../../../presentation/modules/transactions/bloc/transactions_bloc.dart'
     as _i900;
 import '../notification_service/notification_service.dart' as _i333;
 import '../objectbox_service/objectbox_service.dart' as _i1038;
+import '../sms_parser_service/ignored_rule_service.dart' as _i475;
 import '../sms_sync_service/sms_sync_service.dart' as _i206;
 import 'register_module.dart' as _i291;
 
@@ -50,10 +51,13 @@ extension GetItInjectableX on _i174.GetIt {
       () => registerModule.notificationService,
       preResolve: true,
     );
+    gh.singleton<_i475.IgnoredRuleService>(() => _i475.IgnoredRuleService());
     gh.singleton<_i834.LocaleBloc>(() => _i834.LocaleBloc());
-    gh.lazySingleton<_i206.SmsSyncService>(() => _i206.SmsSyncService());
     gh.lazySingleton<_i545.ITransactionRepository>(
       () => _i597.TransactionRepositoryImpl(gh<_i1038.ObjectBoxService>()),
+    );
+    gh.lazySingleton<_i206.SmsSyncService>(
+      () => _i206.SmsSyncService(gh<_i475.IgnoredRuleService>()),
     );
     gh.lazySingleton<_i654.IReminderRepository>(
       () => _i36.ReminderRepositoryImpl(gh<_i1038.ObjectBoxService>()),
@@ -70,11 +74,14 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i61.AnalyticsBloc>(
       () => _i61.AnalyticsBloc(gh<_i545.ITransactionRepository>()),
     );
-    gh.factory<_i900.TransactionsBloc>(
-      () => _i900.TransactionsBloc(gh<_i545.ITransactionRepository>()),
-    );
     gh.factory<_i433.KhataBloc>(
       () => _i433.KhataBloc(gh<_i904.IKhataRepository>()),
+    );
+    gh.factory<_i900.TransactionsBloc>(
+      () => _i900.TransactionsBloc(
+        gh<_i545.ITransactionRepository>(),
+        gh<_i475.IgnoredRuleService>(),
+      ),
     );
     gh.factory<_i459.RemindersBloc>(
       () => _i459.RemindersBloc(gh<_i654.IReminderRepository>()),

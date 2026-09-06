@@ -130,6 +130,9 @@ class TransactionsView
                       const SizedBox(width: 6),
                       // Type: Income
                       _buildTypeFilterChip('💰 Income', 'credit', data?.selectedType ?? 'all'),
+                      const SizedBox(width: 6),
+                      // Type: Notifications / Ignored
+                      _buildTypeFilterChip('🔔 Notifications', 'ignored', data?.selectedType ?? 'all'),
                       const SizedBox(width: 12),
                       Container(width: 1, height: 24, color: AppColors.darkBorder),
                       const SizedBox(width: 12),
@@ -317,10 +320,34 @@ class TransactionsView
                                                 style: TextStyle(
                                                   fontWeight: FontWeight.bold,
                                                   fontSize: 15,
-                                                  color: isDebit ? AppColors.debitRed : AppColors.creditGreen,
+                                                  color: txn.isIgnored
+                                                      ? AppColors.textTertiaryDark
+                                                      : isDebit
+                                                          ? AppColors.debitRed
+                                                          : AppColors.creditGreen,
+                                                  decoration: txn.isIgnored
+                                                      ? TextDecoration.lineThrough
+                                                      : null,
                                                 ),
                                               ),
-                                              if (txn.platform != null)
+                                              if (txn.isIgnored)
+                                                Container(
+                                                  margin: const EdgeInsets.only(top: 2),
+                                                  padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
+                                                  decoration: BoxDecoration(
+                                                    color: AppColors.warningAmber.withValues(alpha: 0.15),
+                                                    borderRadius: BorderRadius.circular(4),
+                                                  ),
+                                                  child: const Text(
+                                                    'Notification Only',
+                                                    style: TextStyle(
+                                                      fontSize: 9,
+                                                      color: AppColors.warningAmber,
+                                                      fontWeight: FontWeight.bold,
+                                                    ),
+                                                  ),
+                                                )
+                                              else if (txn.platform != null)
                                                 Text(
                                                   txn.platform!,
                                                   style: const TextStyle(

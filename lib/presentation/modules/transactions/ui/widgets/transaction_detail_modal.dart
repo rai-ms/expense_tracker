@@ -3,7 +3,11 @@ import 'package:intl/intl.dart';
 
 import '../../../../../core/constants/app_colors.dart';
 import '../../../../../core/constants/app_constants.dart';
+import '../../../../../core/services/di/injection.dart';
+import '../../../../../core/services/event_bus/app_events.dart';
+import '../../../../../core/services/sms_parser_service/ignored_rule_service.dart';
 import '../../../../../data/models/transaction_entity.dart';
+import '../../../../../domain/repositories/i_transaction_repository.dart';
 import 'move_to_khata_modal.dart';
 
 class TransactionDetailModal extends StatelessWidget {
@@ -37,148 +41,236 @@ class TransactionDetailModal extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Center(
-            child: Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: AppColors.darkBorder,
-                borderRadius: BorderRadius.circular(2),
+          children: [
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: AppColors.darkBorder,
+                  borderRadius: BorderRadius.circular(2),
+                ),
               ),
             ),
-          ),
-          const SizedBox(height: 20),
-          Row(
-            children: [
+            const SizedBox(height: 20),
+
+            // Ignored notification banner
+            if (transaction.isIgnored) ...[
               Container(
-                padding: const EdgeInsets.all(14),
+                width: double.infinity,
+                padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: catColor.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(18),
+                  color: AppColors.warningAmber.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: AppColors.warningAmber.withValues(alpha: 0.3)),
                 ),
-                child: Icon(catIcon, color: catColor, size: 28),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                child: const Row(
                   children: [
-                    Text(
-                      transaction.merchant ?? (isDebit ? 'Expense' : 'Income'),
-                      style: const TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      transaction.category,
-                      style: const TextStyle(
-                        fontSize: 13,
-                        color: AppColors.textSecondaryDark,
+                    Icon(Icons.notifications_off_outlined, color: AppColors.warningAmber, size: 20),
+                    SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        'Marked as Notification Only (Ignored from expenses & balance)',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: AppColors.warningAmber,
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
                     ),
                   ],
                 ),
               ),
-              Text(
-                (isDebit ? '- ' : '+ ') + currency.format(transaction.amount),
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: isDebit ? AppColors.debitRed : AppColors.creditGreen,
+              const SizedBox(height: 16),
+            ],
+
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color: catColor.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(18),
+                  ),
+                  child: Icon(catIcon, color: catColor, size: 28),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        transaction.merchant ?? (isDebit ? 'Expense' : 'Income'),
+                        style: const TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        transaction.category,
+                        style: const TextStyle(
+                          fontSize: 13,
+                          color: AppColors.textSecondaryDark,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Text(
+                  (isDebit ? '- ' : '+ ') + currency.format(transaction.amount),
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: isDebit ? AppColors.debitRed : AppColors.creditGreen,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 24),
+            const Divider(color: AppColors.darkBorder),
+            const SizedBox(height: 16),
+
+            // Details List
+            _buildInfoRow('Date & Time', dateFormat.format(transaction.dateTime)),
+            if (transaction.platform != null)
+              _buildInfoRow('Platform / Bank', transaction.platform!),
+            if (transaction.transactionId != null)
+              _buildInfoRow('Transaction ID / UTR', transaction.transactionId!),
+            if (transaction.accountOrCard != null)
+              _buildInfoRow('Account / Card ending', '**${transaction.accountOrCard}'),
+            if (transaction.balanceAfter != null)
+              _buildInfoRow('Available Balance', currency.format(transaction.balanceAfter!)),
+            if (transaction.isAutomated)
+              _buildInfoRow('Source', 'Auto-synced via Bank SMS'),
+
+            if (transaction.rawSms != null && transaction.rawSms!.isNotEmpty) ...[
+              const SizedBox(height: 12),
+              const Text(
+                'Original SMS Message:',
+                style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textSecondaryDark),
+              ),
+              const SizedBox(height: 6),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: AppColors.darkSurfaceVariant.withValues(alpha: 0.4),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  transaction.rawSms!,
+                  style: const TextStyle(fontSize: 11, color: AppColors.textSecondaryDark, height: 1.4),
                 ),
               ),
             ],
-          ),
-          const SizedBox(height: 24),
-          const Divider(color: AppColors.darkBorder),
-          const SizedBox(height: 16),
 
-          // Details List
-          _buildInfoRow('Date & Time', dateFormat.format(transaction.dateTime)),
-          if (transaction.platform != null)
-            _buildInfoRow('Platform / Bank', transaction.platform!),
-          if (transaction.transactionId != null)
-            _buildInfoRow('Transaction ID / UTR', transaction.transactionId!),
-          if (transaction.accountOrCard != null)
-            _buildInfoRow('Account / Card ending', '**${transaction.accountOrCard}'),
-          if (transaction.balanceAfter != null)
-            _buildInfoRow('Available Balance', currency.format(transaction.balanceAfter!)),
-          if (transaction.isAutomated)
-            _buildInfoRow('Source', 'Auto-synced via Bank SMS'),
+            const SizedBox(height: 20),
 
-          if (transaction.rawSms != null && transaction.rawSms!.isNotEmpty) ...[
-            const SizedBox(height: 12),
-            const Text(
-              'Original SMS Message:',
-              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textSecondaryDark),
-            ),
-            const SizedBox(height: 6),
-            Container(
+            // Action: Mark as Notification / Ignore SMS
+            SizedBox(
               width: double.infinity,
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: AppColors.darkSurfaceVariant.withValues(alpha: 0.4),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Text(
-                transaction.rawSms!,
-                style: const TextStyle(fontSize: 11, color: AppColors.textSecondaryDark, height: 1.4),
+              child: OutlinedButton.icon(
+                onPressed: () async {
+                  final repo = sl<ITransactionRepository>();
+                  final ignoredService = sl<IgnoredRuleService>();
+                  final newStatus = !transaction.isIgnored;
+
+                  repo.toggleIgnoredStatus(transaction.id, newStatus);
+                  if (newStatus && transaction.merchant != null && transaction.merchant!.isNotEmpty) {
+                    await ignoredService.addIgnoredKeyword(transaction.merchant!);
+                  }
+
+                  AppEvents.notifyDataChanged();
+                  if (context.mounted) {
+                    Navigator.pop(context);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          newStatus
+                              ? 'Marked as notification only (Ignored from calculations)'
+                              : 'Restored to active transactions',
+                        ),
+                        behavior: SnackBarBehavior.floating,
+                      ),
+                    );
+                  }
+                },
+                icon: Icon(
+                  transaction.isIgnored
+                      ? Icons.check_circle_outline_rounded
+                      : Icons.notifications_off_outlined,
+                  size: 18,
+                  color: transaction.isIgnored ? AppColors.creditGreen : AppColors.warningAmber,
+                ),
+                label: Text(
+                  transaction.isIgnored
+                      ? 'Unmark (Restore to Active Transactions)'
+                      : 'Mark as Notification Only (Ignore SMS)',
+                  style: TextStyle(
+                    color: transaction.isIgnored ? AppColors.creditGreen : AppColors.warningAmber,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                style: OutlinedButton.styleFrom(
+                  side: BorderSide(
+                    color: transaction.isIgnored ? AppColors.creditGreen : AppColors.warningAmber,
+                  ),
+                  padding: const EdgeInsets.symmetric(vertical: 13),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                ),
               ),
             ),
-          ],
+            const SizedBox(height: 12),
 
-          const SizedBox(height: 24),
-          Row(
-            children: [
-              Expanded(
-                child: ElevatedButton.icon(
-                  onPressed: () {
-                    showModalBottomSheet(
-                      context: context,
-                      isScrollControlled: true,
-                      backgroundColor: Theme.of(context).cardTheme.color,
-                      shape: const RoundedRectangleBorder(
-                        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+            Row(
+              children: [
+                Expanded(
+                  child: ElevatedButton.icon(
+                    onPressed: () {
+                      showModalBottomSheet(
+                        context: context,
+                        isScrollControlled: true,
+                        backgroundColor: Theme.of(context).cardTheme.color,
+                        shape: const RoundedRectangleBorder(
+                          borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+                        ),
+                        builder: (_) => MoveToKhataModal(transaction: transaction),
+                      );
+                    },
+                    icon: const Icon(Icons.menu_book_rounded, size: 18),
+                    label: const Text('Move to Khata'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.khataBook,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
                       ),
-                      builder: (_) => MoveToKhataModal(transaction: transaction),
-                    );
-                  },
-                  icon: const Icon(Icons.menu_book_rounded, size: 18),
-                  label: const Text('Move to Khata'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.khataBook,
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
                     ),
                   ),
                 ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: OutlinedButton.icon(
-                  onPressed: () {
-                    Navigator.pop(context);
-                    onDelete();
-                  },
-                  icon: const Icon(Icons.delete_outline_rounded, color: AppColors.debitRed, size: 18),
-                  label: const Text('Delete', style: TextStyle(color: AppColors.debitRed)),
-                  style: OutlinedButton.styleFrom(
-                    side: const BorderSide(color: AppColors.debitRed),
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: () {
+                      Navigator.pop(context);
+                      onDelete();
+                    },
+                    icon: const Icon(Icons.delete_outline_rounded, color: AppColors.debitRed, size: 18),
+                    label: const Text('Delete', style: TextStyle(color: AppColors.debitRed)),
+                    style: OutlinedButton.styleFrom(
+                      side: const BorderSide(color: AppColors.debitRed),
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                    ),
                   ),
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-        ],
+              ],
+            ),
+            const SizedBox(height: 12),
+          ],
+        ),
       ),
-    ),
     );
   }
 

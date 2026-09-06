@@ -87,11 +87,22 @@ class TransactionRepositoryImpl implements ITransactionRepository {
   }
 
   @override
+  bool toggleIgnoredStatus(int id, bool isIgnored) {
+    final entity = _boxService.transactionBox.get(id);
+    if (entity != null) {
+      entity.isIgnored = isIgnored;
+      _boxService.transactionBox.put(entity);
+      return true;
+    }
+    return false;
+  }
+
+  @override
   double getTotalIncome({DateTime? start, DateTime? end}) {
     final list = _getFilteredList(start, end);
     double sum = 0.0;
     for (final t in list) {
-      if (t.isCredit) sum += t.amount;
+      if (!t.isIgnored && t.isCredit) sum += t.amount;
     }
     return sum;
   }
@@ -101,7 +112,7 @@ class TransactionRepositoryImpl implements ITransactionRepository {
     final list = _getFilteredList(start, end);
     double sum = 0.0;
     for (final t in list) {
-      if (t.isDebit) sum += t.amount;
+      if (!t.isIgnored && t.isDebit) sum += t.amount;
     }
     return sum;
   }
@@ -112,8 +123,10 @@ class TransactionRepositoryImpl implements ITransactionRepository {
     double income = 0.0;
     double expense = 0.0;
     for (final t in list) {
-      if (t.isCredit) income += t.amount;
-      if (t.isDebit) expense += t.amount;
+      if (!t.isIgnored) {
+        if (t.isCredit) income += t.amount;
+        if (t.isDebit) expense += t.amount;
+      }
     }
     return income - expense;
   }
@@ -123,7 +136,7 @@ class TransactionRepositoryImpl implements ITransactionRepository {
     final list = _getFilteredList(start, end);
     final Map<String, double> breakdown = {};
     for (final t in list) {
-      if (t.isDebit) {
+      if (!t.isIgnored && t.isDebit) {
         breakdown[t.category] = (breakdown[t.category] ?? 0.0) + t.amount;
       }
     }
@@ -143,7 +156,7 @@ class TransactionRepositoryImpl implements ITransactionRepository {
       final list = getTransactionsByDateRange(monthDate, monthEnd);
       double monthExpense = 0.0;
       for (final t in list) {
-        if (t.isDebit) monthExpense += t.amount;
+        if (!t.isIgnored && t.isDebit) monthExpense += t.amount;
       }
       trend[key] = monthExpense;
     }
@@ -155,7 +168,7 @@ class TransactionRepositoryImpl implements ITransactionRepository {
     final list = _getFilteredList(start, end);
     final Map<String, double> merchants = {};
     for (final t in list) {
-      if (t.isDebit && t.merchant != null && t.merchant!.isNotEmpty) {
+      if (!t.isIgnored && t.isDebit && t.merchant != null && t.merchant!.isNotEmpty) {
         merchants[t.merchant!] = (merchants[t.merchant!] ?? 0.0) + t.amount;
       }
     }

@@ -12,6 +12,7 @@ abstract class ITransactionRepository {
   List<int> addTransactions(List<TransactionEntity> transactions);
   bool updateTransaction(TransactionEntity transaction);
   bool deleteTransaction(int id);
+  bool toggleIgnoredStatus(int id, bool isIgnored);
   
   // Analytics queries
   double getTotalIncome({DateTime? start, DateTime? end});

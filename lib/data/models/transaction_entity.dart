@@ -37,6 +37,9 @@ class TransactionEntity {
 
   bool isAutomated; // true if auto-parsed from SMS, false if manual
 
+  @Index()
+  bool isIgnored; // true if marked as notification only / ignored
+
   TransactionEntity({
     this.id = 0,
     required this.uid,
@@ -52,6 +55,7 @@ class TransactionEntity {
     this.balanceAfter,
     this.notes,
     this.isAutomated = false,
+    this.isIgnored = false,
   });
 
   DateTime get dateTime => DateTime.fromMillisecondsSinceEpoch(date);

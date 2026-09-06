@@ -50,7 +50,10 @@ class SmsParserService {
   /// Parse a single SMS text into structured financial transaction details
   static ParsedSmsResult parse(String smsBody, {DateTime? smsDate, String? senderAddress}) {
     final text = smsBody.trim();
-    if (text.isEmpty) return ParsedSmsResult.invalid(text);
+    // 0. Pre-check: Check if SMS is purely an informational alert / OTP / mandate notice
+    if (isNotificationOnly(text)) {
+      return ParsedSmsResult.invalid(text);
+    }
 
     // 1. Amount Extraction
     final amount = _extractAmount(text);
@@ -359,5 +362,78 @@ class SmsParserService {
     }
 
     return 'Other / Transfer';
+  }
+
+  /// Detect if the SMS is purely a notification / OTP / informational alert rather than a completed transaction
+  static bool isNotificationOnly(String text) {
+    if (text.trim().isEmpty) return true;
+    final lower = text.toLowerCase();
+
+    // 1. Pure OTP / Login / Security verification (without actual debit/credit)
+    if (lower.contains('otp') ||
+        lower.contains('one time password') ||
+        lower.contains('verification code') ||
+        lower.contains('secret code') ||
+        lower.contains('do not share your otp') ||
+        lower.contains('is your secret code')) {
+      if (!lower.contains('debited') &&
+          !lower.contains('credited') &&
+          !lower.contains('spent on') &&
+          !lower.contains('paid to')) {
+        return true;
+      }
+    }
+
+    // 2. Collect requests / Money requests (pending / not yet completed)
+    if (lower.contains('requested money') ||
+        lower.contains('has requested') ||
+        lower.contains('collect request') ||
+        lower.contains('request for payment') ||
+        lower.contains('payment request of')) {
+      return true;
+    }
+
+    // 3. Mandate / Auto-pay setup or reminder (not an actual debit)
+    if (lower.contains('e-mandate') ||
+        lower.contains('mandate registered') ||
+        lower.contains('mandate created') ||
+        lower.contains('autopay set up') ||
+        lower.contains('autopay scheduled') ||
+        lower.contains('standing instruction setup')) {
+      return true;
+    }
+
+    // 4. Credit limit enhancement & Promotional offers
+    if (lower.contains('credit limit enhanced') ||
+        lower.contains('credit limit increased') ||
+        lower.contains('pre-approved') ||
+        lower.contains('apply now for') ||
+        lower.contains('eligible for loan') ||
+        lower.contains('congratulations! you are eligible') ||
+        lower.contains('reward points earned')) {
+      return true;
+    }
+
+    // 5. Bill due reminders / Statement generated (informational notice)
+    if (lower.contains('statement generated') ||
+        lower.contains('e-statement has been sent') ||
+        lower.contains('bill is generated') ||
+        lower.contains('bill due date is') ||
+        lower.contains('due date for your') ||
+        lower.contains('total amount due')) {
+      if (!lower.contains('debited') && !lower.contains('paid') && !lower.contains('credited')) {
+        return true;
+      }
+    }
+
+    // 6. Security advisories & ATM PIN changes
+    if (lower.contains('pin changed') ||
+        lower.contains('kyc update') ||
+        lower.contains('profile password') ||
+        lower.contains('logged in from')) {
+      return true;
+    }
+
+    return false;
   }
 }

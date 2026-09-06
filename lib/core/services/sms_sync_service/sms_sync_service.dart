@@ -4,14 +4,16 @@ import 'package:injectable/injectable.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import '../../base/logger/app_logger.dart';
+import '../sms_parser_service/ignored_rule_service.dart';
 import '../sms_parser_service/sms_parser_service.dart';
 
 /// SMS sync service for scanning device SMS with custom date range support
 @lazySingleton
 class SmsSyncService {
   final SmsQuery _query = SmsQuery();
+  final IgnoredRuleService _ignoredRuleService;
 
-  SmsSyncService();
+  SmsSyncService(this._ignoredRuleService);
 
   /// Check if SMS permission is granted
   Future<bool> hasSmsPermission() async {
@@ -69,6 +71,11 @@ class SmsSyncService {
 
         final body = msg.body;
         if (body == null || body.trim().isEmpty) continue;
+
+        // Check if ignored by custom user rules
+        if (_ignoredRuleService.isIgnored(body, sender: msg.sender)) {
+          continue;
+        }
 
         final parsed = SmsParserService.parse(
           body,
