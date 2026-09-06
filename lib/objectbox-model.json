@@ -1,0 +1,271 @@
+{
+  "_note1": "KEEP THIS FILE! Check it into a version control system (VCS) like git.",
+  "_note2": "ObjectBox manages crucial IDs for your object model. See docs for details.",
+  "_note3": "If you have VCS merge conflicts, you must resolve them according to ObjectBox docs.",
+  "entities": [
+    {
+      "id": "1:5579513230018215064",
+      "lastPropertyId": "9:4567318457456961924",
+      "name": "BillReminderEntity",
+      "properties": [
+        {
+          "id": "1:1646954864954897948",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:4040479769794883911",
+          "name": "uid",
+          "indexId": "1:1241367880183810384",
+          "type": 9,
+          "flags": 2048
+        },
+        {
+          "id": "3:6839329035114131065",
+          "name": "title",
+          "type": 9
+        },
+        {
+          "id": "4:2800818746501707384",
+          "name": "amount",
+          "type": 8
+        },
+        {
+          "id": "5:7996067479029655202",
+          "name": "dueDate",
+          "indexId": "2:3624657269601512892",
+          "type": 6,
+          "flags": 8
+        },
+        {
+          "id": "6:7400883897148399453",
+          "name": "category",
+          "type": 9
+        },
+        {
+          "id": "7:4557647017582631029",
+          "name": "isPaid",
+          "type": 1
+        },
+        {
+          "id": "8:7991056193354628222",
+          "name": "recurrence",
+          "type": 9
+        },
+        {
+          "id": "9:4567318457456961924",
+          "name": "notes",
+          "type": 9
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "2:6319392063145742835",
+      "lastPropertyId": "6:648745224205944255",
+      "name": "KhataContactEntity",
+      "properties": [
+        {
+          "id": "1:8373449443008316482",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:6042571345203459542",
+          "name": "uid",
+          "indexId": "3:111896912165150009",
+          "type": 9,
+          "flags": 2048
+        },
+        {
+          "id": "3:4555141118253808330",
+          "name": "name",
+          "type": 9
+        },
+        {
+          "id": "4:4959036579307854363",
+          "name": "phoneNumber",
+          "type": 9
+        },
+        {
+          "id": "5:2944858499332187846",
+          "name": "createdAt",
+          "type": 6
+        },
+        {
+          "id": "6:648745224205944255",
+          "name": "avatarColorValue",
+          "type": 6
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "3:9025544644016184217",
+      "lastPropertyId": "9:5393403344436247786",
+      "name": "KhataEntryEntity",
+      "properties": [
+        {
+          "id": "1:3073571744691332211",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:6210972413327320833",
+          "name": "uid",
+          "indexId": "4:4071652042096998255",
+          "type": 9,
+          "flags": 2048
+        },
+        {
+          "id": "3:4259362243929400723",
+          "name": "amount",
+          "type": 8
+        },
+        {
+          "id": "4:1208810932975895528",
+          "name": "type",
+          "indexId": "5:7945428052368560305",
+          "type": 9,
+          "flags": 2048
+        },
+        {
+          "id": "5:4402711665916701680",
+          "name": "date",
+          "indexId": "6:6958395748022234296",
+          "type": 6,
+          "flags": 8
+        },
+        {
+          "id": "6:32800847761894955",
+          "name": "dueDate",
+          "type": 6
+        },
+        {
+          "id": "7:2354186064478360054",
+          "name": "notes",
+          "type": 9
+        },
+        {
+          "id": "8:3441387401805460703",
+          "name": "isSettled",
+          "type": 1
+        },
+        {
+          "id": "9:5393403344436247786",
+          "name": "contactId",
+          "indexId": "7:2499354298945978445",
+          "type": 11,
+          "flags": 520,
+          "relationTarget": "KhataContactEntity"
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "4:5354481342646244362",
+      "lastPropertyId": "14:5688478110731555722",
+      "name": "TransactionEntity",
+      "properties": [
+        {
+          "id": "1:8542978380315412299",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:3509368018389350199",
+          "name": "uid",
+          "indexId": "8:5268145437566814250",
+          "type": 9,
+          "flags": 2048
+        },
+        {
+          "id": "3:4485647560969961350",
+          "name": "amount",
+          "type": 8
+        },
+        {
+          "id": "4:147241002099784381",
+          "name": "type",
+          "indexId": "9:6142940680918494830",
+          "type": 9,
+          "flags": 2048
+        },
+        {
+          "id": "5:6917243221425208558",
+          "name": "category",
+          "indexId": "10:450158500652473866",
+          "type": 9,
+          "flags": 2048
+        },
+        {
+          "id": "6:5402160090082300294",
+          "name": "merchant",
+          "type": 9
+        },
+        {
+          "id": "7:7200905912957904680",
+          "name": "platform",
+          "indexId": "11:5245493806902785004",
+          "type": 9,
+          "flags": 2048
+        },
+        {
+          "id": "8:4548301563164315507",
+          "name": "transactionId",
+          "indexId": "12:5254394497647512987",
+          "type": 9,
+          "flags": 2048
+        },
+        {
+          "id": "9:3730046870293130857",
+          "name": "accountOrCard",
+          "type": 9
+        },
+        {
+          "id": "10:4203978725881757306",
+          "name": "date",
+          "indexId": "13:4383274247065485941",
+          "type": 6,
+          "flags": 8
+        },
+        {
+          "id": "11:7699051939632215261",
+          "name": "rawSms",
+          "type": 9
+        },
+        {
+          "id": "12:2976383419395817951",
+          "name": "balanceAfter",
+          "type": 8
+        },
+        {
+          "id": "13:7657578494166693516",
+          "name": "notes",
+          "type": 9
+        },
+        {
+          "id": "14:5688478110731555722",
+          "name": "isAutomated",
+          "type": 1
+        }
+      ],
+      "relations": []
+    }
+  ],
+  "lastEntityId": "4:5354481342646244362",
+  "lastIndexId": "13:4383274247065485941",
+  "lastRelationId": "0:0",
+  "lastSequenceId": "0:0",
+  "modelVersion": 5,
+  "modelVersionParserMinimum": 5,
+  "retiredEntityUids": [],
+  "retiredIndexUids": [],
+  "retiredPropertyUids": [],
+  "retiredRelationUids": [],
+  "version": 1
+}
