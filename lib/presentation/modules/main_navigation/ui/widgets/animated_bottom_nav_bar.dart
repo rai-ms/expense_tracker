@@ -32,6 +32,7 @@ class AnimatedBottomNavBar extends StatelessWidget {
     final isDark = theme.brightness == Brightness.dark;
 
     return Container(
+      height: 68,
       decoration: BoxDecoration(
         color: isDark ? AppColors.darkSurface : AppColors.lightSurface,
         border: Border(
@@ -48,8 +49,10 @@ class AnimatedBottomNavBar extends StatelessWidget {
           ),
         ],
       ),
-      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
       child: Row(
+        mainAxisSize: MainAxisSize.max,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: List.generate(items.length, (index) {
           final item = items[index];
           final isSelected = selectedIndex == index;
@@ -93,19 +96,18 @@ class _AnimatedNavItem extends StatelessWidget {
 
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(18),
+      borderRadius: BorderRadius.circular(16),
       splashColor: AppColors.primary.withValues(alpha: 0.12),
       highlightColor: Colors.transparent,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeOutCubic,
-        alignment: Alignment.center,
-        padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 6),
+        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
         decoration: BoxDecoration(
           color: isSelected
               ? AppColors.primary.withValues(alpha: 0.14)
               : Colors.transparent,
-          borderRadius: BorderRadius.circular(18),
+          borderRadius: BorderRadius.circular(16),
           border: Border.all(
             color: isSelected
                 ? AppColors.primaryLight.withValues(alpha: 0.3)
@@ -115,6 +117,8 @@ class _AnimatedNavItem extends StatelessWidget {
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             // Rive-style Dynamic Animated Micro-Vector Icon
             RiveNavIcon(
@@ -123,7 +127,7 @@ class _AnimatedNavItem extends StatelessWidget {
               activeColor: activeColor,
               inactiveColor: inactiveColor,
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: 2),
             // Smoothly switch: Text label for unselected tabs, glowing neon dot for selected tab
             SizedBox(
               height: 16,
@@ -139,32 +143,37 @@ class _AnimatedNavItem extends StatelessWidget {
                   );
                 },
                 child: isSelected
-                    ? Container(
+                    ? Center(
                         key: const ValueKey('indicator_dot'),
-                        width: 6,
-                        height: 6,
-                        decoration: BoxDecoration(
-                          color: activeColor,
-                          shape: BoxShape.circle,
-                          boxShadow: [
-                            BoxShadow(
-                              color: activeColor.withValues(alpha: 0.8),
-                              blurRadius: 6,
-                              spreadRadius: 1,
-                            ),
-                          ],
+                        child: Container(
+                          width: 5,
+                          height: 5,
+                          decoration: BoxDecoration(
+                            color: activeColor,
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color: activeColor.withValues(alpha: 0.8),
+                                blurRadius: 6,
+                                spreadRadius: 1,
+                              ),
+                            ],
+                          ),
                         ),
                       )
-                    : Text(
-                        data.label,
+                    : Center(
                         key: ValueKey('label_${data.label}'),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w500,
-                          color: inactiveColor,
-                          fontFamily: 'Roboto',
+                        child: Text(
+                          data.label,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 10.5,
+                            fontWeight: FontWeight.w500,
+                            color: inactiveColor,
+                            fontFamily: 'Roboto',
+                          ),
                         ),
                       ),
               ),
