@@ -4,8 +4,10 @@ import '../../../../core/services/di/injection.dart';
 import '../../../../core/services/event_bus/app_events.dart';
 import '../../../../data/models/transaction_entity.dart';
 import '../bloc/transactions_bloc.dart';
+import '../models/saved_filter_preset.dart';
 import '../ui/transactions_view.dart';
 import '../ui/widgets/add_transaction_modal.dart';
+import '../ui/widgets/manage_categories_modal.dart';
 import '../ui/widgets/transaction_detail_modal.dart';
 import '../ui/widgets/transaction_filter_modal.dart';
 
@@ -152,6 +154,23 @@ mixin _TransactionsMixin on State<TransactionsController> {
         },
       ),
     );
+  }
+
+  void onOpenManageCategories() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => ManageCategoriesModal(
+        onCategoriesChanged: () {
+          _state._onSyncData();
+        },
+      ),
+    );
+  }
+
+  void onApplyPreset(SavedFilterPreset preset) {
+    _state.bloc.add(LoadTransactionsEvent(criteria: preset.criteria));
   }
 
   void onAddNewTransaction() {

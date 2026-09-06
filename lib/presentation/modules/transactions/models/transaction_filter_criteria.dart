@@ -83,4 +83,54 @@ class TransactionFilterCriteria {
       searchQuery: searchQuery ?? this.searchQuery,
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'dateFilter': dateFilter.name,
+      'customStartDate': customStartDate?.toIso8601String(),
+      'customEndDate': customEndDate?.toIso8601String(),
+      'types': types.toList(),
+      'categories': categories.toList(),
+      'platforms': platforms.toList(),
+      'minAmount': minAmount,
+      'maxAmount': maxAmount,
+      'sortBy': sortBy.name,
+      'searchQuery': searchQuery,
+    };
+  }
+
+  factory TransactionFilterCriteria.fromJson(Map<String, dynamic> json) {
+    TransactionDateFilter df = TransactionDateFilter.thisMonth;
+    for (final val in TransactionDateFilter.values) {
+      if (val.name == json['dateFilter']) {
+        df = val;
+        break;
+      }
+    }
+
+    TransactionSortBy sb = TransactionSortBy.dateNewest;
+    for (final val in TransactionSortBy.values) {
+      if (val.name == json['sortBy']) {
+        sb = val;
+        break;
+      }
+    }
+
+    return TransactionFilterCriteria(
+      dateFilter: df,
+      customStartDate: json['customStartDate'] != null
+          ? DateTime.tryParse(json['customStartDate'] as String)
+          : null,
+      customEndDate: json['customEndDate'] != null
+          ? DateTime.tryParse(json['customEndDate'] as String)
+          : null,
+      types: (json['types'] as List<dynamic>?)?.map((e) => e.toString()).toSet() ?? {},
+      categories: (json['categories'] as List<dynamic>?)?.map((e) => e.toString()).toSet() ?? {},
+      platforms: (json['platforms'] as List<dynamic>?)?.map((e) => e.toString()).toSet() ?? {},
+      minAmount: (json['minAmount'] as num?)?.toDouble(),
+      maxAmount: (json['maxAmount'] as num?)?.toDouble(),
+      sortBy: sb,
+      searchQuery: json['searchQuery'] as String?,
+    );
+  }
 }

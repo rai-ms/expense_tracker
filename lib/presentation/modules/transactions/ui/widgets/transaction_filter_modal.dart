@@ -3,7 +3,10 @@ import 'package:intl/intl.dart';
 
 import '../../../../../core/constants/app_colors.dart';
 import '../../../../../core/constants/app_constants.dart';
+import '../../../../../core/services/filter_service/saved_filter_service.dart';
+import '../../models/saved_filter_preset.dart';
 import '../../models/transaction_filter_criteria.dart';
+import 'manage_categories_modal.dart';
 
 class TransactionFilterModal extends StatefulWidget {
   final TransactionFilterCriteria initialCriteria;
@@ -26,6 +29,7 @@ class TransactionFilterModal extends StatefulWidget {
 }
 
 enum _FilterTab {
+  saved,
   date,
   type,
   category,
@@ -52,6 +56,8 @@ class _TransactionFilterModalState extends State<TransactionFilterModal> {
   final TextEditingController _categorySearchController = TextEditingController();
   String _categorySearchQuery = '';
 
+  List<SavedFilterPreset> _savedPresets = [];
+
   @override
   void initState() {
     super.initState();
@@ -71,6 +77,14 @@ class _TransactionFilterModalState extends State<TransactionFilterModal> {
     if (_maxAmount != null) {
       _maxAmountController.text = _maxAmount!.toInt().toString();
     }
+
+    _loadSavedPresets();
+  }
+
+  void _loadSavedPresets() {
+    setState(() {
+      _savedPresets = SavedFilterService.getSavedFilters();
+    });
   }
 
   @override
@@ -94,6 +108,8 @@ class _TransactionFilterModalState extends State<TransactionFilterModal> {
 
   int _getTabCount(_FilterTab tab) {
     switch (tab) {
+      case _FilterTab.saved:
+        return _savedPresets.length;
       case _FilterTab.date:
         return _dateFilter != TransactionDateFilter.thisMonth ? 1 : 0;
       case _FilterTab.type:
@@ -128,12 +144,11 @@ class _TransactionFilterModalState extends State<TransactionFilterModal> {
     widget.onClear?.call();
   }
 
-  void _apply() {
-    // Parse custom min/max amounts if entered manually
+  TransactionFilterCriteria _buildCurrentCriteria() {
     final min = double.tryParse(_minAmountController.text.trim());
     final max = double.tryParse(_maxAmountController.text.trim());
 
-    final criteria = TransactionFilterCriteria(
+    return TransactionFilterCriteria(
       dateFilter: _dateFilter,
       customStartDate: _customStartDate,
       customEndDate: _customEndDate,
@@ -145,9 +160,105 @@ class _TransactionFilterModalState extends State<TransactionFilterModal> {
       sortBy: _sortBy,
       searchQuery: widget.initialCriteria.searchQuery,
     );
+  }
 
+  void _apply() {
+    final criteria = _buildCurrentCriteria();
     widget.onApply(criteria);
     Navigator.of(context).pop();
+  }
+
+  void _applyPreset(SavedFilterPreset preset) {
+    setState(() {
+      _dateFilter = preset.criteria.dateFilter;
+      _customStartDate = preset.criteria.customStartDate;
+      _customEndDate = preset.criteria.customEndDate;
+      _types = Set<String>.from(preset.criteria.types);
+      _categories = Set<String>.from(preset.criteria.categories);
+      _platforms = Set<String>.from(preset.criteria.platforms);
+      _minAmount = preset.criteria.minAmount;
+      _maxAmount = preset.criteria.maxAmount;
+      _sortBy = preset.criteria.sortBy;
+
+      _minAmountController.text = _minAmount?.toInt().toString() ?? '';
+      _maxAmountController.text = _maxAmount?.toInt().toString() ?? '';
+    });
+    widget.onApply(_buildCurrentCriteria());
+    Navigator.of(context).pop();
+  }
+
+  void _showSavePresetDialog() {
+    final nameController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (ctx) {
+        return AlertDialog(
+          title: const Row(
+            children: [
+              Icon(Icons.bookmark_add_rounded, color: AppColors.primary),
+              SizedBox(width: 8),
+              Text('Save Filter Preset'),
+            ],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Give this filter combination a name for quick 1-tap access anytime:',
+                style: TextStyle(fontSize: 13, color: AppColors.textSecondaryDark),
+              ),
+              const SizedBox(height: 14),
+              TextField(
+                controller: nameController,
+                autofocus: true,
+                textCapitalization: TextCapitalization.words,
+                decoration: const InputDecoration(
+                  labelText: 'Filter Name',
+                  hintText: 'e.g. Monthly Dining, High GPay Spends',
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                final name = nameController.text.trim();
+                if (name.isEmpty) return;
+
+                final preset = SavedFilterPreset(
+                  id: DateTime.now().millisecondsSinceEpoch.toString(),
+                  name: name,
+                  criteria: _buildCurrentCriteria(),
+                  createdAt: DateTime.now(),
+                );
+
+                SavedFilterService.saveFilter(preset);
+                Navigator.pop(ctx);
+                _loadSavedPresets();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Filter "$name" saved successfully!'),
+                    backgroundColor: AppColors.creditGreen,
+                    duration: const Duration(seconds: 2),
+                  ),
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: Colors.white,
+              ),
+              child: const Text('Save Preset'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -208,6 +319,13 @@ class _TransactionFilterModalState extends State<TransactionFilterModal> {
                   ),
                 ],
                 const Spacer(),
+                // Save Filter Action
+                IconButton(
+                  icon: const Icon(Icons.bookmark_add_outlined, color: AppColors.primary),
+                  tooltip: 'Save Filter as Preset',
+                  visualDensity: VisualDensity.compact,
+                  onPressed: _showSavePresetDialog,
+                ),
                 if (_activeCount > 0)
                   TextButton(
                     onPressed: _resetAll,
@@ -252,6 +370,12 @@ class _TransactionFilterModalState extends State<TransactionFilterModal> {
                   child: ListView(
                     physics: const BouncingScrollPhysics(),
                     children: [
+                      _buildTabItem(
+                        _FilterTab.saved,
+                        'Saved',
+                        Icons.bookmark_rounded,
+                        isAccent: true,
+                      ),
                       _buildTabItem(_FilterTab.date, 'Date Range', Icons.calendar_month_outlined),
                       _buildTabItem(_FilterTab.type, 'Type', Icons.swap_horiz_rounded),
                       _buildTabItem(_FilterTab.category, 'Category', Icons.category_outlined),
@@ -339,7 +463,12 @@ class _TransactionFilterModalState extends State<TransactionFilterModal> {
     );
   }
 
-  Widget _buildTabItem(_FilterTab tab, String title, IconData icon) {
+  Widget _buildTabItem(
+    _FilterTab tab,
+    String title,
+    IconData icon, {
+    bool isAccent = false,
+  }) {
     final isSelected = _selectedTab == tab;
     final count = _getTabCount(tab);
     final theme = Theme.of(context);
@@ -369,14 +498,18 @@ class _TransactionFilterModalState extends State<TransactionFilterModal> {
                 Icon(
                   icon,
                   size: 18,
-                  color: isSelected ? AppColors.primary : AppColors.textSecondaryDark,
+                  color: isSelected
+                      ? AppColors.primary
+                      : isAccent
+                          ? AppColors.warningAmber
+                          : AppColors.textSecondaryDark,
                 ),
                 const Spacer(),
                 if (count > 0)
                   Container(
                     padding: const EdgeInsets.all(4),
-                    decoration: const BoxDecoration(
-                      color: AppColors.primary,
+                    decoration: BoxDecoration(
+                      color: isAccent ? AppColors.warningAmber : AppColors.primary,
                       shape: BoxShape.circle,
                     ),
                     constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
@@ -401,7 +534,9 @@ class _TransactionFilterModalState extends State<TransactionFilterModal> {
                 fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
                 color: isSelected
                     ? (isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight)
-                    : AppColors.textSecondaryDark,
+                    : isAccent
+                        ? AppColors.warningAmber
+                        : AppColors.textSecondaryDark,
               ),
             ),
           ],
@@ -412,6 +547,8 @@ class _TransactionFilterModalState extends State<TransactionFilterModal> {
 
   Widget _buildTabContent() {
     switch (_selectedTab) {
+      case _FilterTab.saved:
+        return _buildSavedFiltersTab();
       case _FilterTab.date:
         return _buildDateTab();
       case _FilterTab.type:
@@ -425,6 +562,156 @@ class _TransactionFilterModalState extends State<TransactionFilterModal> {
       case _FilterTab.sort:
         return _buildSortTab();
     }
+  }
+
+  // --- 0. Saved Filters Tab ---
+  Widget _buildSavedFiltersTab() {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    return ListView(
+      physics: const BouncingScrollPhysics(),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Text(
+              'Saved Filter Presets',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+            ),
+            TextButton.icon(
+              onPressed: _showSavePresetDialog,
+              icon: const Icon(Icons.add, size: 16),
+              label: const Text('Save Current'),
+              style: TextButton.styleFrom(
+                visualDensity: VisualDensity.compact,
+                padding: EdgeInsets.zero,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 6),
+
+        if (_savedPresets.isEmpty)
+          Container(
+            padding: const EdgeInsets.all(24),
+            margin: const EdgeInsets.symmetric(vertical: 12),
+            decoration: BoxDecoration(
+              color: isDark ? AppColors.darkSurface.withValues(alpha: 0.5) : AppColors.lightSurfaceVariant,
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Column(
+              children: [
+                const Icon(Icons.bookmark_border_rounded, size: 38, color: AppColors.textTertiaryDark),
+                const SizedBox(height: 10),
+                const Text(
+                  'No Saved Filters Yet',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                ),
+                const SizedBox(height: 4),
+                const Text(
+                  'Set your preferred filters across tabs and tap "+ Save Current" to create a quick preset.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 12, color: AppColors.textTertiaryDark),
+                ),
+                const SizedBox(height: 12),
+                ElevatedButton.icon(
+                  onPressed: _showSavePresetDialog,
+                  icon: const Icon(Icons.bookmark_add_rounded, size: 16),
+                  label: const Text('Save Current Filter'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: Colors.white,
+                    visualDensity: VisualDensity.compact,
+                  ),
+                ),
+              ],
+            ),
+          )
+        else
+          ..._savedPresets.map((preset) {
+            final activeFiltersList = <String>[];
+            if (preset.criteria.types.isNotEmpty) {
+              activeFiltersList.addAll(preset.criteria.types);
+            }
+            if (preset.criteria.categories.isNotEmpty) {
+              activeFiltersList.addAll(preset.criteria.categories);
+            }
+            if (preset.criteria.platforms.isNotEmpty) {
+              activeFiltersList.addAll(preset.criteria.platforms);
+            }
+            if (preset.criteria.minAmount != null || preset.criteria.maxAmount != null) {
+              activeFiltersList.add('₹ amount range');
+            }
+
+            final summaryText = activeFiltersList.isEmpty
+                ? 'Standard filter'
+                : activeFiltersList.take(3).join(' • ');
+
+            return Container(
+              margin: const EdgeInsets.only(bottom: 10),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+              decoration: BoxDecoration(
+                color: theme.cardTheme.color,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: isDark ? AppColors.darkBorder : AppColors.lightBorder,
+                ),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Icon(Icons.bookmark_rounded, color: AppColors.primary, size: 20),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          preset.name,
+                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          summaryText,
+                          style: const TextStyle(fontSize: 11, color: AppColors.textTertiaryDark),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.delete_outline_rounded, size: 18, color: AppColors.debitRed),
+                    tooltip: 'Delete Preset',
+                    onPressed: () {
+                      SavedFilterService.deleteFilter(preset.id);
+                      _loadSavedPresets();
+                    },
+                  ),
+                  ElevatedButton(
+                    onPressed: () => _applyPreset(preset),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      foregroundColor: Colors.white,
+                      visualDensity: VisualDensity.compact,
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                    ),
+                    child: const Text('Apply'),
+                  ),
+                ],
+              ),
+            );
+          }),
+      ],
+    );
   }
 
   // --- 1. Date Range Tab ---
@@ -585,7 +872,7 @@ class _TransactionFilterModalState extends State<TransactionFilterModal> {
     );
   }
 
-  // --- 3. Category Tab (Multi-Select) ---
+  // --- 3. Category Tab (Multi-Select) with Manage Category action ---
   Widget _buildCategoryTab() {
     final allCategories = AppConstants.getAllCategories();
     final filteredCategories = _categorySearchQuery.isEmpty
@@ -598,47 +885,81 @@ class _TransactionFilterModalState extends State<TransactionFilterModal> {
     return Column(
       children: [
         Padding(
-          padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-          child: TextField(
-            controller: _categorySearchController,
-            onChanged: (q) => setState(() => _categorySearchQuery = q),
-            decoration: InputDecoration(
-              hintText: 'Search categories...',
-              prefixIcon: const Icon(Icons.search, size: 18),
-              suffixIcon: _categorySearchQuery.isNotEmpty
-                  ? IconButton(
-                      icon: const Icon(Icons.clear, size: 16),
-                      onPressed: () {
-                        _categorySearchController.clear();
-                        setState(() => _categorySearchQuery = '');
-                      },
-                    )
-                  : null,
-              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              isDense: true,
-            ),
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+          child: Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: _categorySearchController,
+                  onChanged: (q) => setState(() => _categorySearchQuery = q),
+                  decoration: InputDecoration(
+                    hintText: 'Search categories...',
+                    prefixIcon: const Icon(Icons.search, size: 18),
+                    suffixIcon: _categorySearchQuery.isNotEmpty
+                        ? IconButton(
+                            icon: const Icon(Icons.clear, size: 16),
+                            onPressed: () {
+                              _categorySearchController.clear();
+                              setState(() => _categorySearchQuery = '');
+                            },
+                          )
+                        : null,
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    isDense: true,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              IconButton.filledTonal(
+                icon: const Icon(Icons.tune_rounded, size: 18),
+                tooltip: 'Manage Categories',
+                onPressed: () {
+                  ManageCategoriesModal.show(
+                    context: context,
+                    onCategoriesChanged: () {
+                      setState(() {});
+                    },
+                  );
+                },
+              ),
+            ],
           ),
         ),
-        if (_categories.isNotEmpty)
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  '${_categories.length} selected',
-                  style: const TextStyle(fontSize: 12, color: AppColors.primary, fontWeight: FontWeight.w600),
-                ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                _categories.isNotEmpty
+                    ? '${_categories.length} selected'
+                    : '${allCategories.length} categories',
+                style: const TextStyle(fontSize: 12, color: AppColors.primary, fontWeight: FontWeight.w600),
+              ),
+              if (_categories.isNotEmpty)
                 InkWell(
                   onTap: () => setState(() => _categories.clear()),
                   child: const Text(
-                    'Clear categories',
+                    'Clear selection',
                     style: TextStyle(fontSize: 12, color: AppColors.debitRed),
                   ),
+                )
+              else
+                InkWell(
+                  onTap: () {
+                    ManageCategoriesModal.show(
+                      context: context,
+                      onCategoriesChanged: () => setState(() {}),
+                    );
+                  },
+                  child: const Text(
+                    '+ Manage Categories',
+                    style: TextStyle(fontSize: 12, color: AppColors.primary, fontWeight: FontWeight.bold),
+                  ),
                 ),
-              ],
-            ),
+            ],
           ),
+        ),
         Expanded(
           child: ListView.builder(
             physics: const BouncingScrollPhysics(),

@@ -1,3 +1,5 @@
+import 'package:expense_tracker/core/constants/app_constants.dart';
+import 'package:expense_tracker/presentation/modules/transactions/models/saved_filter_preset.dart';
 import 'package:expense_tracker/presentation/modules/transactions/models/transaction_filter_criteria.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -43,6 +45,38 @@ void main() {
 
       var cleared = updated.copyWith(clearMaxAmount: true);
       expect(cleared.maxAmount, isNull);
+    });
+
+    test('SavedFilterPreset serialization and deserialization works accurately', () {
+      final criteria = const TransactionFilterCriteria(
+        types: {'debit'},
+        categories: {'Food & Dining'},
+        minAmount: 200,
+      );
+
+      final preset = SavedFilterPreset(
+        id: '12345',
+        name: 'Food Expenses',
+        criteria: criteria,
+        createdAt: DateTime(2026, 9, 7),
+      );
+
+      final json = preset.toJson();
+      final decoded = SavedFilterPreset.fromJson(json);
+
+      expect(decoded.id, '12345');
+      expect(decoded.name, 'Food Expenses');
+      expect(decoded.criteria.types, {'debit'});
+      expect(decoded.criteria.categories, {'Food & Dining'});
+      expect(decoded.criteria.minAmount, 200);
+    });
+
+    test('AppConstants returns category details for standard categories', () {
+      final foodCat = AppConstants.getCategory('food');
+      expect(foodCat['name'], 'Food & Dining');
+
+      final shoppingCat = AppConstants.getCategory('Shopping');
+      expect(shoppingCat['name'], 'Shopping');
     });
   });
 }

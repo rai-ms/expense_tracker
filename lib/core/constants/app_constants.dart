@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 
 import '../services/objectbox_service/objectbox_service.dart';
@@ -75,16 +76,48 @@ class AppConstants {
   ];
 
   static const String customCategoriesKey = 'user_custom_categories_list';
+  static const String customCategoriesRichKey = 'user_custom_categories_rich_json';
 
   /// Get all categories (Standard + dynamic user custom categories from ObjectBox)
   static List<Map<String, dynamic>> getAllCategories() {
     final List<Map<String, dynamic>> all = List.from(categories);
     if (ObjectBoxService.instance.isInitialized) {
+      // 1. Try loading rich custom categories JSON
+      final richJson = ObjectBoxService.instance.getSetting(customCategoriesRichKey);
+      final Set<String> processedNames = {};
+
+      if (richJson != null && richJson.trim().isNotEmpty) {
+        try {
+          final List<dynamic> decoded = jsonDecode(richJson);
+          for (final item in decoded) {
+            final map = item as Map<String, dynamic>;
+            final name = map['name'] as String? ?? '';
+            if (name.isNotEmpty &&
+                !all.any((c) => (c['name'] as String).toLowerCase() == name.toLowerCase())) {
+              final iconCode = map['iconCode'] as int? ?? Icons.label_rounded.codePoint;
+              final iconFont = map['iconFont'] as String? ?? 'MaterialIcons';
+              final colorVal = map['color'] as int? ?? AppColors.primaryLight.toARGB32();
+
+              all.insert(all.length - 1, {
+                'id': name.toLowerCase().replaceAll(' ', '_'),
+                'name': name,
+                // ignore: non_const_argument_for_const_parameter
+                'icon': IconData(iconCode, fontFamily: iconFont),
+                'color': Color(colorVal),
+                'isCustom': true,
+              });
+              processedNames.add(name.toLowerCase());
+            }
+          }
+        } catch (_) {}
+      }
+
+      // 2. Backward compatibility with plain string list
       final customNames =
           ObjectBoxService.instance.getStringListSetting(customCategoriesKey);
       for (final name in customNames) {
-        if (!all.any(
-            (c) => (c['name'] as String).toLowerCase() == name.toLowerCase())) {
+        if (!processedNames.contains(name.toLowerCase()) &&
+            !all.any((c) => (c['name'] as String).toLowerCase() == name.toLowerCase())) {
           all.insert(all.length - 1, {
             'id': name.toLowerCase().replaceAll(' ', '_'),
             'name': name,
@@ -96,6 +129,117 @@ class AppConstants {
       }
     }
     return all;
+  }
+
+  /// Add a new custom category
+  static void addCustomCategory({
+    required String name,
+    IconData? icon,
+    Color? color,
+  }) {
+    if (!ObjectBoxService.instance.isInitialized) return;
+    final trimmedName = name.trim();
+    if (trimmedName.isEmpty) return;
+
+    // Load existing rich categories
+    final List<Map<String, dynamic>> richList = _getStoredRichCategories();
+    final existingIndex = richList.indexWhere(
+      (c) => (c['name'] as String).toLowerCase() == trimmedName.toLowerCase(),
+    );
+
+    final item = {
+      'name': trimmedName,
+      'iconCode': (icon ?? Icons.label_rounded).codePoint,
+      'iconFont': (icon ?? Icons.label_rounded).fontFamily ?? 'MaterialIcons',
+      'color': (color ?? AppColors.primaryLight).toARGB32(),
+    };
+
+    if (existingIndex >= 0) {
+      richList[existingIndex] = item;
+    } else {
+      richList.add(item);
+    }
+
+    _persistRichCategories(richList);
+  }
+
+  /// Update an existing custom category
+  static void updateCustomCategory({
+    required String oldName,
+    required String newName,
+    IconData? icon,
+    Color? color,
+  }) {
+    if (!ObjectBoxService.instance.isInitialized) return;
+    final trimmedNew = newName.trim();
+    if (trimmedNew.isEmpty) return;
+
+    final List<Map<String, dynamic>> richList = _getStoredRichCategories();
+    final index = richList.indexWhere(
+      (c) => (c['name'] as String).toLowerCase() == oldName.trim().toLowerCase(),
+    );
+
+    final item = {
+      'name': trimmedNew,
+      'iconCode': (icon ?? Icons.label_rounded).codePoint,
+      'iconFont': (icon ?? Icons.label_rounded).fontFamily ?? 'MaterialIcons',
+      'color': (color ?? AppColors.primaryLight).toARGB32(),
+    };
+
+    if (index >= 0) {
+      richList[index] = item;
+    } else {
+      richList.add(item);
+    }
+
+    _persistRichCategories(richList);
+  }
+
+  /// Delete a custom category
+  static void deleteCustomCategory(String name) {
+    if (!ObjectBoxService.instance.isInitialized) return;
+    final trimmed = name.trim().toLowerCase();
+
+    final List<Map<String, dynamic>> richList = _getStoredRichCategories();
+    richList.removeWhere((c) => (c['name'] as String).toLowerCase() == trimmed);
+    _persistRichCategories(richList);
+
+    // Also update legacy list
+    final legacyList = ObjectBoxService.instance.getStringListSetting(customCategoriesKey);
+    legacyList.removeWhere((n) => n.trim().toLowerCase() == trimmed);
+    ObjectBoxService.instance.setStringListSetting(customCategoriesKey, legacyList);
+  }
+
+  static List<Map<String, dynamic>> _getStoredRichCategories() {
+    if (!ObjectBoxService.instance.isInitialized) return [];
+    final richJson = ObjectBoxService.instance.getSetting(customCategoriesRichKey);
+    if (richJson == null || richJson.trim().isEmpty) {
+      // Migrate from legacy list
+      final legacyList = ObjectBoxService.instance.getStringListSetting(customCategoriesKey);
+      return legacyList
+          .map((n) => {
+                'name': n,
+                'iconCode': Icons.label_rounded.codePoint,
+                'iconFont': 'MaterialIcons',
+                'color': AppColors.primaryLight.toARGB32(),
+              })
+          .toList();
+    }
+    try {
+      final List<dynamic> decoded = jsonDecode(richJson);
+      return decoded.map((e) => Map<String, dynamic>.from(e as Map)).toList();
+    } catch (_) {
+      return [];
+    }
+  }
+
+  static void _persistRichCategories(List<Map<String, dynamic>> list) {
+    final jsonStr = jsonEncode(list);
+    ObjectBoxService.instance.setSetting(customCategoriesRichKey, jsonStr);
+
+    // Keep legacy string list in sync
+    final names = list.map((c) => c['name'] as String).toList();
+    ObjectBoxService.instance.setStringListSetting(customCategoriesKey, names);
   }
 
   /// Get category metadata by name or id
@@ -133,3 +277,4 @@ class AppConstants {
     'Slice',
   ];
 }
+

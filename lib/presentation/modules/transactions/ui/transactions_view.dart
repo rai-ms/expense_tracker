@@ -29,6 +29,11 @@ class TransactionsView
         ),
         actions: [
           IconButton(
+            onPressed: ctr.onOpenManageCategories,
+            icon: const Icon(Icons.category_outlined),
+            tooltip: 'Manage Categories',
+          ),
+          IconButton(
             onPressed: ctr.onAddNewTransaction,
             icon: const Icon(Icons.add_circle_outline_rounded),
             tooltip: context.tr('add_expense'),
