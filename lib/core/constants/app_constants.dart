@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../services/objectbox_service/objectbox_service.dart';
 import 'app_colors.dart';
 
 /// Application wide constants, categories, and identifiers
@@ -73,16 +74,46 @@ class AppConstants {
     },
   ];
 
+  static const String customCategoriesKey = 'user_custom_categories_list';
+
+  /// Get all categories (Standard + dynamic user custom categories from ObjectBox)
+  static List<Map<String, dynamic>> getAllCategories() {
+    final List<Map<String, dynamic>> all = List.from(categories);
+    if (ObjectBoxService.instance.isInitialized) {
+      final customNames =
+          ObjectBoxService.instance.getStringListSetting(customCategoriesKey);
+      for (final name in customNames) {
+        if (!all.any(
+            (c) => (c['name'] as String).toLowerCase() == name.toLowerCase())) {
+          all.insert(all.length - 1, {
+            'id': name.toLowerCase().replaceAll(' ', '_'),
+            'name': name,
+            'icon': Icons.label_rounded,
+            'color': AppColors.primaryLight,
+            'isCustom': true,
+          });
+        }
+      }
+    }
+    return all;
+  }
+
   /// Get category metadata by name or id
   static Map<String, dynamic> getCategory(String categoryKey) {
     final lower = categoryKey.toLowerCase();
-    for (final cat in categories) {
+    for (final cat in getAllCategories()) {
       if (cat['id'] == lower ||
           (cat['name'] as String).toLowerCase() == lower) {
         return cat;
       }
     }
-    return categories.last; // Other
+    return {
+      'id': lower,
+      'name': categoryKey,
+      'icon': Icons.label_rounded,
+      'color': AppColors.primaryLight,
+      'isCustom': true,
+    };
   }
 
   /// Supported UPI Platforms

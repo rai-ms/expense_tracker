@@ -150,7 +150,7 @@ class TransactionsView
                       const SizedBox(width: 6),
 
                       // Category items with icons
-                      ...AppConstants.categories.map((cat) {
+                      ...AppConstants.getAllCategories().map((cat) {
                         final name = cat['name'] as String;
                         final icon = cat['icon'] as IconData;
                         final color = cat['color'] as Color;

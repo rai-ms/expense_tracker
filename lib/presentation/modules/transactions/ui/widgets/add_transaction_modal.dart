@@ -153,7 +153,7 @@ class _AddTransactionModalState extends State<AddTransactionModal> {
             DropdownButtonFormField<String>(
               initialValue: _category,
               decoration: const InputDecoration(labelText: 'Category'),
-              items: AppConstants.categories.map((c) {
+              items: AppConstants.getAllCategories().map((c) {
                 return DropdownMenuItem<String>(
                   value: c['name'] as String,
                   child: Row(
