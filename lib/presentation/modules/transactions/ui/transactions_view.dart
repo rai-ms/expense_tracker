@@ -29,6 +29,11 @@ class TransactionsView
         ),
         actions: [
           IconButton(
+            onPressed: ctr.onExportPdf,
+            icon: const Icon(Icons.picture_as_pdf_outlined),
+            tooltip: 'Export PDF Statement',
+          ),
+          IconButton(
             onPressed: ctr.onOpenManageCategories,
             icon: const Icon(Icons.category_outlined),
             tooltip: 'Manage Categories',
@@ -306,6 +311,23 @@ class TransactionsView
                                 fontSize: 11,
                                 fontWeight: FontWeight.bold,
                                 color: AppColors.creditGreen,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            InkWell(
+                              onTap: ctr.onExportPdf,
+                              borderRadius: BorderRadius.circular(8),
+                              child: Container(
+                                padding: const EdgeInsets.all(4),
+                                decoration: BoxDecoration(
+                                  color: AppColors.primary.withValues(alpha: 0.12),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: const Icon(
+                                  Icons.picture_as_pdf_rounded,
+                                  size: 15,
+                                  color: AppColors.primary,
+                                ),
                               ),
                             ),
                           ],

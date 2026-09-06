@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 import '../../../../core/services/di/injection.dart';
 import '../../../../core/services/event_bus/app_events.dart';
+import '../../../../core/services/pdf_export_service/pdf_export_service.dart';
 import '../../../../data/models/transaction_entity.dart';
 import '../bloc/transactions_bloc.dart';
 import '../models/saved_filter_preset.dart';
@@ -174,6 +176,60 @@ mixin _TransactionsMixin on State<TransactionsController> {
 
   void onApplyPreset(SavedFilterPreset preset) {
     _state.bloc.add(LoadTransactionsEvent(criteria: preset.criteria));
+  }
+
+  Future<void> onExportPdf() async {
+    final data = _state.bloc.state.data;
+    if (data == null || data.transactions.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('No transactions available to export.'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+      return;
+    }
+
+    final criteria = data.criteria;
+    final filterParts = <String>[];
+    if (criteria.types.isNotEmpty) {
+      filterParts.add('Types: ${criteria.types.join(", ")}');
+    }
+    if (criteria.categories.isNotEmpty) {
+      filterParts.add('Categories: ${criteria.categories.join(", ")}');
+    }
+    if (criteria.platforms.isNotEmpty) {
+      filterParts.add('Apps: ${criteria.platforms.join(", ")}');
+    }
+    if (criteria.minAmount != null || criteria.maxAmount != null) {
+      final min = criteria.minAmount != null ? 'Min Rs.${criteria.minAmount!.toInt()}' : '';
+      final max = criteria.maxAmount != null ? 'Max Rs.${criteria.maxAmount!.toInt()}' : '';
+      filterParts.add([min, max].where((s) => s.isNotEmpty).join(' - '));
+    }
+    if (criteria.matchMode == FilterMatchMode.strict) {
+      filterParts.add('Strict Match');
+    }
+
+    final filterSubtitle = filterParts.isEmpty ? null : filterParts.join(' • ');
+
+    final doc = await PdfExportService.generateExpenseStatement(
+      transactions: data.transactions,
+      totalIncome: data.totalIncome,
+      totalExpense: data.totalExpense,
+      periodLabel: data.dateFilterLabel,
+      startDate: data.startDate,
+      endDate: data.endDate,
+      filterSubtitle: filterSubtitle,
+    );
+
+    if (mounted) {
+      PdfExportService.showPdfPreviewModal(
+        context: context,
+        document: doc,
+        title: 'Export PDF Statement',
+        fileName: 'SpendWise_Statement_${DateFormat("yyyyMMdd_HHmm").format(DateTime.now())}',
+      );
+    }
   }
 
   void onAddNewTransaction() {
