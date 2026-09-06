@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_sms_inbox/flutter_sms_inbox.dart';
 import 'package:injectable/injectable.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -6,6 +7,55 @@ import 'package:permission_handler/permission_handler.dart';
 import '../../base/logger/app_logger.dart';
 import '../sms_parser_service/ignored_rule_service.dart';
 import '../sms_parser_service/sms_parser_service.dart';
+
+/// Payload for background isolate worker
+class _SmsBatchParsePayload {
+  final List<Map<String, dynamic>> rawMessages;
+  final List<String> ignoredKeywords;
+  final List<String> ignoredSenders;
+
+  _SmsBatchParsePayload({
+    required this.rawMessages,
+    required this.ignoredKeywords,
+    required this.ignoredSenders,
+  });
+}
+
+/// Top-level function executed on a dedicated background isolate thread
+List<ParsedSmsResult> _parseSmsBatchInBackground(_SmsBatchParsePayload payload) {
+  final List<ParsedSmsResult> parsedList = [];
+
+  for (final msg in payload.rawMessages) {
+    final body = msg['body'] as String;
+    final sender = msg['sender'] as String?;
+    final dateMillis = msg['date'] as int;
+    final msgDate = DateTime.fromMillisecondsSinceEpoch(dateMillis);
+
+    // Filter out ignored messages via user rules
+    final bodyLower = body.toLowerCase();
+    final isIgnoredKeyword = payload.ignoredKeywords
+        .any((k) => bodyLower.contains(k.toLowerCase()));
+    final isIgnoredSender = sender != null &&
+        payload.ignoredSenders
+            .any((s) => sender.toLowerCase().contains(s.toLowerCase()));
+
+    if (isIgnoredKeyword || isIgnoredSender) {
+      continue;
+    }
+
+    final parsed = SmsParserService.parse(
+      body,
+      smsDate: msgDate,
+      senderAddress: sender,
+    );
+
+    if (parsed.isValidTransaction) {
+      parsedList.add(parsed);
+    }
+  }
+
+  return parsedList;
+}
 
 /// SMS sync service for scanning device SMS with custom date range support
 @lazySingleton
@@ -28,7 +78,7 @@ class SmsSyncService {
     return status.isGranted;
   }
 
-  /// Scan inbox SMS and parse financial messages with date filtering
+  /// Scan inbox SMS and parse financial messages with date filtering on background thread
   Future<List<ParsedSmsResult>> syncInbox({
     DateTime? fromDate,
     DateTime? toDate,
@@ -54,7 +104,7 @@ class SmsSyncService {
         count: limit,
       );
 
-      final List<ParsedSmsResult> parsedList = [];
+      final List<Map<String, dynamic>> rawBatch = [];
 
       for (final msg in messages) {
         final msgDate = msg.date ?? DateTime.now();
@@ -72,23 +122,24 @@ class SmsSyncService {
         final body = msg.body;
         if (body == null || body.trim().isEmpty) continue;
 
-        // Check if ignored by custom user rules
-        if (_ignoredRuleService.isIgnored(body, sender: msg.sender)) {
-          continue;
-        }
-
-        final parsed = SmsParserService.parse(
-          body,
-          smsDate: msgDate,
-          senderAddress: msg.sender,
-        );
-
-        if (parsed.isValidTransaction) {
-          parsedList.add(parsed);
-        }
+        rawBatch.add({
+          'body': body,
+          'sender': msg.sender,
+          'date': msgDate.millisecondsSinceEpoch,
+        });
       }
 
-      Log.i('SMS Sync completed: Found ${parsedList.length} transactions since ${fromDate ?? "beginning"} (scanned ${messages.length} SMS).');
+      // Offload CPU-heavy regex parsing to a background worker isolate (multi-threading)
+      final payload = _SmsBatchParsePayload(
+        rawMessages: rawBatch,
+        ignoredKeywords: _ignoredRuleService.ignoredKeywords,
+        ignoredSenders: _ignoredRuleService.ignoredSenders,
+      );
+
+      final List<ParsedSmsResult> parsedList =
+          await compute(_parseSmsBatchInBackground, payload);
+
+      Log.i('SMS Sync completed in background thread: Found ${parsedList.length} transactions since ${fromDate ?? "beginning"} (scanned ${messages.length} SMS).');
       return parsedList;
     } catch (e, stack) {
       Log.e('Error syncing SMS inbox', error: e, stackTrace: stack);
