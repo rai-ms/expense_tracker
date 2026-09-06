@@ -3,6 +3,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../core/base/logger/app_logger.dart';
 import '../../../../core/services/di/injection.dart';
+import '../../../../core/services/event_bus/app_events.dart';
 import '../../../../core/services/pdf_export_service/pdf_export_service.dart';
 import '../../../../data/models/khata_contact_entity.dart';
 import '../../../../data/models/khata_entry_entity.dart';
@@ -33,6 +34,19 @@ class KhataDetailControllerState extends State<KhataDetailController>
     super.initState();
     _khataRepo = sl<IKhataRepository>();
     loadContact();
+    AppEvents.syncNotifier.addListener(_onSyncData);
+  }
+
+  @override
+  void dispose() {
+    AppEvents.syncNotifier.removeListener(_onSyncData);
+    super.dispose();
+  }
+
+  void _onSyncData() {
+    if (mounted) {
+      loadContact();
+    }
   }
 
   @override
@@ -74,6 +88,7 @@ mixin _KhataDetailMixin on State<KhataDetailController> {
         initialType: initialType,
         onSave: (entry) {
           _state._khataRepo.addEntry(_state.contact!.id, entry);
+          AppEvents.notifyDataChanged();
           loadContact();
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -108,6 +123,7 @@ mixin _KhataDetailMixin on State<KhataDetailController> {
             onPressed: () {
               Navigator.pop(ctx);
               _state._khataRepo.settleAllEntriesForContact(_state.contact!.id);
+              AppEvents.notifyDataChanged();
               loadContact();
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
@@ -141,6 +157,7 @@ mixin _KhataDetailMixin on State<KhataDetailController> {
             onPressed: () {
               Navigator.pop(ctx);
               _state._khataRepo.deleteEntry(entry.id);
+              AppEvents.notifyDataChanged();
               loadContact();
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
@@ -175,6 +192,7 @@ mixin _KhataDetailMixin on State<KhataDetailController> {
             onPressed: () {
               Navigator.pop(ctx);
               _state._khataRepo.deleteContact(_state.contact!.id);
+              AppEvents.notifyDataChanged();
               Navigator.pop(context, true);
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(

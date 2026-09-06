@@ -1,5 +1,6 @@
 import '../../../core/base/bloc_base/base_bloc.dart';
 import '../../../core/base/bloc_base/bloc_event.dart';
+import '../../../core/services/event_bus/app_events.dart';
 import '../../../data/models/bill_reminder_entity.dart';
 import '../../../domain/repositories/i_reminder_repository.dart';
 
@@ -87,6 +88,7 @@ class RemindersBloc extends BaseBloc<RemindersEvent, RemindersData> {
   ) {
     try {
       _reminderRepository.addReminder(event.reminder);
+      AppEvents.notifyDataChanged();
       add(LoadRemindersEvent());
     } catch (e) {
       emitFailed(message: 'Failed to add reminder: $e');
@@ -99,6 +101,7 @@ class RemindersBloc extends BaseBloc<RemindersEvent, RemindersData> {
   ) {
     try {
       _reminderRepository.togglePaidStatus(event.reminderId, event.isPaid);
+      AppEvents.notifyDataChanged();
       add(LoadRemindersEvent());
     } catch (e) {
       emitFailed(message: 'Failed to update reminder status: $e');
@@ -111,6 +114,7 @@ class RemindersBloc extends BaseBloc<RemindersEvent, RemindersData> {
   ) {
     try {
       _reminderRepository.deleteReminder(event.reminderId);
+      AppEvents.notifyDataChanged();
       add(LoadRemindersEvent());
     } catch (e) {
       emitFailed(message: 'Failed to delete reminder: $e');

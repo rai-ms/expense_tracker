@@ -2,6 +2,7 @@ import 'package:intl/intl.dart';
 
 import '../../../core/base/bloc_base/base_bloc.dart';
 import '../../../core/base/bloc_base/bloc_event.dart';
+import '../../../core/services/event_bus/app_events.dart';
 import '../../../core/services/sms_sync_service/sms_sync_service.dart';
 import '../../../data/models/transaction_entity.dart';
 import '../../../domain/repositories/i_transaction_repository.dart';
@@ -221,6 +222,7 @@ class DashboardBloc extends BaseBloc<DashboardEvent, DashboardData> {
         limit: event.limit,
       );
 
+      bool addedAny = false;
       for (final parsed in parsedList) {
         if (parsed.transactionId != null &&
             _transactionRepository.hasTransactionWithTxnId(parsed.transactionId!)) {
@@ -243,6 +245,11 @@ class DashboardBloc extends BaseBloc<DashboardEvent, DashboardData> {
         );
 
         _transactionRepository.addTransaction(entity);
+        addedAny = true;
+      }
+
+      if (addedAny) {
+        AppEvents.notifyDataChanged();
       }
 
       // Reload with active filter
@@ -262,6 +269,7 @@ class DashboardBloc extends BaseBloc<DashboardEvent, DashboardData> {
   ) async {
     try {
       _transactionRepository.addTransaction(event.transaction);
+      AppEvents.notifyDataChanged();
       add(LoadDashboardDataEvent(
         filter: _currentFilter,
         customStartDate: _customStart,

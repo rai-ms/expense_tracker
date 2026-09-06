@@ -4,6 +4,7 @@ import '../../../../core/services/di/injection.dart';
 import '../../../../data/models/bill_reminder_entity.dart';
 import '../../../../domain/repositories/i_reminder_repository.dart';
 import '../../../blocs/reminders/reminders_bloc.dart';
+import '../../../../core/services/event_bus/app_events.dart';
 import '../ui/reminders_view.dart';
 import '../ui/widgets/add_reminder_modal.dart';
 
@@ -23,12 +24,20 @@ class RemindersControllerState extends State<RemindersController>
     super.initState();
     bloc = RemindersBloc(sl<IReminderRepository>());
     bloc.add(LoadRemindersEvent());
+    AppEvents.syncNotifier.addListener(_onSyncData);
   }
 
   @override
   void dispose() {
+    AppEvents.syncNotifier.removeListener(_onSyncData);
     bloc.close();
     super.dispose();
+  }
+
+  void _onSyncData() {
+    if (mounted) {
+      bloc.add(LoadRemindersEvent());
+    }
   }
 
   @override

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/services/di/injection.dart';
+import '../../../../core/services/event_bus/app_events.dart';
 import '../../../../core/services/sms_parser_service/sms_parser_service.dart';
 import '../../../../core/services/sms_sync_service/sms_sync_service.dart';
 import '../../../../data/models/transaction_entity.dart';
@@ -91,6 +92,7 @@ mixin _SmsSimulatorMixin on State<SmsSimulatorController> {
     );
 
     repo.addTransaction(txn);
+    AppEvents.notifyDataChanged();
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -126,6 +128,10 @@ mixin _SmsSimulatorMixin on State<SmsSimulatorController> {
         repo.addTransaction(txn);
         count++;
       }
+    }
+
+    if (count > 0) {
+      AppEvents.notifyDataChanged();
     }
 
     ScaffoldMessenger.of(context).showSnackBar(

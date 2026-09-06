@@ -5,6 +5,7 @@ import '../../../../data/models/khata_contact_entity.dart';
 import '../../../../domain/repositories/i_khata_repository.dart';
 import '../../../blocs/khata/khata_bloc.dart';
 import '../../khata_detail/controller/khata_detail_controller.dart';
+import '../../../../core/services/event_bus/app_events.dart';
 import '../ui/khata_view.dart';
 import '../ui/widgets/add_contact_modal.dart';
 import '../ui/widgets/add_entry_modal.dart';
@@ -24,12 +25,20 @@ class KhataControllerState extends State<KhataController> with _KhataMixin {
     super.initState();
     bloc = KhataBloc(sl<IKhataRepository>());
     bloc.add(LoadKhataDataEvent());
+    AppEvents.syncNotifier.addListener(_onSyncData);
   }
 
   @override
   void dispose() {
+    AppEvents.syncNotifier.removeListener(_onSyncData);
     bloc.close();
     super.dispose();
+  }
+
+  void _onSyncData() {
+    if (mounted) {
+      bloc.add(LoadKhataDataEvent());
+    }
   }
 
   @override

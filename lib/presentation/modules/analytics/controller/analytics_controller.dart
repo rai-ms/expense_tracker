@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/services/di/injection.dart';
 import '../../../../domain/repositories/i_transaction_repository.dart';
 import '../../../blocs/analytics/analytics_bloc.dart';
+import '../../../../core/services/event_bus/app_events.dart';
 import '../ui/analytics_view.dart';
 
 class AnalyticsController extends StatefulWidget {
@@ -21,12 +22,25 @@ class AnalyticsControllerState extends State<AnalyticsController>
     super.initState();
     bloc = AnalyticsBloc(sl<ITransactionRepository>());
     bloc.add(const LoadAnalyticsEvent(timeRange: AnalyticsTimeRange.thisMonth));
+    AppEvents.syncNotifier.addListener(_onSyncData);
   }
 
   @override
   void dispose() {
+    AppEvents.syncNotifier.removeListener(_onSyncData);
     bloc.close();
     super.dispose();
+  }
+
+  void _onSyncData() {
+    if (mounted) {
+      final current = bloc.state.data;
+      bloc.add(
+        LoadAnalyticsEvent(
+          timeRange: current?.timeRange ?? AnalyticsTimeRange.thisMonth,
+        ),
+      );
+    }
   }
 
   @override

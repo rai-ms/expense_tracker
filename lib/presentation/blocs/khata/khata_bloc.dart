@@ -2,6 +2,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../core/base/bloc_base/base_bloc.dart';
 import '../../../core/base/bloc_base/bloc_event.dart';
 import '../../../core/base/logger/app_logger.dart';
+import '../../../core/services/event_bus/app_events.dart';
 import '../../../data/models/khata_contact_entity.dart';
 import '../../../data/models/khata_entry_entity.dart';
 import '../../../domain/repositories/i_khata_repository.dart';
@@ -106,6 +107,7 @@ class KhataBloc extends BaseBloc<KhataEvent, KhataData> {
   ) {
     try {
       _khataRepository.addContact(event.contact);
+      AppEvents.notifyDataChanged();
       add(LoadKhataDataEvent());
     } catch (e) {
       emitFailed(message: 'Failed to add contact: $e');
@@ -118,6 +120,7 @@ class KhataBloc extends BaseBloc<KhataEvent, KhataData> {
   ) {
     try {
       _khataRepository.addEntry(event.contactId, event.entry);
+      AppEvents.notifyDataChanged();
       add(LoadKhataDataEvent());
     } catch (e) {
       emitFailed(message: 'Failed to add ledger entry: $e');
@@ -130,6 +133,7 @@ class KhataBloc extends BaseBloc<KhataEvent, KhataData> {
   ) {
     try {
       _khataRepository.settleAllEntriesForContact(event.contactId);
+      AppEvents.notifyDataChanged();
       add(LoadKhataDataEvent());
     } catch (e) {
       emitFailed(message: 'Failed to settle contact: $e');

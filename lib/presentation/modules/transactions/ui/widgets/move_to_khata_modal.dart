@@ -4,6 +4,7 @@ import 'package:uuid/uuid.dart';
 
 import '../../../../../core/constants/app_colors.dart';
 import '../../../../../core/services/di/injection.dart';
+import '../../../../../core/services/event_bus/app_events.dart';
 import '../../../../../data/models/khata_contact_entity.dart';
 import '../../../../../data/models/khata_entry_entity.dart';
 import '../../../../../data/models/transaction_entity.dart';
@@ -105,6 +106,7 @@ class _MoveToKhataModalState extends State<MoveToKhataModal> {
     );
 
     _khataRepo.addEntry(targetContact.id, entry);
+    AppEvents.notifyDataChanged();
 
     Navigator.pop(context, true);
     ScaffoldMessenger.of(context).showSnackBar(

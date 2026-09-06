@@ -10,6 +10,8 @@ import '../../../../domain/repositories/i_transaction_repository.dart';
 import '../../../blocs/dashboard/dashboard_bloc.dart';
 import '../../transactions/ui/widgets/add_transaction_modal.dart';
 import '../../transactions/ui/widgets/transaction_detail_modal.dart';
+import '../../../../core/services/event_bus/app_events.dart';
+import '../../main_navigation/controller/main_navigation_controller.dart';
 import '../ui/dashboard_view.dart';
 import '../ui/widgets/sync_sms_date_modal.dart';
 
@@ -32,12 +34,27 @@ class DashboardControllerState extends State<DashboardController>
       sl<SmsSyncService>(),
     );
     bloc.add(LoadDashboardDataEvent());
+    AppEvents.syncNotifier.addListener(_onSyncData);
   }
 
   @override
   void dispose() {
+    AppEvents.syncNotifier.removeListener(_onSyncData);
     bloc.close();
     super.dispose();
+  }
+
+  void _onSyncData() {
+    if (mounted) {
+      final currentData = bloc.state.data;
+      bloc.add(
+        LoadDashboardDataEvent(
+          filter: currentData?.activeFilter ?? DashboardDateFilter.thisMonth,
+          customStartDate: currentData?.filterStartDate,
+          customEndDate: currentData?.filterEndDate,
+        ),
+      );
+    }
   }
 
   @override
@@ -95,7 +112,11 @@ mixin _DashboardMixin on State<DashboardController> {
   }
 
   void onAddKhata() {
-    context.push(AppRoutes.khata);
+    if (MainNavigationControllerState.tabControllerNotifier != null) {
+      MainNavigationControllerState.switchToTab(2);
+    } else {
+      context.push(AppRoutes.khata);
+    }
   }
 
   void onExportPdf() {
@@ -104,12 +125,16 @@ mixin _DashboardMixin on State<DashboardController> {
 
   void onSmsSimulator() {
     context.push(AppRoutes.smsSimulator).then((_) {
-      _state.bloc.add(LoadDashboardDataEvent());
+      AppEvents.notifyDataChanged();
     });
   }
 
   void onViewAllTransactions() {
-    context.push(AppRoutes.transactions);
+    if (MainNavigationControllerState.tabControllerNotifier != null) {
+      MainNavigationControllerState.switchToTab(1);
+    } else {
+      context.push(AppRoutes.transactions);
+    }
   }
 
   void onDateFilterChanged(DashboardDateFilter filter) {
@@ -159,7 +184,7 @@ mixin _DashboardMixin on State<DashboardController> {
         transaction: txn,
         onDelete: () {
           sl<ITransactionRepository>().deleteTransaction(txn.id);
-          _state.bloc.add(LoadDashboardDataEvent());
+          AppEvents.notifyDataChanged();
         },
       ),
     );

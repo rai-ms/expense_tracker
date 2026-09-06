@@ -2,6 +2,7 @@ import 'package:intl/intl.dart';
 
 import '../../../core/base/bloc_base/base_bloc.dart';
 import '../../../core/base/bloc_base/bloc_event.dart';
+import '../../../core/services/event_bus/app_events.dart';
 import '../../../data/models/transaction_entity.dart';
 import '../../../domain/repositories/i_transaction_repository.dart';
 
@@ -239,6 +240,7 @@ class TransactionsBloc extends BaseBloc<TransactionsEvent, TransactionsData> {
   ) {
     try {
       _transactionRepository.deleteTransaction(event.transactionId);
+      AppEvents.notifyDataChanged();
       add(
         LoadTransactionsEvent(
           searchQuery: _currentSearch,
@@ -261,6 +263,7 @@ class TransactionsBloc extends BaseBloc<TransactionsEvent, TransactionsData> {
   ) {
     try {
       _transactionRepository.addTransaction(event.transaction);
+      AppEvents.notifyDataChanged();
       add(
         LoadTransactionsEvent(
           searchQuery: _currentSearch,

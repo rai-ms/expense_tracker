@@ -4,6 +4,7 @@ import '../../../../core/services/di/injection.dart';
 import '../../../../data/models/transaction_entity.dart';
 import '../../../../domain/repositories/i_transaction_repository.dart';
 import '../../../blocs/transactions/transactions_bloc.dart';
+import '../../../../core/services/event_bus/app_events.dart';
 import '../ui/transactions_view.dart';
 import '../ui/widgets/add_transaction_modal.dart';
 import '../ui/widgets/transaction_detail_modal.dart';
@@ -25,13 +26,32 @@ class TransactionsControllerState extends State<TransactionsController>
     super.initState();
     bloc = TransactionsBloc(sl<ITransactionRepository>());
     bloc.add(const LoadTransactionsEvent());
+    AppEvents.syncNotifier.addListener(_onSyncData);
   }
 
   @override
   void dispose() {
+    AppEvents.syncNotifier.removeListener(_onSyncData);
     bloc.close();
     searchController.dispose();
     super.dispose();
+  }
+
+  void _onSyncData() {
+    if (mounted) {
+      final current = bloc.state.data;
+      bloc.add(
+        LoadTransactionsEvent(
+          searchQuery: current?.searchQuery,
+          selectedCategory: current?.selectedCategory,
+          selectedType: current?.selectedType,
+          selectedPlatform: current?.selectedPlatform,
+          dateFilter: current?.dateFilter ?? TransactionDateFilter.thisMonth,
+          customStartDate: current?.startDate,
+          customEndDate: current?.endDate,
+        ),
+      );
+    }
   }
 
   @override
