@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_native_contact_picker/flutter_native_contact_picker.dart';
+import 'package:flutter_native_contact_picker/model/contact.dart';
 import 'package:intl/intl.dart';
 import 'package:uuid/uuid.dart';
 
@@ -31,6 +33,7 @@ class _MoveToKhataModalState extends State<MoveToKhataModal> {
   final _newContactController = TextEditingController();
   final _notesController = TextEditingController();
   final _amountController = TextEditingController();
+  final FlutterNativeContactPicker _contactPicker = FlutterNativeContactPicker();
   late String _type; // 'gave' or 'got'
   bool _isCreatingNew = false;
 
@@ -50,6 +53,18 @@ class _MoveToKhataModalState extends State<MoveToKhataModal> {
       _selectedContact = _contacts.first;
     } else {
       _isCreatingNew = true;
+    }
+  }
+
+  Future<void> _pickContactFromPhone() async {
+    try {
+      final Contact? contact = await _contactPicker.selectContact();
+      if (contact != null && contact.fullName != null && contact.fullName!.trim().isNotEmpty) {
+        _newContactController.text = contact.fullName!.trim();
+        setState(() {});
+      }
+    } catch (e) {
+      debugPrint('Error picking contact: $e');
     }
   }
 
@@ -263,9 +278,14 @@ class _MoveToKhataModalState extends State<MoveToKhataModal> {
                 TextField(
                   controller: _newContactController,
                   autofocus: true,
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     labelText: 'Contact Name (Person / Business)',
-                    prefixIcon: Icon(Icons.person_add_alt_1_rounded),
+                    prefixIcon: const Icon(Icons.person_add_alt_1_rounded),
+                    suffixIcon: IconButton(
+                      icon: const Icon(Icons.contacts_rounded, color: AppColors.primary),
+                      tooltip: context.tr('pick_contact'),
+                      onPressed: _pickContactFromPhone,
+                    ),
                     hintText: 'e.g. Rahul Sharma, Kirana Store',
                   ),
                 ),

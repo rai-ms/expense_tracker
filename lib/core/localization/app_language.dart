@@ -18,7 +18,9 @@ class AppLanguage {
 
   static const List<AppLanguage> supportedLanguages = [
     AppLanguage(code: 'en', name: 'English', nativeName: 'English'),
+    AppLanguage(code: 'hinglish', name: 'Hinglish', nativeName: 'Hinglish (हिंग्लिश)'),
     AppLanguage(code: 'hi', name: 'Hindi', nativeName: 'हिन्दी'),
+    AppLanguage(code: 'bho', name: 'Bhojpuri', nativeName: 'भोजपुरी'),
     AppLanguage(code: 'bn', name: 'Bengali', nativeName: 'বাংলা'),
     AppLanguage(code: 'ur', name: 'Urdu', nativeName: 'اردو', isRtl: true),
     AppLanguage(code: 'ar', name: 'Arabic', nativeName: 'العربية', isRtl: true),
