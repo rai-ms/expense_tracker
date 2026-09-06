@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/services/di/injection.dart';
+import '../../../../core/services/event_bus/app_events.dart';
 import '../../../../data/models/transaction_entity.dart';
 import '../bloc/transactions_bloc.dart';
-import '../../../../core/services/event_bus/app_events.dart';
 import '../ui/transactions_view.dart';
 import '../ui/widgets/add_transaction_modal.dart';
 import '../ui/widgets/transaction_detail_modal.dart';
+import '../ui/widgets/transaction_filter_modal.dart';
 
 class TransactionsController extends StatefulWidget {
   const TransactionsController({super.key});
@@ -38,18 +39,8 @@ class TransactionsControllerState extends State<TransactionsController>
 
   void _onSyncData() {
     if (mounted) {
-      final current = bloc.state.data;
-      bloc.add(
-        LoadTransactionsEvent(
-          searchQuery: current?.searchQuery,
-          selectedCategory: current?.selectedCategory,
-          selectedType: current?.selectedType,
-          selectedPlatform: current?.selectedPlatform,
-          dateFilter: current?.dateFilter ?? TransactionDateFilter.thisMonth,
-          customStartDate: current?.startDate,
-          customEndDate: current?.endDate,
-        ),
-      );
+      final currentCriteria = bloc.state.data?.criteria ?? const TransactionFilterCriteria();
+      bloc.add(LoadTransactionsEvent(criteria: currentCriteria));
     }
   }
 
@@ -63,98 +54,88 @@ mixin _TransactionsMixin on State<TransactionsController> {
   TransactionsControllerState get _state => this as TransactionsControllerState;
 
   void onSearchChanged(String query) {
-    final current = _state.bloc.state.data;
+    final current = _state.bloc.state.data?.criteria ?? const TransactionFilterCriteria();
     _state.bloc.add(
       LoadTransactionsEvent(
-        searchQuery: query,
-        selectedCategory: current?.selectedCategory,
-        selectedType: current?.selectedType,
-        selectedPlatform: current?.selectedPlatform,
-        dateFilter: current?.dateFilter ?? TransactionDateFilter.thisMonth,
-        customStartDate: current?.startDate,
-        customEndDate: current?.endDate,
-      ),
-    );
-  }
-
-  void onTypeFilterChanged(String type) {
-    final current = _state.bloc.state.data;
-    _state.bloc.add(
-      LoadTransactionsEvent(
-        searchQuery: current?.searchQuery,
-        selectedCategory: current?.selectedCategory,
-        selectedType: type,
-        selectedPlatform: current?.selectedPlatform,
-        dateFilter: current?.dateFilter ?? TransactionDateFilter.thisMonth,
-        customStartDate: current?.startDate,
-        customEndDate: current?.endDate,
-      ),
-    );
-  }
-
-  void onCategoryFilterChanged(String? category) {
-    final current = _state.bloc.state.data;
-    _state.bloc.add(
-      LoadTransactionsEvent(
-        searchQuery: current?.searchQuery,
-        selectedCategory: category,
-        selectedType: current?.selectedType,
-        selectedPlatform: current?.selectedPlatform,
-        dateFilter: current?.dateFilter ?? TransactionDateFilter.thisMonth,
-        customStartDate: current?.startDate,
-        customEndDate: current?.endDate,
-      ),
-    );
-  }
-
-  void onDateFilterChanged(TransactionDateFilter filter) {
-    if (filter == TransactionDateFilter.custom) {
-      onSelectCustomDateRange();
-    } else {
-      final current = _state.bloc.state.data;
-      _state.bloc.add(
-        LoadTransactionsEvent(
-          searchQuery: current?.searchQuery,
-          selectedCategory: current?.selectedCategory,
-          selectedType: current?.selectedType,
-          selectedPlatform: current?.selectedPlatform,
-          dateFilter: filter,
+        criteria: current.copyWith(
+          searchQuery: query.trim().isEmpty ? null : query.trim(),
         ),
-      );
-    }
+      ),
+    );
   }
 
-  Future<void> onSelectCustomDateRange() async {
-    final current = _state.bloc.state.data;
-    final now = DateTime.now();
-    final picked = await showDateRangePicker(
+  void onOpenFilterModal() {
+    final data = _state.bloc.state.data;
+    final currentCriteria = data?.criteria ?? const TransactionFilterCriteria();
+    final categories = data?.availableCategories ?? [];
+    final platforms = data?.availablePlatforms ?? [];
+
+    showModalBottomSheet(
       context: context,
-      firstDate: DateTime(2020),
-      lastDate: now.add(const Duration(days: 30)),
-      initialDateRange: DateTimeRange(
-        start: current?.startDate ?? DateTime(now.year, now.month, 1),
-        end: current?.endDate ?? now,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => TransactionFilterModal(
+        initialCriteria: currentCriteria,
+        availableCategories: categories,
+        availablePlatforms: platforms,
+        onApply: (newCriteria) {
+          _state.bloc.add(LoadTransactionsEvent(criteria: newCriteria));
+        },
+        onClear: onClearAllFilters,
       ),
     );
-
-    if (picked != null) {
-      final start = DateTime(picked.start.year, picked.start.month, picked.start.day);
-      final end = DateTime(picked.end.year, picked.end.month, picked.end.day, 23, 59, 59);
-      _state.bloc.add(
-        LoadTransactionsEvent(
-          searchQuery: current?.searchQuery,
-          selectedCategory: current?.selectedCategory,
-          selectedType: current?.selectedType,
-          selectedPlatform: current?.selectedPlatform,
-          dateFilter: TransactionDateFilter.custom,
-          customStartDate: start,
-          customEndDate: end,
-        ),
-      );
-    }
   }
 
-  void onResetFilters() {
+  void onQuickDateFilterChanged(TransactionDateFilter filter) {
+    final current = _state.bloc.state.data?.criteria ?? const TransactionFilterCriteria();
+    _state.bloc.add(
+      LoadTransactionsEvent(
+        criteria: current.copyWith(dateFilter: filter),
+      ),
+    );
+  }
+
+  void onRemoveFilterTag(String filterType, [String? value]) {
+    final current = _state.bloc.state.data?.criteria ?? const TransactionFilterCriteria();
+    TransactionFilterCriteria updated = current;
+
+    switch (filterType) {
+      case 'date':
+        updated = current.copyWith(dateFilter: TransactionDateFilter.thisMonth);
+        break;
+      case 'type':
+        if (value != null) {
+          final newTypes = Set<String>.from(current.types)..remove(value);
+          updated = current.copyWith(types: newTypes);
+        }
+        break;
+      case 'category':
+        if (value != null) {
+          final newCats = Set<String>.from(current.categories)..remove(value);
+          updated = current.copyWith(categories: newCats);
+        }
+        break;
+      case 'platform':
+        if (value != null) {
+          final newPlats = Set<String>.from(current.platforms)..remove(value);
+          updated = current.copyWith(platforms: newPlats);
+        }
+        break;
+      case 'amount':
+        updated = current.copyWith(
+          clearMinAmount: true,
+          clearMaxAmount: true,
+        );
+        break;
+      case 'sort':
+        updated = current.copyWith(sortBy: TransactionSortBy.dateNewest);
+        break;
+    }
+
+    _state.bloc.add(LoadTransactionsEvent(criteria: updated));
+  }
+
+  void onClearAllFilters() {
     _state.searchController.clear();
     _state.bloc.add(const LoadTransactionsEvent());
   }
@@ -189,3 +170,4 @@ mixin _TransactionsMixin on State<TransactionsController> {
     );
   }
 }
+

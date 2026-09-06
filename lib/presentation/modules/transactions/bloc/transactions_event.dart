@@ -1,12 +1,5 @@
 part of 'transactions_bloc.dart';
 
-enum TransactionDateFilter {
-  thisMonth,
-  lastMonth,
-  allTime,
-  custom,
-}
-
 /// Base class for all Transactions events
 abstract class TransactionsEvent extends BlocEvent {
   const TransactionsEvent();
@@ -14,34 +7,14 @@ abstract class TransactionsEvent extends BlocEvent {
 
 /// Event to load transactions with multiple filter criteria
 class LoadTransactionsEvent extends TransactionsEvent {
-  final String? searchQuery;
-  final String? selectedCategory;
-  final String? selectedType; // 'all', 'debit', 'credit'
-  final String? selectedPlatform;
-  final TransactionDateFilter dateFilter;
-  final DateTime? customStartDate;
-  final DateTime? customEndDate;
+  final TransactionFilterCriteria criteria;
 
   const LoadTransactionsEvent({
-    this.searchQuery,
-    this.selectedCategory,
-    this.selectedType = 'all',
-    this.selectedPlatform,
-    this.dateFilter = TransactionDateFilter.thisMonth,
-    this.customStartDate,
-    this.customEndDate,
+    this.criteria = const TransactionFilterCriteria(),
   });
 
   @override
-  List<Object?> get props => [
-        searchQuery,
-        selectedCategory,
-        selectedType,
-        selectedPlatform,
-        dateFilter,
-        customStartDate,
-        customEndDate,
-      ];
+  List<Object?> get props => [criteria];
 }
 
 /// Event to delete a transaction by ID

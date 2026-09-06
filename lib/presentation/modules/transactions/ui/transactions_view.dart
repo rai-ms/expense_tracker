@@ -6,10 +6,9 @@ import '../../../../core/base/base_controller/widget_view.dart';
 import '../../../../core/base/bloc_base/bloc_event_state.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_constants.dart';
+import '../../../../core/localization/app_localizations.dart';
 import '../bloc/transactions_bloc.dart';
 import '../controller/transactions_controller.dart';
-
-import '../../../../core/localization/app_localizations.dart';
 
 class TransactionsView
     extends WidgetView<TransactionsView, TransactionsControllerState> {
@@ -19,6 +18,7 @@ class TransactionsView
   Widget build(BuildContext context) {
     final currency = NumberFormat.currency(locale: 'en_IN', symbol: '₹');
     final dateFormat = DateFormat('dd MMM yyyy, hh:mm a');
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -42,146 +42,224 @@ class TransactionsView
           builder: (context, state) {
             final data = state.data;
             final txns = data?.transactions ?? [];
-            final selectedDateFilter = data?.dateFilter ?? TransactionDateFilter.thisMonth;
-            final selectedCategory = data?.selectedCategory;
+            final criteria = data?.criteria ?? const TransactionFilterCriteria();
+            final activeFilterCount = criteria.activeFilterCount;
 
             return Column(
               children: [
-                // Search Field
+                // 1. Search Bar + E-Commerce Style Filter Trigger Button
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
-                  child: TextField(
-                    controller: ctr.searchController,
-                    onChanged: ctr.onSearchChanged,
-                    decoration: InputDecoration(
-                      hintText: context.tr('search_transactions'),
-                      prefixIcon: const Icon(Icons.search_rounded),
-                      suffixIcon: ctr.searchController.text.isNotEmpty
-                          ? IconButton(
-                              icon: const Icon(Icons.clear),
-                              onPressed: () {
-                                ctr.searchController.clear();
-                                ctr.onSearchChanged('');
-                              },
-                            )
-                          : null,
+                  padding: const EdgeInsets.fromLTRB(16, 6, 16, 8),
+                  child: Row(
+                    children: [
+                      // Search Input
+                      Expanded(
+                        child: TextField(
+                          controller: ctr.searchController,
+                          onChanged: ctr.onSearchChanged,
+                          decoration: InputDecoration(
+                            hintText: context.tr('search_transactions'),
+                            prefixIcon: const Icon(Icons.search_rounded, size: 20),
+                            suffixIcon: ctr.searchController.text.isNotEmpty
+                                ? IconButton(
+                                    icon: const Icon(Icons.clear, size: 18),
+                                    onPressed: () {
+                                      ctr.searchController.clear();
+                                      ctr.onSearchChanged('');
+                                    },
+                                  )
+                                : null,
+                            contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+
+                      // E-Commerce Style Filter Button with Badge
+                      InkWell(
+                        onTap: ctr.onOpenFilterModal,
+                        borderRadius: BorderRadius.circular(16),
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 200),
+                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                          decoration: BoxDecoration(
+                            color: activeFilterCount > 0
+                                ? AppColors.primary
+                                : Theme.of(context).cardTheme.color,
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(
+                              color: activeFilterCount > 0
+                                  ? AppColors.primaryLight
+                                  : (isDark ? AppColors.darkBorder : AppColors.lightBorder),
+                              width: 1.2,
+                            ),
+                            boxShadow: activeFilterCount > 0
+                                ? [
+                                    BoxShadow(
+                                      color: AppColors.primary.withValues(alpha: 0.35),
+                                      blurRadius: 8,
+                                      offset: const Offset(0, 3),
+                                    ),
+                                  ]
+                                : null,
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.tune_rounded,
+                                size: 18,
+                                color: activeFilterCount > 0 ? Colors.white : AppColors.primary,
+                              ),
+                              const SizedBox(width: 6),
+                              Text(
+                                activeFilterCount > 0 ? 'Filters ($activeFilterCount)' : 'Filter',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 13,
+                                  color: activeFilterCount > 0
+                                      ? Colors.white
+                                      : (isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                // 2. Active Filter Pills Strip (If any filters applied)
+                if (activeFilterCount > 0)
+                  Container(
+                    height: 36,
+                    margin: const EdgeInsets.only(bottom: 6),
+                    child: ListView(
+                      scrollDirection: Axis.horizontal,
+                      physics: const BouncingScrollPhysics(),
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      children: [
+                        // Clear All Pill
+                        InkWell(
+                          onTap: ctr.onClearAllFilters,
+                          borderRadius: BorderRadius.circular(20),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                            decoration: BoxDecoration(
+                              color: AppColors.debitRed.withValues(alpha: 0.12),
+                              borderRadius: BorderRadius.circular(20),
+                              border: Border.all(color: AppColors.debitRed.withValues(alpha: 0.3)),
+                            ),
+                            child: const Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(Icons.close_rounded, size: 14, color: AppColors.debitRed),
+                                SizedBox(width: 4),
+                                Text(
+                                  'Clear All',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                    color: AppColors.debitRed,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+
+                        // Date Filter Pill
+                        if (criteria.dateFilter != TransactionDateFilter.thisMonth) ...[
+                          _buildActiveFilterTag(
+                            label: data?.dateFilterLabel ?? 'Date Range',
+                            icon: Icons.calendar_month_outlined,
+                            onRemove: () => ctr.onRemoveFilterTag('date'),
+                          ),
+                          const SizedBox(width: 8),
+                        ],
+
+                        // Type Filter Pills
+                        ...criteria.types.map(
+                          (t) => Padding(
+                            padding: const EdgeInsets.only(right: 8),
+                            child: _buildActiveFilterTag(
+                              label: t == 'debit'
+                                  ? 'Expense'
+                                  : t == 'credit'
+                                      ? 'Income'
+                                      : 'Notifications',
+                              icon: t == 'debit'
+                                  ? Icons.arrow_upward_rounded
+                                  : t == 'credit'
+                                      ? Icons.arrow_downward_rounded
+                                      : Icons.notifications_off_outlined,
+                              onRemove: () => ctr.onRemoveFilterTag('type', t),
+                            ),
+                          ),
+                        ),
+
+                        // Category Filter Pills
+                        ...criteria.categories.map(
+                          (cat) => Padding(
+                            padding: const EdgeInsets.only(right: 8),
+                            child: _buildActiveFilterTag(
+                              label: cat,
+                              icon: Icons.category_outlined,
+                              onRemove: () => ctr.onRemoveFilterTag('category', cat),
+                            ),
+                          ),
+                        ),
+
+                        // Platform Filter Pills
+                        ...criteria.platforms.map(
+                          (plat) => Padding(
+                            padding: const EdgeInsets.only(right: 8),
+                            child: _buildActiveFilterTag(
+                              label: plat,
+                              icon: Icons.account_balance_wallet_outlined,
+                              onRemove: () => ctr.onRemoveFilterTag('platform', plat),
+                            ),
+                          ),
+                        ),
+
+                        // Amount Filter Pill
+                        if (criteria.minAmount != null || criteria.maxAmount != null) ...[
+                          _buildActiveFilterTag(
+                            label: _formatAmountRange(criteria.minAmount, criteria.maxAmount),
+                            icon: Icons.currency_rupee_rounded,
+                            onRemove: () => ctr.onRemoveFilterTag('amount'),
+                          ),
+                          const SizedBox(width: 8),
+                        ],
+
+                        // Sort Filter Pill
+                        if (criteria.sortBy != TransactionSortBy.dateNewest) ...[
+                          _buildActiveFilterTag(
+                            label: _formatSortLabel(criteria.sortBy),
+                            icon: Icons.sort_rounded,
+                            onRemove: () => ctr.onRemoveFilterTag('sort'),
+                          ),
+                          const SizedBox(width: 8),
+                        ],
+                      ],
                     ),
                   ),
-                ),
-
-                // 1. Date Period Filter Bar
-                Container(
-                  height: 38,
-                  margin: const EdgeInsets.symmetric(vertical: 4),
-                  child: ListView(
-                    scrollDirection: Axis.horizontal,
-                    physics: const BouncingScrollPhysics(),
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    children: [
-                      _buildDateChip(
-                        context: context,
-                        label: context.tr('this_month'),
-                        icon: Icons.calendar_today_rounded,
-                        isSelected: selectedDateFilter == TransactionDateFilter.thisMonth,
-                        onTap: () => ctr.onDateFilterChanged(TransactionDateFilter.thisMonth),
-                      ),
-                      const SizedBox(width: 8),
-                      _buildDateChip(
-                        context: context,
-                        label: context.tr('last_month'),
-                        icon: Icons.history_rounded,
-                        isSelected: selectedDateFilter == TransactionDateFilter.lastMonth,
-                        onTap: () => ctr.onDateFilterChanged(TransactionDateFilter.lastMonth),
-                      ),
-                      const SizedBox(width: 8),
-                      _buildDateChip(
-                        context: context,
-                        label: context.tr('all_time'),
-                        icon: Icons.all_inclusive_rounded,
-                        isSelected: selectedDateFilter == TransactionDateFilter.allTime,
-                        onTap: () => ctr.onDateFilterChanged(TransactionDateFilter.allTime),
-                      ),
-                      const SizedBox(width: 8),
-                      _buildDateChip(
-                        context: context,
-                        label: selectedDateFilter == TransactionDateFilter.custom
-                            ? (data?.dateFilterLabel ?? context.tr('custom_range'))
-                            : context.tr('custom_range'),
-                        icon: Icons.date_range_rounded,
-                        isSelected: selectedDateFilter == TransactionDateFilter.custom,
-                        onTap: () => ctr.onDateFilterChanged(TransactionDateFilter.custom),
-                      ),
-                    ],
-                  ),
-                ),
-
-                // 2. Type & Category Quick Filters Bar
-                Container(
-                  height: 38,
-                  margin: const EdgeInsets.only(bottom: 6),
-                  child: ListView(
-                    scrollDirection: Axis.horizontal,
-                    physics: const BouncingScrollPhysics(),
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    children: [
-                      // Type: All
-                      _buildTypeFilterChip(context.tr('all'), 'all', data?.selectedType ?? 'all'),
-                      const SizedBox(width: 6),
-                      // Type: Expenses
-                      _buildTypeFilterChip('💸 ${context.tr('expense')}', 'debit', data?.selectedType ?? 'all'),
-                      const SizedBox(width: 6),
-                      // Type: Income
-                      _buildTypeFilterChip('💰 ${context.tr('income')}', 'credit', data?.selectedType ?? 'all'),
-                      const SizedBox(width: 6),
-                      // Type: Notifications / Ignored
-                      _buildTypeFilterChip('🔔 Notifications', 'ignored', data?.selectedType ?? 'all'),
-                      const SizedBox(width: 12),
-                      Container(width: 1, height: 24, color: AppColors.darkBorder),
-                      const SizedBox(width: 12),
-
-                      // Category: All
-                      FilterChip(
-                        label: const Text('All Categories'),
-                        selected: selectedCategory == null || selectedCategory.isEmpty,
-                        onSelected: (val) {
-                          if (val) ctr.onCategoryFilterChanged(null);
-                        },
-                      ),
-                      const SizedBox(width: 6),
-
-                      // Category items with icons
-                      ...AppConstants.getAllCategories().map((cat) {
-                        final name = cat['name'] as String;
-                        final icon = cat['icon'] as IconData;
-                        final color = cat['color'] as Color;
-                        final isSelected = selectedCategory == name;
-
-                        return Padding(
-                          padding: const EdgeInsets.only(right: 6),
-                          child: FilterChip(
-                            avatar: Icon(icon, color: color, size: 16),
-                            label: Text(name),
-                            selected: isSelected,
-                            selectedColor: color.withValues(alpha: 0.2),
-                            onSelected: (val) {
-                              ctr.onCategoryFilterChanged(val ? name : null);
-                            },
-                          ),
-                        );
-                      }),
-                    ],
-                  ),
-                ),
 
                 // 3. Filter Metrics Summary Strip
                 if (data != null)
                   Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
+                    margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                     padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                     decoration: BoxDecoration(
                       color: Theme.of(context).cardTheme.color,
                       borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: AppColors.darkBorder.withValues(alpha: 0.5)),
+                      border: Border.all(
+                        color: isDark
+                            ? AppColors.darkBorder.withValues(alpha: 0.6)
+                            : AppColors.lightBorder,
+                      ),
                     ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -231,13 +309,13 @@ class TransactionsView
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   Icon(
-                                    Icons.search_off_rounded,
+                                    Icons.filter_alt_off_rounded,
                                     size: 56,
                                     color: AppColors.textTertiaryDark.withValues(alpha: 0.5),
                                   ),
                                   const SizedBox(height: 12),
                                   const Text(
-                                    'No matching transactions found',
+                                    'No transactions match selected filters',
                                     style: TextStyle(
                                       color: AppColors.textSecondaryDark,
                                       fontSize: 15,
@@ -246,7 +324,7 @@ class TransactionsView
                                   ),
                                   const SizedBox(height: 16),
                                   OutlinedButton.icon(
-                                    onPressed: ctr.onResetFilters,
+                                    onPressed: ctr.onClearAllFilters,
                                     icon: const Icon(Icons.restart_alt_rounded, size: 16),
                                     label: const Text('Reset All Filters'),
                                   ),
@@ -254,7 +332,7 @@ class TransactionsView
                               ),
                             )
                           : ListView.separated(
-                              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                               physics: const BouncingScrollPhysics(),
                               itemCount: txns.length,
                               separatorBuilder: (_, _) => const SizedBox(height: 10),
@@ -276,7 +354,9 @@ class TransactionsView
                                         color: Theme.of(context).cardTheme.color,
                                         borderRadius: BorderRadius.circular(20),
                                         border: Border.all(
-                                          color: AppColors.darkBorder.withValues(alpha: 0.6),
+                                          color: isDark
+                                              ? AppColors.darkBorder.withValues(alpha: 0.6)
+                                              : AppColors.lightBorder,
                                         ),
                                       ),
                                       child: Row(
@@ -380,66 +460,63 @@ class TransactionsView
     );
   }
 
-  Widget _buildDateChip({
-    required BuildContext context,
+  Widget _buildActiveFilterTag({
     required String label,
     required IconData icon,
-    required bool isSelected,
-    required VoidCallback onTap,
+    required VoidCallback onRemove,
   }) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(20),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-        decoration: BoxDecoration(
-          color: isSelected ? AppColors.primary : Theme.of(context).cardTheme.color,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: isSelected ? AppColors.primaryLight : AppColors.darkBorder,
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      decoration: BoxDecoration(
+        color: AppColors.primary.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 13, color: AppColors.primary),
+          const SizedBox(width: 5),
+          Text(
+            label,
+            style: const TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: AppColors.primary,
+            ),
           ),
-          boxShadow: isSelected
-              ? [
-                  BoxShadow(
-                    color: AppColors.primary.withValues(alpha: 0.3),
-                    blurRadius: 8,
-                    offset: const Offset(0, 3),
-                  ),
-                ]
-              : null,
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              icon,
-              size: 14,
-              color: isSelected ? Colors.white : AppColors.textSecondaryDark,
-            ),
-            const SizedBox(width: 6),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                color: isSelected ? Colors.white : AppColors.textSecondaryDark,
-              ),
-            ),
-          ],
-        ),
+          const SizedBox(width: 4),
+          InkWell(
+            onTap: onRemove,
+            child: const Icon(Icons.close_rounded, size: 14, color: AppColors.primary),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildTypeFilterChip(String label, String value, String current) {
-    final isSelected = value == current;
-    return ChoiceChip(
-      label: Text(label),
-      selected: isSelected,
-      onSelected: (val) {
-        if (val) ctr.onTypeFilterChanged(value);
-      },
-    );
+  String _formatAmountRange(double? min, double? max) {
+    final currency = NumberFormat.currency(locale: 'en_IN', symbol: '₹', decimalDigits: 0);
+    if (min != null && max != null) {
+      return '${currency.format(min)} - ${currency.format(max)}';
+    } else if (min != null) {
+      return '> ${currency.format(min)}';
+    } else if (max != null) {
+      return '< ${currency.format(max)}';
+    }
+    return 'Amount';
+  }
+
+  String _formatSortLabel(TransactionSortBy sort) {
+    switch (sort) {
+      case TransactionSortBy.dateNewest:
+        return 'Date: Newest';
+      case TransactionSortBy.dateOldest:
+        return 'Date: Oldest';
+      case TransactionSortBy.amountHighToLow:
+        return 'Amount: High to Low';
+      case TransactionSortBy.amountLowToHigh:
+        return 'Amount: Low to High';
+    }
   }
 }
