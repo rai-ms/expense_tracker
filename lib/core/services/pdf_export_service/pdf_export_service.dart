@@ -210,20 +210,25 @@ class PdfExportService {
           pw.Text('Ledger Entries', style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold, color: PdfColors.grey800)),
           pw.SizedBox(height: 8),
           pw.TableHelper.fromTextArray(
-            headers: ['Date', 'Type', 'Notes / Due Date', 'Status', 'You Gave', 'You Got'],
+            headers: ['Date', 'Type', 'Txn ID / Ref', 'Notes / Due Date', 'Status', 'You Gave', 'You Got'],
             data: entries.map((e) {
               final dateStr = dateFormat.format(e.dateTime);
               final typeStr = e.isGave ? 'Gave (Maine Diye)' : 'Got (Mujhe Mile)';
+              final refParts = [
+                if (e.platform != null && e.platform!.isNotEmpty) e.platform!,
+                if (e.transactionId != null && e.transactionId!.isNotEmpty) e.transactionId!,
+              ];
+              final refStr = refParts.isEmpty ? '-' : refParts.join(' • ');
               final notesStr = e.notes ?? '-';
               final status = e.isSettled ? 'Settled' : 'Pending';
               final gaveAmt = e.isGave ? currencyFormat.format(e.amount) : '-';
               final gotAmt = e.isGot ? currencyFormat.format(e.amount) : '-';
-              return [dateStr, typeStr, notesStr, status, gaveAmt, gotAmt];
+              return [dateStr, typeStr, refStr, notesStr, status, gaveAmt, gotAmt];
             }).toList(),
-            headerStyle: pw.TextStyle(fontWeight: pw.FontWeight.bold, color: PdfColors.white, fontSize: 9),
+            headerStyle: pw.TextStyle(fontWeight: pw.FontWeight.bold, color: PdfColors.white, fontSize: 8),
             headerDecoration: const pw.BoxDecoration(color: PdfColors.indigo700),
             cellStyle: const pw.TextStyle(fontSize: 8),
-            cellPadding: const pw.EdgeInsets.symmetric(horizontal: 6, vertical: 5),
+            cellPadding: const pw.EdgeInsets.symmetric(horizontal: 5, vertical: 4),
           ),
         ],
       ),

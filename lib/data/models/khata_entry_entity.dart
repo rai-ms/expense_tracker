@@ -19,6 +19,11 @@ class KhataEntryEntity {
 
   int? dueDate; // Epoch ms (optional reminder date)
 
+  @Index()
+  String? transactionId; // Original Bank Transaction ID / UPI Ref / UTR
+
+  String? platform; // Platform / Bank / App (e.g. GPay, PhonePe, Paytm, HDFC)
+
   String? notes;
 
   bool isSettled;
@@ -32,6 +37,8 @@ class KhataEntryEntity {
     required this.type,
     required this.date,
     this.dueDate,
+    this.transactionId,
+    this.platform,
     this.notes,
     this.isSettled = false,
   });

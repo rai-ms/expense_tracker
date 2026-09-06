@@ -24,6 +24,8 @@ class AddEntryModal extends StatefulWidget {
 class _AddEntryModalState extends State<AddEntryModal> {
   final _amountController = TextEditingController();
   final _notesController = TextEditingController();
+  final _txnIdController = TextEditingController();
+  final _platformController = TextEditingController();
   late String _type;
   DateTime? _dueDate;
 
@@ -37,6 +39,8 @@ class _AddEntryModalState extends State<AddEntryModal> {
   void dispose() {
     _amountController.dispose();
     _notesController.dispose();
+    _txnIdController.dispose();
+    _platformController.dispose();
     super.dispose();
   }
 
@@ -47,12 +51,17 @@ class _AddEntryModalState extends State<AddEntryModal> {
     final amount = double.tryParse(amountText);
     if (amount == null || amount <= 0) return;
 
+    final txnId = _txnIdController.text.trim();
+    final platform = _platformController.text.trim();
+
     final entry = KhataEntryEntity(
       uid: const Uuid().v4(),
       amount: amount,
       type: _type,
       date: DateTime.now().millisecondsSinceEpoch,
       dueDate: _dueDate?.millisecondsSinceEpoch,
+      transactionId: txnId.isNotEmpty ? txnId : null,
+      platform: platform.isNotEmpty ? platform : null,
       notes: _notesController.text.trim().isNotEmpty
           ? _notesController.text.trim()
           : null,
@@ -141,15 +150,45 @@ class _AddEntryModalState extends State<AddEntryModal> {
               hintText: '0.00',
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 14),
 
           // Notes Field
           TextField(
             controller: _notesController,
             decoration: const InputDecoration(
               labelText: 'Notes / Reason',
+              prefixIcon: Icon(Icons.note_alt_outlined),
               hintText: 'e.g. Lunch split, movie ticket, loan',
             ),
+          ),
+          const SizedBox(height: 14),
+
+          // Optional Transaction ID & Platform Row
+          Row(
+            children: [
+              Expanded(
+                flex: 3,
+                child: TextField(
+                  controller: _txnIdController,
+                  decoration: const InputDecoration(
+                    labelText: 'Txn ID / UTR (optional)',
+                    prefixIcon: Icon(Icons.tag_rounded),
+                    hintText: 'e.g. 4291848194',
+                  ),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                flex: 2,
+                child: TextField(
+                  controller: _platformController,
+                  decoration: const InputDecoration(
+                    labelText: 'Mode / App',
+                    hintText: 'e.g. UPI, GPay',
+                  ),
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: 24),
 

@@ -104,7 +104,7 @@
     },
     {
       "id": "3:9025544644016184217",
-      "lastPropertyId": "9:5393403344436247786",
+      "lastPropertyId": "11:4213167380193738433",
       "name": "KhataEntryEntity",
       "properties": [
         {
@@ -161,6 +161,18 @@
           "type": 11,
           "flags": 520,
           "relationTarget": "KhataContactEntity"
+        },
+        {
+          "id": "10:4167654721294079963",
+          "name": "transactionId",
+          "indexId": "14:8189672903923528940",
+          "type": 9,
+          "flags": 2048
+        },
+        {
+          "id": "11:4213167380193738433",
+          "name": "platform",
+          "type": 9
         }
       ],
       "relations": []
@@ -258,7 +270,7 @@
     }
   ],
   "lastEntityId": "4:5354481342646244362",
-  "lastIndexId": "13:4383274247065485941",
+  "lastIndexId": "14:8189672903923528940",
   "lastRelationId": "0:0",
   "lastSequenceId": "0:0",
   "modelVersion": 5,

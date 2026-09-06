@@ -144,7 +144,7 @@ final _entities = <obx_int.ModelEntity>[
   obx_int.ModelEntity(
     id: const obx_int.IdUid(3, 9025544644016184217),
     name: 'KhataEntryEntity',
-    lastPropertyId: const obx_int.IdUid(9, 5393403344436247786),
+    lastPropertyId: const obx_int.IdUid(11, 4213167380193738433),
     flags: 0,
     properties: <obx_int.ModelProperty>[
       obx_int.ModelProperty(
@@ -206,6 +206,19 @@ final _entities = <obx_int.ModelEntity>[
         indexId: const obx_int.IdUid(7, 2499354298945978445),
         relationField: 'contact',
         relationTarget: 'KhataContactEntity',
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(10, 4167654721294079963),
+        name: 'transactionId',
+        type: 9,
+        flags: 2048,
+        indexId: const obx_int.IdUid(14, 8189672903923528940),
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(11, 4213167380193738433),
+        name: 'platform',
+        type: 9,
+        flags: 0,
       ),
     ],
     relations: <obx_int.ModelRelation>[],
@@ -357,7 +370,7 @@ obx_int.ModelDefinition getObjectBoxModel() {
     generatorVersion: obx_int.GeneratorVersion.v2025_12_16,
     entities: _entities,
     lastEntityId: const obx_int.IdUid(4, 5354481342646244362),
-    lastIndexId: const obx_int.IdUid(13, 4383274247065485941),
+    lastIndexId: const obx_int.IdUid(14, 8189672903923528940),
     lastRelationId: const obx_int.IdUid(0, 0),
     lastSequenceId: const obx_int.IdUid(0, 0),
     retiredEntityUids: const [],
@@ -550,7 +563,13 @@ obx_int.ModelDefinition getObjectBoxModel() {
         final notesOffset = object.notes == null
             ? null
             : fbb.writeString(object.notes!);
-        fbb.startTable(10);
+        final transactionIdOffset = object.transactionId == null
+            ? null
+            : fbb.writeString(object.transactionId!);
+        final platformOffset = object.platform == null
+            ? null
+            : fbb.writeString(object.platform!);
+        fbb.startTable(12);
         fbb.addInt64(0, object.id);
         fbb.addOffset(1, uidOffset);
         fbb.addFloat64(2, object.amount);
@@ -560,6 +579,8 @@ obx_int.ModelDefinition getObjectBoxModel() {
         fbb.addOffset(6, notesOffset);
         fbb.addBool(7, object.isSettled);
         fbb.addInt64(8, object.contact.targetId);
+        fbb.addOffset(9, transactionIdOffset);
+        fbb.addOffset(10, platformOffset);
         fbb.finish(fbb.endTable());
         return object.id;
       },
@@ -595,6 +616,12 @@ obx_int.ModelDefinition getObjectBoxModel() {
           rootOffset,
           14,
         );
+        final transactionIdParam = const fb.StringReader(
+          asciiOptimization: true,
+        ).vTableGetNullable(buffer, rootOffset, 22);
+        final platformParam = const fb.StringReader(
+          asciiOptimization: true,
+        ).vTableGetNullable(buffer, rootOffset, 24);
         final notesParam = const fb.StringReader(
           asciiOptimization: true,
         ).vTableGetNullable(buffer, rootOffset, 16);
@@ -611,6 +638,8 @@ obx_int.ModelDefinition getObjectBoxModel() {
           type: typeParam,
           date: dateParam,
           dueDate: dueDateParam,
+          transactionId: transactionIdParam,
+          platform: platformParam,
           notes: notesParam,
           isSettled: isSettledParam,
         );
@@ -890,6 +919,16 @@ class KhataEntryEntity_ {
       obx.QueryRelationToOne<KhataEntryEntity, KhataContactEntity>(
         _entities[2].properties[8],
       );
+
+  /// See [KhataEntryEntity.transactionId].
+  static final transactionId = obx.QueryStringProperty<KhataEntryEntity>(
+    _entities[2].properties[9],
+  );
+
+  /// See [KhataEntryEntity.platform].
+  static final platform = obx.QueryStringProperty<KhataEntryEntity>(
+    _entities[2].properties[10],
+  );
 }
 
 /// [TransactionEntity] entity fields to define ObjectBox queries.

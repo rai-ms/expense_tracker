@@ -99,6 +99,8 @@ class _MoveToKhataModalState extends State<MoveToKhataModal> {
       amount: amount,
       type: _type,
       date: widget.transaction.date,
+      transactionId: widget.transaction.transactionId,
+      platform: widget.transaction.platform,
       notes: _notesController.text.trim().isNotEmpty
           ? _notesController.text.trim()
           : null,
@@ -155,6 +157,52 @@ class _MoveToKhataModalState extends State<MoveToKhataModal> {
                     icon: const Icon(Icons.close),
                   ),
                 ],
+              ),
+              const SizedBox(height: 10),
+
+              // Linked Transaction Metadata Pill
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: AppColors.primary.withValues(alpha: 0.25)),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.link_rounded, color: AppColors.primary, size: 18),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            widget.transaction.merchant ?? widget.transaction.category,
+                            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                          ),
+                          Text(
+                            widget.transaction.transactionId != null
+                                ? 'Txn ID: ${widget.transaction.transactionId!} • ${widget.transaction.platform ?? "UPI"}'
+                                : 'Platform: ${widget.transaction.platform ?? "Bank/SMS"}',
+                            style: const TextStyle(fontSize: 11, color: AppColors.textSecondaryDark),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                      decoration: BoxDecoration(
+                        color: AppColors.primary.withValues(alpha: 0.2),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: const Text(
+                        'Linked',
+                        style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.primary),
+                      ),
+                    ),
+                  ],
+                ),
               ),
               const SizedBox(height: 14),
 

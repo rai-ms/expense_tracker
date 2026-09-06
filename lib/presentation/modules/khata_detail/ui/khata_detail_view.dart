@@ -445,6 +445,43 @@ class KhataDetailView
                                       ),
                                       const SizedBox(height: 2),
                                     ],
+                                    if ((entry.transactionId != null && entry.transactionId!.isNotEmpty) ||
+                                        (entry.platform != null && entry.platform!.isNotEmpty)) ...[
+                                      Container(
+                                        margin: const EdgeInsets.only(top: 2, bottom: 4),
+                                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                        decoration: BoxDecoration(
+                                          color: AppColors.primary.withValues(alpha: 0.12),
+                                          borderRadius: BorderRadius.circular(6),
+                                          border: Border.all(
+                                            color: AppColors.primary.withValues(alpha: 0.25),
+                                            width: 0.5,
+                                          ),
+                                        ),
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            const Icon(
+                                              Icons.tag_rounded,
+                                              size: 11,
+                                              color: AppColors.primaryLight,
+                                            ),
+                                            const SizedBox(width: 4),
+                                            Flexible(
+                                              child: Text(
+                                                '${entry.platform != null && entry.platform!.isNotEmpty ? "${entry.platform} • " : ""}${entry.transactionId ?? ""}',
+                                                style: const TextStyle(
+                                                  fontSize: 10,
+                                                  fontWeight: FontWeight.w600,
+                                                  color: AppColors.primaryLight,
+                                                ),
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
                                     Text(
                                       dateFormat.format(entry.dateTime),
                                       style: const TextStyle(
