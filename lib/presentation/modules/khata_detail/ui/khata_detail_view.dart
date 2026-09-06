@@ -44,15 +44,17 @@ class KhataDetailView
       );
     }
 
-    final netBalance = contact.netBalance;
-    final entries = contact.entries.toList()
-      ..sort((a, b) => b.date.compareTo(a.date));
-
+    final entries = ctr.entries;
+    double netBalance = 0;
     double totalGave = 0;
     double totalGot = 0;
     for (final e in entries) {
       if (e.isGave) totalGave += e.amount;
       if (e.isGot) totalGot += e.amount;
+      if (!e.isSettled) {
+        if (e.isGave) netBalance += e.amount;
+        if (e.isGot) netBalance -= e.amount;
+      }
     }
 
     return Scaffold(

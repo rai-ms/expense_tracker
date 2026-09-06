@@ -27,6 +27,7 @@ class KhataDetailControllerState extends State<KhataDetailController>
     with _KhataDetailMixin {
   late final IKhataRepository _khataRepo;
   KhataContactEntity? contact;
+  List<KhataEntryEntity> entries = [];
   bool isLoading = true;
 
   @override
@@ -61,6 +62,7 @@ mixin _KhataDetailMixin on State<KhataDetailController> {
   void loadContact() {
     setState(() {
       _state.contact = _state._khataRepo.getContactById(widget.contactId);
+      _state.entries = _state._khataRepo.getEntriesForContact(widget.contactId);
       _state.isLoading = false;
     });
   }

@@ -1,4 +1,4 @@
-import 'package:injectable/injectable.dart';
+import 'package:injectable/injectable.dart' hide Order;
 import '../../core/services/objectbox_service/objectbox_service.dart';
 import '../../domain/repositories/i_khata_repository.dart';
 import '../../objectbox.g.dart';
@@ -54,11 +54,13 @@ class KhataRepositoryImpl implements IKhataRepository {
 
   @override
   List<KhataEntryEntity> getEntriesForContact(int contactId) {
-    final contact = getContactById(contactId);
-    if (contact == null) return [];
-    final entries = contact.entries.toList();
-    entries.sort((a, b) => b.date.compareTo(a.date));
-    return entries;
+    final query = _boxService.khataEntryBox.query(
+      KhataEntryEntity_.contact.equals(contactId),
+    )..order(KhataEntryEntity_.date, flags: Order.descending);
+    final q = query.build();
+    final results = q.find();
+    q.close();
+    return results;
   }
 
   @override
@@ -84,10 +86,8 @@ class KhataRepositoryImpl implements IKhataRepository {
 
   @override
   bool settleAllEntriesForContact(int contactId) {
-    final contact = getContactById(contactId);
-    if (contact == null) return false;
-
-    for (final entry in contact.entries) {
+    final entries = getEntriesForContact(contactId);
+    for (final entry in entries) {
       entry.isSettled = true;
       _boxService.khataEntryBox.put(entry);
     }
@@ -104,7 +104,13 @@ class KhataRepositoryImpl implements IKhataRepository {
     final contacts = getAllContacts();
     double total = 0.0;
     for (final contact in contacts) {
-      final balance = contact.netBalance;
+      final entries = getEntriesForContact(contact.id);
+      double balance = 0.0;
+      for (final e in entries) {
+        if (e.isSettled) continue;
+        if (e.isGave) balance += e.amount;
+        if (e.isGot) balance -= e.amount;
+      }
       if (balance > 0) total += balance;
     }
     return total;
@@ -115,7 +121,13 @@ class KhataRepositoryImpl implements IKhataRepository {
     final contacts = getAllContacts();
     double total = 0.0;
     for (final contact in contacts) {
-      final balance = contact.netBalance;
+      final entries = getEntriesForContact(contact.id);
+      double balance = 0.0;
+      for (final e in entries) {
+        if (e.isSettled) continue;
+        if (e.isGave) balance += e.amount;
+        if (e.isGot) balance -= e.amount;
+      }
       if (balance < 0) total += balance.abs();
     }
     return total;
