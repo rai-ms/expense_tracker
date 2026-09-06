@@ -91,29 +91,28 @@ class _AnimatedNavItem extends StatelessWidget {
         ? AppColors.textTertiaryDark
         : AppColors.textTertiaryLight;
 
-    return Center(
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(18),
-        splashColor: AppColors.primary.withValues(alpha: 0.12),
-        highlightColor: Colors.transparent,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeOutCubic,
-          width: double.infinity,
-          padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 6),
-          decoration: BoxDecoration(
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(18),
+      splashColor: AppColors.primary.withValues(alpha: 0.12),
+      highlightColor: Colors.transparent,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeOutCubic,
+        alignment: Alignment.center,
+        padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 6),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? AppColors.primary.withValues(alpha: 0.14)
+              : Colors.transparent,
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(
             color: isSelected
-                ? AppColors.primary.withValues(alpha: 0.14)
+                ? AppColors.primaryLight.withValues(alpha: 0.3)
                 : Colors.transparent,
-            borderRadius: BorderRadius.circular(18),
-            border: Border.all(
-              color: isSelected
-                  ? AppColors.primaryLight.withValues(alpha: 0.3)
-                  : Colors.transparent,
-              width: 1.0,
-            ),
+            width: 1.0,
           ),
+        ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -173,7 +172,6 @@ class _AnimatedNavItem extends StatelessWidget {
           ],
         ),
       ),
-    ),
-  );
-}
+    );
+  }
 }
