@@ -3,6 +3,8 @@ import 'package:intl/intl.dart';
 
 import '../../../../../core/constants/app_colors.dart';
 
+import '../../../../../core/localization/app_localizations.dart';
+
 class SpendMeter extends StatelessWidget {
   final double todaySpend;
   final double totalExpense;
@@ -51,9 +53,9 @@ class SpendMeter extends StatelessWidget {
                     child: Icon(Icons.speed_rounded, color: meterColor, size: 18),
                   ),
                   const SizedBox(width: 10),
-                  const Text(
-                    'Monthly Budget Meter',
-                    style: TextStyle(
+                  Text(
+                    context.tr('monthly_budget'),
+                    style: const TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w600,
                     ),
@@ -85,14 +87,14 @@ class SpendMeter extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Spent: ${currency.format(totalExpense)}',
+                '${context.tr('expense')}: ${currency.format(totalExpense)}',
                 style: const TextStyle(
                   fontSize: 12,
                   color: AppColors.textSecondaryDark,
                 ),
               ),
               Text(
-                'Budget: ${currency.format(monthlyBudget)}',
+                '${context.tr('monthly_budget')}: ${currency.format(monthlyBudget)}',
                 style: const TextStyle(
                   fontSize: 12,
                   color: AppColors.textSecondaryDark,
@@ -110,9 +112,9 @@ class SpendMeter extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
-                  'Today\'s Spending:',
-                  style: TextStyle(fontSize: 12, color: AppColors.textSecondaryDark),
+                Text(
+                  context.tr('today_spend'),
+                  style: const TextStyle(fontSize: 12, color: AppColors.textSecondaryDark),
                 ),
                 Text(
                   currency.format(todaySpend),

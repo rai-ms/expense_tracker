@@ -11,6 +11,8 @@ import 'widgets/category_pie_chart.dart';
 import 'widgets/spend_trend_line_chart.dart';
 import 'widgets/top_merchants_widget.dart';
 
+import '../../../../core/localization/app_localizations.dart';
+
 class AnalyticsView
     extends WidgetView<AnalyticsView, AnalyticsControllerState> {
   const AnalyticsView(super.ctr, {super.key});
@@ -22,9 +24,9 @@ class AnalyticsView
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        title: const Text(
-          'Spend Analytics',
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+        title: Text(
+          context.tr('analytics'),
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
         ),
       ),
       body: BlocBuilder<AnalyticsBloc, BlocEventState<AnalyticsData>>(
@@ -58,7 +60,7 @@ class AnalyticsView
                       ),
                       const SizedBox(width: 8),
                       _buildTimePill(
-                        'This Month',
+                        context.tr('this_month'),
                         AnalyticsTimeRange.thisMonth,
                         data.timeRange,
                       ),
@@ -76,7 +78,7 @@ class AnalyticsView
                       ),
                       const SizedBox(width: 8),
                       _buildTimePill(
-                        'All Time',
+                        context.tr('all_time'),
                         AnalyticsTimeRange.allTime,
                         data.timeRange,
                       ),
@@ -101,9 +103,9 @@ class AnalyticsView
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
-                              'Total Inflow',
-                              style: TextStyle(
+                            Text(
+                              context.tr('income'),
+                              style: const TextStyle(
                                 fontSize: 12,
                                 color: AppColors.textSecondaryDark,
                               ),
@@ -135,9 +137,9 @@ class AnalyticsView
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
-                              'Total Outflow',
-                              style: TextStyle(
+                            Text(
+                              context.tr('expense'),
+                              style: const TextStyle(
                                 fontSize: 12,
                                 color: AppColors.textSecondaryDark,
                               ),

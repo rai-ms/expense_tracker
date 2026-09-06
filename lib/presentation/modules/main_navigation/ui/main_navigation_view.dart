@@ -9,6 +9,8 @@ import '../../reminders/controller/reminders_controller.dart';
 import '../../transactions/controller/transactions_controller.dart';
 import '../controller/main_navigation_controller.dart';
 
+import '../../../../core/localization/app_localizations.dart';
+
 class MainNavigationView
     extends WidgetView<MainNavigationView, MainNavigationControllerState> {
   const MainNavigationView(super.ctr, {super.key});
@@ -43,31 +45,31 @@ class MainNavigationView
             backgroundColor: Colors.transparent,
             indicatorColor: AppColors.primary.withValues(alpha: 0.2),
             elevation: 0,
-            destinations: const [
+            destinations: [
               NavigationDestination(
-                icon: Icon(Icons.dashboard_outlined),
-                selectedIcon: Icon(Icons.dashboard_rounded, color: AppColors.primary),
-                label: 'Home',
+                icon: const Icon(Icons.dashboard_outlined),
+                selectedIcon: const Icon(Icons.dashboard_rounded, color: AppColors.primary),
+                label: context.tr('dashboard'),
               ),
               NavigationDestination(
-                icon: Icon(Icons.receipt_long_outlined),
-                selectedIcon: Icon(Icons.receipt_long_rounded, color: AppColors.primary),
-                label: 'Transactions',
+                icon: const Icon(Icons.receipt_long_outlined),
+                selectedIcon: const Icon(Icons.receipt_long_rounded, color: AppColors.primary),
+                label: context.tr('transactions'),
               ),
               NavigationDestination(
-                icon: Icon(Icons.menu_book_outlined),
-                selectedIcon: Icon(Icons.menu_book_rounded, color: AppColors.primary),
-                label: 'KhataBook',
+                icon: const Icon(Icons.menu_book_outlined),
+                selectedIcon: const Icon(Icons.menu_book_rounded, color: AppColors.primary),
+                label: context.tr('khata'),
               ),
               NavigationDestination(
-                icon: Icon(Icons.pie_chart_outline_rounded),
-                selectedIcon: Icon(Icons.pie_chart_rounded, color: AppColors.primary),
-                label: 'Analytics',
+                icon: const Icon(Icons.pie_chart_outline_rounded),
+                selectedIcon: const Icon(Icons.pie_chart_rounded, color: AppColors.primary),
+                label: context.tr('analytics'),
               ),
               NavigationDestination(
-                icon: Icon(Icons.notifications_none_rounded),
-                selectedIcon: Icon(Icons.notifications_rounded, color: AppColors.primary),
-                label: 'Reminders',
+                icon: const Icon(Icons.notifications_none_rounded),
+                selectedIcon: const Icon(Icons.notifications_rounded, color: AppColors.primary),
+                label: context.tr('reminders'),
               ),
             ],
           ),

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../../../../../core/constants/app_colors.dart';
 
+import '../../../../../core/localization/app_localizations.dart';
+
 class QuickActionBar extends StatelessWidget {
   final VoidCallback onSyncSms;
   final VoidCallback onAddExpense;
@@ -27,28 +29,28 @@ class QuickActionBar extends StatelessWidget {
         children: [
           _buildActionPill(
             icon: Icons.sync_rounded,
-            label: 'Sync SMS',
+            label: context.tr('sync_sms'),
             color: AppColors.primary,
             onTap: onSyncSms,
           ),
           const SizedBox(width: 10),
           _buildActionPill(
             icon: Icons.add_circle_outline_rounded,
-            label: 'Add Expense',
+            label: context.tr('add_expense'),
             color: AppColors.debitRed,
             onTap: onAddExpense,
           ),
           const SizedBox(width: 10),
           _buildActionPill(
             icon: Icons.menu_book_rounded,
-            label: 'KhataBook',
+            label: context.tr('khata'),
             color: AppColors.creditGreen,
             onTap: onAddKhata,
           ),
           const SizedBox(width: 10),
           _buildActionPill(
             icon: Icons.picture_as_pdf_rounded,
-            label: 'Export PDF',
+            label: context.tr('export_pdf'),
             color: AppColors.bills,
             onTap: onExportPdf,
           ),

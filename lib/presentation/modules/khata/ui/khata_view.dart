@@ -9,6 +9,8 @@ import '../bloc/khata_bloc.dart';
 import '../controller/khata_controller.dart';
 import '../../settings/ui/language_selection_modal.dart';
 
+import '../../../../core/localization/app_localizations.dart';
+
 class KhataView extends WidgetView<KhataView, KhataControllerState> {
   const KhataView(super.ctr, {super.key});
 
@@ -19,9 +21,9 @@ class KhataView extends WidgetView<KhataView, KhataControllerState> {
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        title: const Text(
-          'KhataBook (Udhar-Jama)',
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+        title: Text(
+          context.tr('khata_ledger'),
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
         ),
         actions: [
           IconButton(
@@ -32,7 +34,7 @@ class KhataView extends WidgetView<KhataView, KhataControllerState> {
           IconButton(
             onPressed: ctr.onAddNewContact,
             icon: const Icon(Icons.person_add_alt_1_rounded),
-            tooltip: 'Add Contact',
+            tooltip: context.tr('add_customer'),
           ),
         ],
       ),
@@ -61,10 +63,10 @@ class KhataView extends WidgetView<KhataView, KhataControllerState> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
-                              'Aapko Milenge',
-                              style: TextStyle(
-                                fontSize: 12,
+                            Text(
+                              context.tr('you_will_receive'),
+                              style: const TextStyle(
+                                fontSize: 13,
                                 color: AppColors.textSecondaryDark,
                                 fontWeight: FontWeight.w500,
                               ),
@@ -77,10 +79,6 @@ class KhataView extends WidgetView<KhataView, KhataControllerState> {
                                 fontWeight: FontWeight.bold,
                                 color: AppColors.creditGreen,
                               ),
-                            ),
-                            const Text(
-                              'You will receive',
-                              style: TextStyle(fontSize: 10, color: AppColors.textTertiaryDark),
                             ),
                           ],
                         ),
@@ -96,10 +94,10 @@ class KhataView extends WidgetView<KhataView, KhataControllerState> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
-                              'Aapko Dene Hain',
-                              style: TextStyle(
-                                fontSize: 12,
+                            Text(
+                              context.tr('you_will_give'),
+                              style: const TextStyle(
+                                fontSize: 13,
                                 color: AppColors.textSecondaryDark,
                                 fontWeight: FontWeight.w500,
                               ),
@@ -112,10 +110,6 @@ class KhataView extends WidgetView<KhataView, KhataControllerState> {
                                 fontWeight: FontWeight.bold,
                                 color: AppColors.debitRed,
                               ),
-                            ),
-                            const Text(
-                              'You will give',
-                              style: TextStyle(fontSize: 10, color: AppColors.textTertiaryDark),
                             ),
                           ],
                         ),
@@ -140,20 +134,18 @@ class KhataView extends WidgetView<KhataView, KhataControllerState> {
                                   color: AppColors.textTertiaryDark.withValues(alpha: 0.5),
                                 ),
                                 const SizedBox(height: 12),
-                                const Text(
-                                  'No Khata contacts yet',
-                                  style: TextStyle(
+                                Text(
+                                  context.tr('no_entries'),
+                                  style: const TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
                                 const SizedBox(height: 6),
-                                const Text(
-                                  'Tap "+ Contact" to track money lent or borrowed',
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    color: AppColors.textSecondaryDark,
-                                  ),
+                                ElevatedButton.icon(
+                                  onPressed: ctr.onAddNewContact,
+                                  icon: const Icon(Icons.person_add_rounded, size: 16),
+                                  label: Text(context.tr('add_customer')),
                                 ),
                               ],
                             ),

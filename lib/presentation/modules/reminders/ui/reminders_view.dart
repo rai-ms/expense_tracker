@@ -6,6 +6,7 @@ import '../../../../core/base/base_controller/widget_view.dart';
 import '../../../../core/base/bloc_base/bloc_event_state.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_constants.dart';
+import '../../../../core/localization/app_localizations.dart';
 import '../bloc/reminders_bloc.dart';
 import '../controller/reminders_controller.dart';
 
@@ -20,15 +21,15 @@ class RemindersView extends WidgetView<RemindersView, RemindersControllerState> 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        title: const Text(
-          'Bill & Payment Reminders',
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+        title: Text(
+          context.tr('bill_reminders'),
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
         ),
         actions: [
           IconButton(
             onPressed: ctr.onAddNewReminder,
             icon: const Icon(Icons.add_alert_rounded),
-            tooltip: 'Add Reminder',
+            tooltip: context.tr('bill_reminders'),
           ),
         ],
       ),
@@ -53,14 +54,14 @@ class RemindersView extends WidgetView<RemindersView, RemindersControllerState> 
                     color: AppColors.textTertiaryDark.withValues(alpha: 0.5),
                   ),
                   const SizedBox(height: 12),
-                  const Text(
-                    'No bill reminders set',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  Text(
+                    context.tr('no_entries'),
+                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 6),
-                  const Text(
-                    'Never miss credit card or utility bill dues again!',
-                    style: TextStyle(fontSize: 12, color: AppColors.textSecondaryDark),
+                  Text(
+                    context.tr('reminders'),
+                    style: const TextStyle(fontSize: 12, color: AppColors.textSecondaryDark),
                   ),
                 ],
               ),
@@ -135,11 +136,11 @@ class RemindersView extends WidgetView<RemindersView, RemindersControllerState> 
                                 ),
                                 child: Text(
                                   isPaid
-                                      ? 'Paid'
+                                      ? context.tr('paid')
                                       : isOverdue
-                                          ? 'Overdue'
+                                          ? context.tr('overdue')
                                           : isDueToday
-                                              ? 'Due Today'
+                                              ? context.tr('today_spend')
                                               : 'Due ${dateFormat.format(reminder.dueDateTime)}',
                                   style: TextStyle(
                                     fontSize: 10,

@@ -5,6 +5,8 @@ import '../../../../../core/constants/app_colors.dart';
 import '../../../../../core/constants/app_constants.dart';
 import '../../../../../data/models/transaction_entity.dart';
 
+import '../../../../../core/localization/app_localizations.dart';
+
 class RecentTransactionsList extends StatelessWidget {
   final List<TransactionEntity> transactions;
   final Function(TransactionEntity) onTransactionTap;
@@ -28,9 +30,9 @@ class RecentTransactionsList extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Text(
-              'Recent Transactions',
-              style: TextStyle(
+            Text(
+              context.tr('recent_transactions'),
+              style: const TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
                 letterSpacing: -0.2,
@@ -38,7 +40,7 @@ class RecentTransactionsList extends StatelessWidget {
             ),
             TextButton(
               onPressed: onViewAll,
-              child: const Text('View All'),
+              child: Text(context.tr('view_all')),
             ),
           ],
         ),
@@ -60,9 +62,9 @@ class RecentTransactionsList extends StatelessWidget {
                     color: AppColors.textTertiaryDark.withValues(alpha: 0.6),
                   ),
                   const SizedBox(height: 12),
-                  const Text(
-                    'No transactions recorded yet',
-                    style: TextStyle(
+                  Text(
+                    context.tr('no_transactions'),
+                    style: const TextStyle(
                       fontSize: 14,
                       color: AppColors.textSecondaryDark,
                       fontWeight: FontWeight.w500,

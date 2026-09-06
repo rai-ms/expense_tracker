@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 
+import '../../../../../core/localization/app_localizations.dart';
 import '../../../../../data/models/khata_contact_entity.dart';
 
 class AddContactModal extends StatefulWidget {
@@ -66,9 +67,9 @@ class _AddContactModalState extends State<AddContactModal> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
-                'Add Khata Contact',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              Text(
+                context.tr('add_customer'),
+                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               IconButton(
                 onPressed: () => Navigator.pop(context),
@@ -79,8 +80,8 @@ class _AddContactModalState extends State<AddContactModal> {
           const SizedBox(height: 16),
           TextField(
             controller: _nameController,
-            decoration: const InputDecoration(
-              labelText: 'Person / Customer Name *',
+            decoration: InputDecoration(
+              labelText: '${context.tr('add_customer')} *',
               hintText: 'e.g. Rahul Sharma, Amit Verma',
             ),
           ),
@@ -88,8 +89,8 @@ class _AddContactModalState extends State<AddContactModal> {
           TextField(
             controller: _phoneController,
             keyboardType: TextInputType.phone,
-            decoration: const InputDecoration(
-              labelText: 'Phone Number (for WhatsApp reminder)',
+            decoration: InputDecoration(
+              labelText: 'Phone Number (${context.tr('whatsapp_reminder')})',
               hintText: 'e.g. 9876543210',
             ),
           ),
@@ -125,7 +126,7 @@ class _AddContactModalState extends State<AddContactModal> {
             width: double.infinity,
             child: ElevatedButton(
               onPressed: _submit,
-              child: const Text('Add Contact'),
+              child: Text(context.tr('save')),
             ),
           ),
           const SizedBox(height: 20),

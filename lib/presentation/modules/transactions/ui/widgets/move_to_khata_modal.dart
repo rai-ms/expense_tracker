@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../../../../core/constants/app_colors.dart';
+import '../../../../../core/localization/app_localizations.dart';
 import '../../../../../core/services/di/injection.dart';
 import '../../../../../core/services/event_bus/app_events.dart';
 import '../../../../../data/models/khata_contact_entity.dart';
@@ -142,13 +143,13 @@ class _MoveToKhataModalState extends State<MoveToKhataModal> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Row(
+                  Row(
                     children: [
-                      Icon(Icons.menu_book_rounded, color: AppColors.khataBook, size: 22),
-                      SizedBox(width: 8),
+                      const Icon(Icons.menu_book_rounded, color: AppColors.khataBook, size: 22),
+                      const SizedBox(width: 8),
                       Text(
-                        'Move to KhataBook',
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                        context.tr('khata'),
+                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                       ),
                     ],
                   ),
@@ -276,7 +277,7 @@ class _MoveToKhataModalState extends State<MoveToKhataModal> {
                 children: [
                   Expanded(
                     child: ChoiceChip(
-                      label: const Center(child: Text('Maine Diye (You Gave)')),
+                      label: Center(child: Text(context.tr('you_gave'))),
                       selected: _type == 'gave',
                       selectedColor: AppColors.debitRed.withValues(alpha: 0.2),
                       labelStyle: TextStyle(
@@ -291,7 +292,7 @@ class _MoveToKhataModalState extends State<MoveToKhataModal> {
                   const SizedBox(width: 10),
                   Expanded(
                     child: ChoiceChip(
-                      label: const Center(child: Text('Mujhe Mile (You Got)')),
+                      label: Center(child: Text(context.tr('you_got'))),
                       selected: _type == 'got',
                       selectedColor: AppColors.creditGreen.withValues(alpha: 0.2),
                       labelStyle: TextStyle(
@@ -333,7 +334,7 @@ class _MoveToKhataModalState extends State<MoveToKhataModal> {
                 child: ElevatedButton.icon(
                   onPressed: _submit,
                   icon: const Icon(Icons.check_circle_outline_rounded),
-                  label: const Text('Save to KhataBook'),
+                  label: Text(context.tr('save')),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: _type == 'gave' ? AppColors.debitRed : AppColors.creditGreen,
                     padding: const EdgeInsets.symmetric(vertical: 14),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../../../../core/constants/app_colors.dart';
+import '../../../../../core/localization/app_localizations.dart';
 import '../../../../../data/models/khata_contact_entity.dart';
 import '../../../../../data/models/khata_entry_entity.dart';
 
@@ -92,7 +93,7 @@ class _AddEntryModalState extends State<AddEntryModal> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Add Entry for ${widget.contact.name}',
+                '${context.tr('khata')}: ${widget.contact.name}',
                 style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               IconButton(
@@ -108,7 +109,7 @@ class _AddEntryModalState extends State<AddEntryModal> {
             children: [
               Expanded(
                 child: ChoiceChip(
-                  label: const Center(child: Text('Maine Diye (Gave)')),
+                  label: Center(child: Text(context.tr('you_gave'))),
                   selected: _type == 'gave',
                   selectedColor: AppColors.debitRed.withValues(alpha: 0.2),
                   labelStyle: TextStyle(
@@ -123,7 +124,7 @@ class _AddEntryModalState extends State<AddEntryModal> {
               const SizedBox(width: 12),
               Expanded(
                 child: ChoiceChip(
-                  label: const Center(child: Text('Mujhe Mile (Got)')),
+                  label: Center(child: Text(context.tr('you_got'))),
                   selected: _type == 'got',
                   selectedColor: AppColors.creditGreen.withValues(alpha: 0.2),
                   labelStyle: TextStyle(
@@ -201,7 +202,7 @@ class _AddEntryModalState extends State<AddEntryModal> {
                 backgroundColor: _type == 'gave' ? AppColors.debitRed : AppColors.creditGreen,
               ),
               child: Text(
-                _type == 'gave' ? 'Save "Maine Diye"' : 'Save "Mujhe Mile"',
+                context.tr('save'),
               ),
             ),
           ),

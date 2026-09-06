@@ -9,6 +9,8 @@ import '../../../../core/constants/app_constants.dart';
 import '../bloc/transactions_bloc.dart';
 import '../controller/transactions_controller.dart';
 
+import '../../../../core/localization/app_localizations.dart';
+
 class TransactionsView
     extends WidgetView<TransactionsView, TransactionsControllerState> {
   const TransactionsView(super.ctr, {super.key});
@@ -21,15 +23,15 @@ class TransactionsView
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        title: const Text(
-          'All Transactions',
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+        title: Text(
+          context.tr('all_transactions'),
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
         ),
         actions: [
           IconButton(
             onPressed: ctr.onAddNewTransaction,
             icon: const Icon(Icons.add_circle_outline_rounded),
-            tooltip: 'Add Transaction',
+            tooltip: context.tr('add_expense'),
           ),
         ],
       ),
@@ -52,7 +54,7 @@ class TransactionsView
                     controller: ctr.searchController,
                     onChanged: ctr.onSearchChanged,
                     decoration: InputDecoration(
-                      hintText: 'Search merchant, UTR, notes...',
+                      hintText: context.tr('search_transactions'),
                       prefixIcon: const Icon(Icons.search_rounded),
                       suffixIcon: ctr.searchController.text.isNotEmpty
                           ? IconButton(
@@ -78,7 +80,7 @@ class TransactionsView
                     children: [
                       _buildDateChip(
                         context: context,
-                        label: 'This Month',
+                        label: context.tr('this_month'),
                         icon: Icons.calendar_today_rounded,
                         isSelected: selectedDateFilter == TransactionDateFilter.thisMonth,
                         onTap: () => ctr.onDateFilterChanged(TransactionDateFilter.thisMonth),
@@ -86,7 +88,7 @@ class TransactionsView
                       const SizedBox(width: 8),
                       _buildDateChip(
                         context: context,
-                        label: 'Last Month',
+                        label: context.tr('last_month'),
                         icon: Icons.history_rounded,
                         isSelected: selectedDateFilter == TransactionDateFilter.lastMonth,
                         onTap: () => ctr.onDateFilterChanged(TransactionDateFilter.lastMonth),
@@ -94,7 +96,7 @@ class TransactionsView
                       const SizedBox(width: 8),
                       _buildDateChip(
                         context: context,
-                        label: 'All Time',
+                        label: context.tr('all_time'),
                         icon: Icons.all_inclusive_rounded,
                         isSelected: selectedDateFilter == TransactionDateFilter.allTime,
                         onTap: () => ctr.onDateFilterChanged(TransactionDateFilter.allTime),
@@ -103,8 +105,8 @@ class TransactionsView
                       _buildDateChip(
                         context: context,
                         label: selectedDateFilter == TransactionDateFilter.custom
-                            ? (data?.dateFilterLabel ?? 'Custom 📅')
-                            : 'Custom 📅',
+                            ? (data?.dateFilterLabel ?? context.tr('custom_range'))
+                            : context.tr('custom_range'),
                         icon: Icons.date_range_rounded,
                         isSelected: selectedDateFilter == TransactionDateFilter.custom,
                         onTap: () => ctr.onDateFilterChanged(TransactionDateFilter.custom),
@@ -123,13 +125,13 @@ class TransactionsView
                     padding: const EdgeInsets.symmetric(horizontal: 20),
                     children: [
                       // Type: All
-                      _buildTypeFilterChip('All', 'all', data?.selectedType ?? 'all'),
+                      _buildTypeFilterChip(context.tr('all'), 'all', data?.selectedType ?? 'all'),
                       const SizedBox(width: 6),
                       // Type: Expenses
-                      _buildTypeFilterChip('💸 Expenses', 'debit', data?.selectedType ?? 'all'),
+                      _buildTypeFilterChip('💸 ${context.tr('expense')}', 'debit', data?.selectedType ?? 'all'),
                       const SizedBox(width: 6),
                       // Type: Income
-                      _buildTypeFilterChip('💰 Income', 'credit', data?.selectedType ?? 'all'),
+                      _buildTypeFilterChip('💰 ${context.tr('income')}', 'credit', data?.selectedType ?? 'all'),
                       const SizedBox(width: 6),
                       // Type: Notifications / Ignored
                       _buildTypeFilterChip('🔔 Notifications', 'ignored', data?.selectedType ?? 'all'),

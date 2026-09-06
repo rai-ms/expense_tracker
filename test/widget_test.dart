@@ -1,8 +1,11 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:expense_tracker/core/constants/app_colors.dart';
+import 'package:expense_tracker/core/localization/app_language.dart';
+import 'package:expense_tracker/core/localization/app_localizations.dart';
 import 'package:expense_tracker/presentation/modules/dashboard/ui/widgets/balance_card.dart';
 import 'package:expense_tracker/presentation/modules/dashboard/ui/widgets/spend_meter.dart';
 import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
@@ -32,8 +35,15 @@ void main() {
   group('UI Widgets Tests', () {
     testWidgets('BalanceCard renders correctly with currency and values', (tester) async {
       await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
+        MaterialApp(
+          localizationsDelegates: const [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          supportedLocales: AppLanguage.supportedLocales,
+          home: const Scaffold(
             body: BalanceCard(
               totalBalance: 50000.0,
               totalIncome: 75000.0,
@@ -43,7 +53,7 @@ void main() {
         ),
       );
 
-      expect(find.textContaining('Net Balance'), findsOneWidget);
+      expect(find.textContaining('Total Balance'), findsOneWidget);
       expect(find.textContaining('50,000'), findsOneWidget);
       expect(find.text('Income'), findsOneWidget);
       expect(find.text('Expense'), findsOneWidget);
@@ -52,6 +62,13 @@ void main() {
     testWidgets('SpendMeter renders correctly with budget calculation', (tester) async {
       await tester.pumpWidget(
         MaterialApp(
+          localizationsDelegates: const [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          supportedLocales: AppLanguage.supportedLocales,
           theme: ThemeData(
             cardTheme: const CardThemeData(color: AppColors.darkCard),
           ),
@@ -65,9 +82,10 @@ void main() {
         ),
       );
 
-      expect(find.text('Monthly Budget Meter'), findsOneWidget);
+      expect(find.text('Monthly Budget'), findsOneWidget);
       expect(find.text('50% used'), findsOneWidget);
       expect(find.textContaining('1,200'), findsOneWidget);
     });
   });
 }
+

@@ -31,6 +31,9 @@ class AppLanguage {
     AppLanguage(code: 'pa', name: 'Punjabi', nativeName: 'ਪੰਜਾਬੀ'),
   ];
 
+  static List<Locale> get supportedLocales =>
+      supportedLanguages.map((l) => l.locale).toList();
+
   static AppLanguage fromCode(String code) {
     return supportedLanguages.firstWhere(
       (lang) => lang.code == code,

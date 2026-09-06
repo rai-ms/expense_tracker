@@ -3,6 +3,7 @@ import 'package:uuid/uuid.dart';
 
 import '../../../../../core/constants/app_colors.dart';
 import '../../../../../core/constants/app_constants.dart';
+import '../../../../../core/localization/app_localizations.dart';
 import '../../../../../data/models/transaction_entity.dart';
 
 class AddTransactionModal extends StatefulWidget {
@@ -77,9 +78,9 @@ class _AddTransactionModalState extends State<AddTransactionModal> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
-                  'Add New Transaction',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                Text(
+                  context.tr('add_expense'),
+                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 IconButton(
                   onPressed: () => Navigator.pop(context),
@@ -94,7 +95,7 @@ class _AddTransactionModalState extends State<AddTransactionModal> {
               children: [
                 Expanded(
                   child: ChoiceChip(
-                    label: const Center(child: Text('Expense (Debit)')),
+                    label: Center(child: Text(context.tr('expense'))),
                     selected: _type == 'debit',
                     selectedColor: AppColors.debitRed.withValues(alpha: 0.2),
                     labelStyle: TextStyle(
@@ -109,7 +110,7 @@ class _AddTransactionModalState extends State<AddTransactionModal> {
                 const SizedBox(width: 12),
                 Expanded(
                   child: ChoiceChip(
-                    label: const Center(child: Text('Income (Credit)')),
+                    label: Center(child: Text(context.tr('income'))),
                     selected: _type == 'credit',
                     selectedColor: AppColors.creditGreen.withValues(alpha: 0.2),
                     labelStyle: TextStyle(
@@ -201,7 +202,7 @@ class _AddTransactionModalState extends State<AddTransactionModal> {
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: _submit,
-                child: const Text('Save Transaction'),
+                child: Text(context.tr('save')),
               ),
             ),
             const SizedBox(height: 20),

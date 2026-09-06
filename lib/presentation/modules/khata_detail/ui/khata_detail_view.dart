@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 
 import '../../../../core/base/base_controller/widget_view.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/localization/app_localizations.dart';
 import '../controller/khata_detail_controller.dart';
 
 class KhataDetailView
@@ -145,7 +146,6 @@ class KhataDetailView
       ),
       body: Column(
         children: [
-          // Top Summary Banner Card
           Container(
             margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             padding: const EdgeInsets.all(18),
@@ -181,10 +181,10 @@ class KhataDetailView
                       children: [
                         Text(
                           netBalance > 0
-                              ? 'You will receive (Aapko milenge)'
+                              ? context.tr('you_will_receive')
                               : netBalance < 0
-                                  ? 'You will give (Aapko dene hain)'
-                                  : 'Account is Settled',
+                                  ? context.tr('you_will_give')
+                                  : context.tr('account_settled'),
                           style: const TextStyle(
                             fontSize: 13,
                             fontWeight: FontWeight.w500,
@@ -211,7 +211,7 @@ class KhataDetailView
                       ElevatedButton.icon(
                         onPressed: () => ctr.onSendWhatsApp(netBalance),
                         icon: const Icon(Icons.send_rounded, size: 16),
-                        label: const Text('WhatsApp'),
+                        label: Text(context.tr('whatsapp_reminder')),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.creditGreen,
                           foregroundColor: Colors.white,
@@ -226,8 +226,6 @@ class KhataDetailView
                 const SizedBox(height: 16),
                 const Divider(height: 1, color: AppColors.darkBorder),
                 const SizedBox(height: 14),
-
-                // Breakdown: Total Gave vs Total Got
                 Row(
                   children: [
                     Expanded(
@@ -557,10 +555,10 @@ class KhataDetailView
                     child: ElevatedButton.icon(
                       onPressed: ctr.onAddGaveEntry,
                       icon: const Icon(Icons.arrow_outward_rounded, size: 20),
-                      label: const Text(
-                        'YOU GAVE ₹\n(Maine Diye)',
+                      label: Text(
+                        context.tr('you_gave'),
                         textAlign: TextAlign.center,
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.bold,
                           height: 1.2,
@@ -583,10 +581,10 @@ class KhataDetailView
                     child: ElevatedButton.icon(
                       onPressed: ctr.onAddGotEntry,
                       icon: const Icon(Icons.call_received_rounded, size: 20),
-                      label: const Text(
-                        'YOU GOT ₹\n(Mujhe Mile)',
+                      label: Text(
+                        context.tr('you_got'),
                         textAlign: TextAlign.center,
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.bold,
                           height: 1.2,

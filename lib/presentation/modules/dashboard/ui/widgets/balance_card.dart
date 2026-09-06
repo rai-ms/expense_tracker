@@ -3,6 +3,8 @@ import 'package:intl/intl.dart';
 
 import '../../../../../core/constants/app_colors.dart';
 
+import '../../../../../core/localization/app_localizations.dart';
+
 class BalanceCard extends StatelessWidget {
   final double totalBalance;
   final double totalIncome;
@@ -42,7 +44,7 @@ class BalanceCard extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Net Balance ($filterLabel)',
+                '${context.tr('total_balance')} ($filterLabel)',
                 style: const TextStyle(
                   color: Colors.white70,
                   fontSize: 13,
@@ -55,13 +57,13 @@ class BalanceCard extends StatelessWidget {
                   color: Colors.white.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(20),
                 ),
-                child: const Row(
+                child: Row(
                   children: [
-                    Icon(Icons.sync_rounded, color: Colors.white, size: 14),
-                    SizedBox(width: 4),
+                    const Icon(Icons.sync_rounded, color: Colors.white, size: 14),
+                    const SizedBox(width: 4),
                     Text(
-                      'Live Sync',
-                      style: TextStyle(
+                      context.tr('sync_sms'),
+                      style: const TextStyle(
                         color: Colors.white,
                         fontSize: 11,
                         fontWeight: FontWeight.w600,
@@ -112,9 +114,9 @@ class BalanceCard extends StatelessWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
-                              'Income',
-                              style: TextStyle(
+                            Text(
+                              context.tr('income'),
+                              style: const TextStyle(
                                 color: Colors.white70,
                                 fontSize: 11,
                                 fontWeight: FontWeight.w500,
@@ -166,9 +168,9 @@ class BalanceCard extends StatelessWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
-                              'Expense',
-                              style: TextStyle(
+                            Text(
+                              context.tr('expense'),
+                              style: const TextStyle(
                                 color: Colors.white70,
                                 fontSize: 11,
                                 fontWeight: FontWeight.w500,
