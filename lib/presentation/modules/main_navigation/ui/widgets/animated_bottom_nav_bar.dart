@@ -104,12 +104,12 @@ class _AnimatedNavItem extends StatelessWidget {
               ? AppColors.primary.withValues(alpha: 0.14)
               : Colors.transparent,
           borderRadius: BorderRadius.circular(20),
-          border: isSelected
-              ? Border.all(
-                  color: AppColors.primaryLight.withValues(alpha: 0.3),
-                  width: 1.0,
-                )
-              : null,
+          border: Border.all(
+            color: isSelected
+                ? AppColors.primaryLight.withValues(alpha: 0.3)
+                : Colors.transparent,
+            width: 1.0,
+          ),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -151,13 +151,6 @@ class _AnimatedNavItem extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: activeColor,
                     shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color: activeColor.withValues(alpha: 0.8),
-                        blurRadius: 4,
-                        spreadRadius: 1,
-                      ),
-                    ],
                   ),
                 ),
               ),
