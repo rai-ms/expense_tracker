@@ -1,4 +1,4 @@
-package com.toonshala.expense_tracker
+package com.rai.expensetracker
 
 import io.flutter.embedding.android.FlutterActivity
 
