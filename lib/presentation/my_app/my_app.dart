@@ -32,9 +32,12 @@ class MyApp extends StatelessWidget {
             darkTheme: AppTheme.darkTheme,
             themeMode: ThemeMode.dark, // Sleek fintech dark mode
             locale: currentLocale,
-            supportedLocales: AppLanguage.supportedLanguages.map((l) => l.locale).toList(),
+            supportedLocales: AppLanguage.supportedLocales,
             localizationsDelegates: const [
               AppLocalizations.delegate,
+              AppMaterialLocalizationsDelegate(),
+              AppCupertinoLocalizationsDelegate(),
+              AppWidgetsLocalizationsDelegate(),
               GlobalMaterialLocalizations.delegate,
               GlobalWidgetsLocalizations.delegate,
               GlobalCupertinoLocalizations.delegate,

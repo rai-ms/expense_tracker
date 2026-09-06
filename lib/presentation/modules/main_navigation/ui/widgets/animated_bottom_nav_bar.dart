@@ -139,23 +139,27 @@ class _AnimatedNavItem extends StatelessWidget {
             ),
             const SizedBox(height: 2),
             // Glowing neon indicator dot
-            AnimatedContainer(
-              duration: const Duration(milliseconds: 300),
-              curve: Curves.easeOutBack,
-              width: isSelected ? 6 : 0,
-              height: isSelected ? 6 : 0,
-              decoration: BoxDecoration(
-                color: activeColor,
-                shape: BoxShape.circle,
-                boxShadow: isSelected
-                    ? [
-                        BoxShadow(
-                          color: activeColor.withValues(alpha: 0.9),
-                          blurRadius: 6,
-                          spreadRadius: 1,
-                        ),
-                      ]
-                    : [],
+            AnimatedOpacity(
+              duration: const Duration(milliseconds: 250),
+              opacity: isSelected ? 1.0 : 0.0,
+              child: AnimatedScale(
+                duration: const Duration(milliseconds: 250),
+                scale: isSelected ? 1.0 : 0.0,
+                child: Container(
+                  width: 5,
+                  height: 5,
+                  decoration: BoxDecoration(
+                    color: activeColor,
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: activeColor.withValues(alpha: 0.8),
+                        blurRadius: 4,
+                        spreadRadius: 1,
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ),
           ],

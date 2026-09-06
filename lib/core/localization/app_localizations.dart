@@ -1,5 +1,7 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 /// Comprehensive multi-language localization manager
 class AppLocalizations {
@@ -801,6 +803,69 @@ class _AppLocalizationsDelegate
 
   @override
   bool shouldReload(_AppLocalizationsDelegate old) => false;
+}
+
+/// Fallback Material Localizations Delegate for custom/unsupported language codes (e.g. Hinglish, Bhojpuri)
+class AppMaterialLocalizationsDelegate
+    extends LocalizationsDelegate<MaterialLocalizations> {
+  const AppMaterialLocalizationsDelegate();
+
+  @override
+  bool isSupported(Locale locale) => true;
+
+  @override
+  Future<MaterialLocalizations> load(Locale locale) {
+    if (GlobalMaterialLocalizations.delegate.isSupported(locale)) {
+      return GlobalMaterialLocalizations.delegate.load(locale);
+    }
+    if (locale.languageCode == 'bho' || locale.languageCode == 'hinglish') {
+      return GlobalMaterialLocalizations.delegate.load(const Locale('hi'));
+    }
+    return GlobalMaterialLocalizations.delegate.load(const Locale('en'));
+  }
+
+  @override
+  bool shouldReload(AppMaterialLocalizationsDelegate old) => false;
+}
+
+/// Fallback Cupertino Localizations Delegate for custom language codes
+class AppCupertinoLocalizationsDelegate
+    extends LocalizationsDelegate<CupertinoLocalizations> {
+  const AppCupertinoLocalizationsDelegate();
+
+  @override
+  bool isSupported(Locale locale) => true;
+
+  @override
+  Future<CupertinoLocalizations> load(Locale locale) {
+    if (GlobalCupertinoLocalizations.delegate.isSupported(locale)) {
+      return GlobalCupertinoLocalizations.delegate.load(locale);
+    }
+    return GlobalCupertinoLocalizations.delegate.load(const Locale('en'));
+  }
+
+  @override
+  bool shouldReload(AppCupertinoLocalizationsDelegate old) => false;
+}
+
+/// Fallback Widgets Localizations Delegate for custom language codes
+class AppWidgetsLocalizationsDelegate
+    extends LocalizationsDelegate<WidgetsLocalizations> {
+  const AppWidgetsLocalizationsDelegate();
+
+  @override
+  bool isSupported(Locale locale) => true;
+
+  @override
+  Future<WidgetsLocalizations> load(Locale locale) {
+    if (GlobalWidgetsLocalizations.delegate.isSupported(locale)) {
+      return GlobalWidgetsLocalizations.delegate.load(locale);
+    }
+    return GlobalWidgetsLocalizations.delegate.load(const Locale('en'));
+  }
+
+  @override
+  bool shouldReload(AppWidgetsLocalizationsDelegate old) => false;
 }
 
 /// Helper extension on BuildContext for effortless translation: context.tr('key')
