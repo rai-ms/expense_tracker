@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/base/base_controller/widget_view.dart';
-import '../../../../core/constants/app_colors.dart';
+import '../../../../core/localization/app_localizations.dart';
 import '../../analytics/controller/analytics_controller.dart';
 import '../../dashboard/controller/dashboard_controller.dart';
 import '../../khata/controller/khata_controller.dart';
 import '../../reminders/controller/reminders_controller.dart';
 import '../../transactions/controller/transactions_controller.dart';
 import '../controller/main_navigation_controller.dart';
-
-import '../../../../core/localization/app_localizations.dart';
+import 'widgets/animated_bottom_nav_bar.dart';
 
 class MainNavigationView
     extends WidgetView<MainNavigationView, MainNavigationControllerState> {
@@ -32,47 +31,36 @@ class MainNavigationView
       ),
       bottomNavigationBar: SafeArea(
         top: false,
-        child: Container(
-          decoration: const BoxDecoration(
-            color: AppColors.darkSurface,
-            border: Border(
-              top: BorderSide(color: AppColors.darkBorder, width: 0.8),
+        child: AnimatedBottomNavBar(
+          selectedIndex: ctr.currentIndex,
+          onItemSelected: ctr.onTabSelected,
+          items: [
+            AnimatedNavItemData(
+              icon: Icons.dashboard_outlined,
+              activeIcon: Icons.dashboard_rounded,
+              label: context.tr('dashboard'),
             ),
-          ),
-          child: NavigationBar(
-            selectedIndex: ctr.currentIndex,
-            onDestinationSelected: ctr.onTabSelected,
-            backgroundColor: Colors.transparent,
-            indicatorColor: AppColors.primary.withValues(alpha: 0.2),
-            elevation: 0,
-            destinations: [
-              NavigationDestination(
-                icon: const Icon(Icons.dashboard_outlined),
-                selectedIcon: const Icon(Icons.dashboard_rounded, color: AppColors.primary),
-                label: context.tr('dashboard'),
-              ),
-              NavigationDestination(
-                icon: const Icon(Icons.receipt_long_outlined),
-                selectedIcon: const Icon(Icons.receipt_long_rounded, color: AppColors.primary),
-                label: context.tr('transactions'),
-              ),
-              NavigationDestination(
-                icon: const Icon(Icons.menu_book_outlined),
-                selectedIcon: const Icon(Icons.menu_book_rounded, color: AppColors.primary),
-                label: context.tr('khata'),
-              ),
-              NavigationDestination(
-                icon: const Icon(Icons.pie_chart_outline_rounded),
-                selectedIcon: const Icon(Icons.pie_chart_rounded, color: AppColors.primary),
-                label: context.tr('analytics'),
-              ),
-              NavigationDestination(
-                icon: const Icon(Icons.notifications_none_rounded),
-                selectedIcon: const Icon(Icons.notifications_rounded, color: AppColors.primary),
-                label: context.tr('reminders'),
-              ),
-            ],
-          ),
+            AnimatedNavItemData(
+              icon: Icons.receipt_long_outlined,
+              activeIcon: Icons.receipt_long_rounded,
+              label: context.tr('transactions'),
+            ),
+            AnimatedNavItemData(
+              icon: Icons.menu_book_outlined,
+              activeIcon: Icons.menu_book_rounded,
+              label: context.tr('khata'),
+            ),
+            AnimatedNavItemData(
+              icon: Icons.pie_chart_outline_rounded,
+              activeIcon: Icons.pie_chart_rounded,
+              label: context.tr('analytics'),
+            ),
+            AnimatedNavItemData(
+              icon: Icons.notifications_none_rounded,
+              activeIcon: Icons.notifications_rounded,
+              label: context.tr('reminders'),
+            ),
+          ],
         ),
       ),
     );
