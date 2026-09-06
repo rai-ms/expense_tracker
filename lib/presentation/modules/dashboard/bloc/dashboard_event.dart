@@ -52,3 +52,12 @@ class AddQuickTransactionEvent extends DashboardEvent {
   @override
   List<Object?> get props => [transaction];
 }
+
+/// Event to update and persist monthly budget
+class UpdateMonthlyBudgetEvent extends DashboardEvent {
+  final double newBudget;
+  const UpdateMonthlyBudgetEvent(this.newBudget);
+
+  @override
+  List<Object?> get props => [newBudget];
+}

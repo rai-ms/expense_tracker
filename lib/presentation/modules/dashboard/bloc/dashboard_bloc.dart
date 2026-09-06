@@ -1,5 +1,6 @@
 import 'package:injectable/injectable.dart';
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../../core/base/bloc_base/base_bloc.dart';
 import '../../../../core/base/bloc_base/bloc_event.dart';
@@ -13,6 +14,8 @@ part 'dashboard_state.dart';
 
 @injectable
 class DashboardBloc extends BaseBloc<DashboardEvent, DashboardData> {
+  static const String _prefMonthlyBudgetKey = 'user_monthly_budget_amount';
+
   final ITransactionRepository _transactionRepository;
   final SmsSyncService _smsSyncService;
 
@@ -24,6 +27,7 @@ class DashboardBloc extends BaseBloc<DashboardEvent, DashboardData> {
     on<LoadDashboardDataEvent>(_onLoadDashboardData);
     on<SyncSmsEvent>(_onSyncSms);
     on<AddQuickTransactionEvent>(_onAddQuickTransaction);
+    on<UpdateMonthlyBudgetEvent>(_onUpdateMonthlyBudget);
   }
 
   Future<void> _onLoadDashboardData(
@@ -88,13 +92,16 @@ class DashboardBloc extends BaseBloc<DashboardEvent, DashboardData> {
 
       final categoryBreakdown = _transactionRepository.getCategoryBreakdown(start: startDate, end: endDate);
 
+      final prefs = await SharedPreferences.getInstance();
+      final monthlyBudget = prefs.getDouble(_prefMonthlyBudgetKey) ?? 50000.0;
+
       emitSuccess(
         data: DashboardData(
           totalBalance: totalBalance,
           totalIncome: totalIncome,
           totalExpense: totalExpense,
           todaySpend: todaySpend,
-          monthlyBudget: 50000.0,
+          monthlyBudget: monthlyBudget,
           recentTransactions: recent,
           categoryBreakdown: categoryBreakdown,
           activeFilter: event.filter,
@@ -174,6 +181,23 @@ class DashboardBloc extends BaseBloc<DashboardEvent, DashboardData> {
       ));
     } catch (e) {
       emitFailed(message: 'Failed to add transaction: $e');
+    }
+  }
+
+  Future<void> _onUpdateMonthlyBudget(
+    UpdateMonthlyBudgetEvent event,
+    dynamic emit,
+  ) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setDouble(_prefMonthlyBudgetKey, event.newBudget);
+      add(LoadDashboardDataEvent(
+        filter: _currentFilter,
+        customStartDate: _customStart,
+        customEndDate: _customEnd,
+      ));
+    } catch (e) {
+      emitFailed(message: 'Failed to update monthly budget: $e');
     }
   }
 }

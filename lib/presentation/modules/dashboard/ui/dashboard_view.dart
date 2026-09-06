@@ -169,6 +169,7 @@ class DashboardView extends WidgetView<DashboardView, DashboardControllerState> 
                     todaySpend: data.todaySpend,
                     totalExpense: data.totalExpense,
                     monthlyBudget: data.monthlyBudget,
+                    onEditBudget: () => ctr.onEditMonthlyBudget(data.monthlyBudget),
                   ),
                   const SizedBox(height: 24),
 

@@ -13,6 +13,7 @@ import '../../transactions/ui/widgets/transaction_detail_modal.dart';
 import '../../../../core/services/event_bus/app_events.dart';
 import '../../main_navigation/controller/main_navigation_controller.dart';
 import '../ui/dashboard_view.dart';
+import '../ui/widgets/adjust_budget_modal.dart';
 import '../ui/widgets/sync_sms_date_modal.dart';
 
 class DashboardController extends StatefulWidget {
@@ -92,6 +93,22 @@ mixin _DashboardMixin on State<DashboardController> {
           );
         },
       ),
+    );
+  }
+
+  void onEditMonthlyBudget(double currentBudget) {
+    AdjustBudgetModal.show(
+      context: context,
+      currentBudget: currentBudget,
+      onBudgetSaved: (newBudget) {
+        _state.bloc.add(UpdateMonthlyBudgetEvent(newBudget));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Monthly budget updated to ₹${newBudget.toInt()}'),
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      },
     );
   }
 

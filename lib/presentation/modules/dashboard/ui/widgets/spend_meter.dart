@@ -9,12 +9,14 @@ class SpendMeter extends StatelessWidget {
   final double todaySpend;
   final double totalExpense;
   final double monthlyBudget;
+  final VoidCallback? onEditBudget;
 
   const SpendMeter({
     super.key,
     required this.todaySpend,
     required this.totalExpense,
     required this.monthlyBudget,
+    this.onEditBudget,
   });
 
   @override
@@ -60,14 +62,37 @@ class SpendMeter extends StatelessWidget {
                       fontWeight: FontWeight.w600,
                     ),
                   ),
+                  if (onEditBudget != null) ...[
+                    const SizedBox(width: 6),
+                    InkWell(
+                      onTap: onEditBudget,
+                      borderRadius: BorderRadius.circular(8),
+                      child: Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          color: AppColors.primary.withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: const Icon(
+                          Icons.edit_rounded,
+                          size: 14,
+                          color: AppColors.primaryLight,
+                        ),
+                      ),
+                    ),
+                  ],
                 ],
               ),
-              Text(
-                '$percentage% used',
-                style: TextStyle(
-                  color: meterColor,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 13,
+              InkWell(
+                onTap: onEditBudget,
+                borderRadius: BorderRadius.circular(8),
+                child: Text(
+                  '$percentage% used',
+                  style: TextStyle(
+                    color: meterColor,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 13,
+                  ),
                 ),
               ),
             ],
