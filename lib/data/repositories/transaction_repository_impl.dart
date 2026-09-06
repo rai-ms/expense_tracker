@@ -105,11 +105,11 @@ class TransactionRepositoryImpl implements ITransactionRepository {
   }
 
   @override
-  double getNetBalance() {
-    final all = getAllTransactions();
+  double getNetBalance({DateTime? start, DateTime? end}) {
+    final list = _getFilteredList(start, end);
     double income = 0.0;
     double expense = 0.0;
-    for (final t in all) {
+    for (final t in list) {
       if (t.isCredit) income += t.amount;
       if (t.isDebit) expense += t.amount;
     }

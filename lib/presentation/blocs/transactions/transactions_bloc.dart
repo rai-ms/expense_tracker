@@ -1,7 +1,16 @@
+import 'package:intl/intl.dart';
+
 import '../../../core/base/bloc_base/base_bloc.dart';
 import '../../../core/base/bloc_base/bloc_event.dart';
 import '../../../data/models/transaction_entity.dart';
 import '../../../domain/repositories/i_transaction_repository.dart';
+
+enum TransactionDateFilter {
+  thisMonth,
+  lastMonth,
+  allTime,
+  custom,
+}
 
 // Transactions Events
 abstract class TransactionsEvent extends BlocEvent {
@@ -13,12 +22,18 @@ class LoadTransactionsEvent extends TransactionsEvent {
   final String? selectedCategory;
   final String? selectedType; // 'all', 'debit', 'credit'
   final String? selectedPlatform;
+  final TransactionDateFilter dateFilter;
+  final DateTime? customStartDate;
+  final DateTime? customEndDate;
 
   const LoadTransactionsEvent({
     this.searchQuery,
     this.selectedCategory,
-    this.selectedType,
+    this.selectedType = 'all',
     this.selectedPlatform,
+    this.dateFilter = TransactionDateFilter.thisMonth,
+    this.customStartDate,
+    this.customEndDate,
   });
 
   @override
@@ -27,6 +42,9 @@ class LoadTransactionsEvent extends TransactionsEvent {
         selectedCategory,
         selectedType,
         selectedPlatform,
+        dateFilter,
+        customStartDate,
+        customEndDate,
       ];
 }
 
@@ -53,6 +71,13 @@ class TransactionsData {
   final String? selectedCategory;
   final String selectedType;
   final String? selectedPlatform;
+  final TransactionDateFilter dateFilter;
+  final DateTime? startDate;
+  final DateTime? endDate;
+  final String dateFilterLabel;
+  final double totalIncome;
+  final double totalExpense;
+  final double netBalance;
 
   const TransactionsData({
     required this.transactions,
@@ -60,12 +85,27 @@ class TransactionsData {
     this.selectedCategory,
     this.selectedType = 'all',
     this.selectedPlatform,
+    this.dateFilter = TransactionDateFilter.thisMonth,
+    this.startDate,
+    this.endDate,
+    this.dateFilterLabel = 'This Month',
+    this.totalIncome = 0.0,
+    this.totalExpense = 0.0,
+    this.netBalance = 0.0,
   });
 }
 
 // Transactions BLoC
 class TransactionsBloc extends BaseBloc<TransactionsEvent, TransactionsData> {
   final ITransactionRepository _transactionRepository;
+
+  TransactionDateFilter _currentDateFilter = TransactionDateFilter.thisMonth;
+  DateTime? _customStart;
+  DateTime? _customEnd;
+  String? _currentType = 'all';
+  String? _currentCategory;
+  String? _currentPlatform;
+  String? _currentSearch;
 
   TransactionsBloc(this._transactionRepository) {
     on<LoadTransactionsEvent>(_onLoadTransactions);
@@ -79,7 +119,50 @@ class TransactionsBloc extends BaseBloc<TransactionsEvent, TransactionsData> {
   ) {
     emitLoading();
     try {
-      final all = _transactionRepository.getAllTransactions();
+      _currentDateFilter = event.dateFilter;
+      _customStart = event.customStartDate;
+      _customEnd = event.customEndDate;
+      _currentType = event.selectedType ?? 'all';
+      _currentCategory = event.selectedCategory;
+      _currentPlatform = event.selectedPlatform;
+      _currentSearch = event.searchQuery;
+
+      final now = DateTime.now();
+      DateTime? startDate;
+      DateTime? endDate;
+      String dateLabel = 'This Month';
+
+      switch (event.dateFilter) {
+        case TransactionDateFilter.thisMonth:
+          startDate = DateTime(now.year, now.month, 1);
+          endDate = DateTime(now.year, now.month + 1, 0, 23, 59, 59);
+          dateLabel = DateFormat('MMMM yyyy').format(now);
+          break;
+        case TransactionDateFilter.lastMonth:
+          startDate = DateTime(now.year, now.month - 1, 1);
+          endDate = DateTime(now.year, now.month, 0, 23, 59, 59);
+          dateLabel = DateFormat('MMMM yyyy').format(startDate);
+          break;
+        case TransactionDateFilter.allTime:
+          startDate = null;
+          endDate = null;
+          dateLabel = 'All Time';
+          break;
+        case TransactionDateFilter.custom:
+          startDate = event.customStartDate;
+          endDate = event.customEndDate;
+          if (startDate != null && endDate != null) {
+            final f = DateFormat('dd MMM');
+            dateLabel = '${f.format(startDate)} - ${f.format(endDate)}';
+          } else {
+            dateLabel = 'Custom Range';
+          }
+          break;
+      }
+
+      final all = (startDate != null && endDate != null)
+          ? _transactionRepository.getTransactionsByDateRange(startDate, endDate)
+          : _transactionRepository.getAllTransactions();
 
       var filtered = all;
 
@@ -118,6 +201,17 @@ class TransactionsBloc extends BaseBloc<TransactionsEvent, TransactionsData> {
         }).toList();
       }
 
+      // Calculate totals for this filtered slice
+      double income = 0;
+      double expense = 0;
+      for (final t in filtered) {
+        if (t.isCredit) {
+          income += t.amount;
+        } else {
+          expense += t.amount;
+        }
+      }
+
       emitSuccess(
         data: TransactionsData(
           transactions: filtered,
@@ -125,6 +219,13 @@ class TransactionsBloc extends BaseBloc<TransactionsEvent, TransactionsData> {
           selectedCategory: event.selectedCategory,
           selectedType: event.selectedType ?? 'all',
           selectedPlatform: event.selectedPlatform,
+          dateFilter: event.dateFilter,
+          startDate: startDate,
+          endDate: endDate,
+          dateFilterLabel: dateLabel,
+          totalIncome: income,
+          totalExpense: expense,
+          netBalance: income - expense,
         ),
       );
     } catch (e) {
@@ -138,7 +239,17 @@ class TransactionsBloc extends BaseBloc<TransactionsEvent, TransactionsData> {
   ) {
     try {
       _transactionRepository.deleteTransaction(event.transactionId);
-      add(const LoadTransactionsEvent());
+      add(
+        LoadTransactionsEvent(
+          searchQuery: _currentSearch,
+          selectedCategory: _currentCategory,
+          selectedType: _currentType,
+          selectedPlatform: _currentPlatform,
+          dateFilter: _currentDateFilter,
+          customStartDate: _customStart,
+          customEndDate: _customEnd,
+        ),
+      );
     } catch (e) {
       emitFailed(message: 'Failed to delete transaction: $e');
     }
@@ -150,7 +261,17 @@ class TransactionsBloc extends BaseBloc<TransactionsEvent, TransactionsData> {
   ) {
     try {
       _transactionRepository.addTransaction(event.transaction);
-      add(const LoadTransactionsEvent());
+      add(
+        LoadTransactionsEvent(
+          searchQuery: _currentSearch,
+          selectedCategory: _currentCategory,
+          selectedType: _currentType,
+          selectedPlatform: _currentPlatform,
+          dateFilter: _currentDateFilter,
+          customStartDate: _customStart,
+          customEndDate: _customEnd,
+        ),
+      );
     } catch (e) {
       emitFailed(message: 'Failed to add transaction: $e');
     }

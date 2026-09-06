@@ -50,4 +50,5 @@ app.*.map.json
 # Local build / secrets / downloads
 **/local.properties
 .gradle/
+android/build/
 download/

@@ -112,6 +112,44 @@ mixin _DashboardMixin on State<DashboardController> {
     context.push(AppRoutes.transactions);
   }
 
+  void onDateFilterChanged(DashboardDateFilter filter) {
+    if (filter == DashboardDateFilter.custom) {
+      onSelectCustomDateRange();
+    } else {
+      _state.bloc.add(LoadDashboardDataEvent(filter: filter));
+    }
+  }
+
+  Future<void> onSelectCustomDateRange() async {
+    final now = DateTime.now();
+    final picked = await showDateRangePicker(
+      context: context,
+      firstDate: DateTime(now.year - 5),
+      lastDate: DateTime(now.year + 1),
+      initialDateRange: DateTimeRange(
+        start: DateTime(now.year, now.month, 1),
+        end: now,
+      ),
+    );
+
+    if (picked != null) {
+      _state.bloc.add(
+        LoadDashboardDataEvent(
+          filter: DashboardDateFilter.custom,
+          customStartDate: picked.start,
+          customEndDate: DateTime(
+            picked.end.year,
+            picked.end.month,
+            picked.end.day,
+            23,
+            59,
+            59,
+          ),
+        ),
+      );
+    }
+  }
+
   void onTransactionTap(TransactionEntity txn) {
     showModalBottomSheet(
       context: context,

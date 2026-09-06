@@ -7,12 +7,14 @@ class BalanceCard extends StatelessWidget {
   final double totalBalance;
   final double totalIncome;
   final double totalExpense;
+  final String filterLabel;
 
   const BalanceCard({
     super.key,
     required this.totalBalance,
     required this.totalIncome,
     required this.totalExpense,
+    this.filterLabel = 'This Month',
   });
 
   @override
@@ -39,12 +41,12 @@ class BalanceCard extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
-                'Total Net Balance',
-                style: TextStyle(
+              Text(
+                'Net Balance ($filterLabel)',
+                style: const TextStyle(
                   color: Colors.white70,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
               Container(

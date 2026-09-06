@@ -6,7 +6,7 @@ import '../models/bill_reminder_entity.dart';
 class ReminderRepositoryImpl implements IReminderRepository {
   final ObjectBoxService _boxService;
 
-  ReminderRepositoryImpl(this._boxService);
+  const ReminderRepositoryImpl(this._boxService);
 
   @override
   List<BillReminderEntity> getAllReminders() {

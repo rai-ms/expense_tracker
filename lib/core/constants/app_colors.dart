@@ -9,6 +9,7 @@ class AppColors {
   static const Color primaryLight = Color(0xFF818CF8);
   static const Color primaryDark = Color(0xFF4F46E5);
   static const Color secondary = Color(0xFF06B6D4); // Cyan Accent
+  static const Color khataBook = Color(0xFF6366F1); // KhataBook Theme Color
 
   // Financial status colors
   static const Color creditGreen = Color(0xFF10B981); // Positive Inflow / You Got / Credit

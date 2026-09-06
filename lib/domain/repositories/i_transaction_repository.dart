@@ -14,7 +14,7 @@ abstract class ITransactionRepository {
   // Analytics queries
   double getTotalIncome({DateTime? start, DateTime? end});
   double getTotalExpense({DateTime? start, DateTime? end});
-  double getNetBalance();
+  double getNetBalance({DateTime? start, DateTime? end});
   Map<String, double> getCategoryBreakdown({DateTime? start, DateTime? end});
   Map<String, double> getMonthlySpendTrend({int months = 6});
   Map<String, double> getTopMerchants({int limit = 5, DateTime? start, DateTime? end});

@@ -51,6 +51,9 @@ mixin _TransactionsMixin on State<TransactionsController> {
         selectedCategory: current?.selectedCategory,
         selectedType: current?.selectedType,
         selectedPlatform: current?.selectedPlatform,
+        dateFilter: current?.dateFilter ?? TransactionDateFilter.thisMonth,
+        customStartDate: current?.startDate,
+        customEndDate: current?.endDate,
       ),
     );
   }
@@ -63,6 +66,9 @@ mixin _TransactionsMixin on State<TransactionsController> {
         selectedCategory: current?.selectedCategory,
         selectedType: type,
         selectedPlatform: current?.selectedPlatform,
+        dateFilter: current?.dateFilter ?? TransactionDateFilter.thisMonth,
+        customStartDate: current?.startDate,
+        customEndDate: current?.endDate,
       ),
     );
   }
@@ -75,8 +81,63 @@ mixin _TransactionsMixin on State<TransactionsController> {
         selectedCategory: category,
         selectedType: current?.selectedType,
         selectedPlatform: current?.selectedPlatform,
+        dateFilter: current?.dateFilter ?? TransactionDateFilter.thisMonth,
+        customStartDate: current?.startDate,
+        customEndDate: current?.endDate,
       ),
     );
+  }
+
+  void onDateFilterChanged(TransactionDateFilter filter) {
+    if (filter == TransactionDateFilter.custom) {
+      onSelectCustomDateRange();
+    } else {
+      final current = _state.bloc.state.data;
+      _state.bloc.add(
+        LoadTransactionsEvent(
+          searchQuery: current?.searchQuery,
+          selectedCategory: current?.selectedCategory,
+          selectedType: current?.selectedType,
+          selectedPlatform: current?.selectedPlatform,
+          dateFilter: filter,
+        ),
+      );
+    }
+  }
+
+  Future<void> onSelectCustomDateRange() async {
+    final current = _state.bloc.state.data;
+    final now = DateTime.now();
+    final picked = await showDateRangePicker(
+      context: context,
+      firstDate: DateTime(2020),
+      lastDate: now.add(const Duration(days: 30)),
+      initialDateRange: DateTimeRange(
+        start: current?.startDate ?? DateTime(now.year, now.month, 1),
+        end: current?.endDate ?? now,
+      ),
+    );
+
+    if (picked != null) {
+      final start = DateTime(picked.start.year, picked.start.month, picked.start.day);
+      final end = DateTime(picked.end.year, picked.end.month, picked.end.day, 23, 59, 59);
+      _state.bloc.add(
+        LoadTransactionsEvent(
+          searchQuery: current?.searchQuery,
+          selectedCategory: current?.selectedCategory,
+          selectedType: current?.selectedType,
+          selectedPlatform: current?.selectedPlatform,
+          dateFilter: TransactionDateFilter.custom,
+          customStartDate: start,
+          customEndDate: end,
+        ),
+      );
+    }
+  }
+
+  void onResetFilters() {
+    _state.searchController.clear();
+    _state.bloc.add(const LoadTransactionsEvent());
   }
 
   void onTransactionTap(TransactionEntity txn) {

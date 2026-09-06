@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import '../../../../../core/constants/app_colors.dart';
 import '../../../../../core/constants/app_constants.dart';
 import '../../../../../data/models/transaction_entity.dart';
+import 'move_to_khata_modal.dart';
 
 class TransactionDetailModal extends StatelessWidget {
   final TransactionEntity transaction;
@@ -31,9 +32,11 @@ class TransactionDetailModal extends StatelessWidget {
         color: Theme.of(context).cardTheme.color,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
       ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: SafeArea(
+        top: false,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Center(
             child: Container(
@@ -128,25 +131,54 @@ class TransactionDetailModal extends StatelessWidget {
           ],
 
           const SizedBox(height: 24),
-          SizedBox(
-            width: double.infinity,
-            child: OutlinedButton.icon(
-              onPressed: () {
-                Navigator.pop(context);
-                onDelete();
-              },
-              icon: const Icon(Icons.delete_outline_rounded, color: AppColors.debitRed),
-              label: const Text('Delete Transaction', style: TextStyle(color: AppColors.debitRed)),
-              style: OutlinedButton.styleFrom(
-                side: const BorderSide(color: AppColors.debitRed),
-                padding: const EdgeInsets.symmetric(vertical: 14),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          Row(
+            children: [
+              Expanded(
+                child: ElevatedButton.icon(
+                  onPressed: () {
+                    showModalBottomSheet(
+                      context: context,
+                      isScrollControlled: true,
+                      backgroundColor: Theme.of(context).cardTheme.color,
+                      shape: const RoundedRectangleBorder(
+                        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+                      ),
+                      builder: (_) => MoveToKhataModal(transaction: transaction),
+                    );
+                  },
+                  icon: const Icon(Icons.menu_book_rounded, size: 18),
+                  label: const Text('Move to Khata'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.khataBook,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                  ),
+                ),
               ),
-            ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: () {
+                    Navigator.pop(context);
+                    onDelete();
+                  },
+                  icon: const Icon(Icons.delete_outline_rounded, color: AppColors.debitRed, size: 18),
+                  label: const Text('Delete', style: TextStyle(color: AppColors.debitRed)),
+                  style: OutlinedButton.styleFrom(
+                    side: const BorderSide(color: AppColors.debitRed),
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  ),
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: 12),
         ],
       ),
+    ),
     );
   }
 

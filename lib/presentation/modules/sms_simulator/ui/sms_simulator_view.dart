@@ -30,7 +30,9 @@ class SmsSimulatorView
           ),
         ],
       ),
-      body: SingleChildScrollView(
+      body: SafeArea(
+        top: false,
+        child: SingleChildScrollView(
         physics: const BouncingScrollPhysics(),
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
         child: Column(
@@ -207,6 +209,7 @@ class SmsSimulatorView
             const SizedBox(height: 40),
           ],
         ),
+      ),
       ),
     );
   }

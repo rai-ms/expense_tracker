@@ -8,4 +8,6 @@ abstract class IReminderRepository {
   bool updateReminder(BillReminderEntity reminder);
   bool togglePaidStatus(int reminderId, bool isPaid);
   bool deleteReminder(int id);
+
+  const IReminderRepository();
 }

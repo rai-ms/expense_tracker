@@ -95,11 +95,56 @@ class DashboardView extends WidgetView<DashboardView, DashboardControllerState> 
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // Date Filter Selector Bar
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    physics: const BouncingScrollPhysics(),
+                    child: Row(
+                      children: [
+                        _buildFilterChip(
+                          context: context,
+                          label: 'This Month',
+                          icon: Icons.calendar_today_rounded,
+                          isSelected: data.activeFilter == DashboardDateFilter.thisMonth,
+                          onTap: () => ctr.onDateFilterChanged(DashboardDateFilter.thisMonth),
+                        ),
+                        const SizedBox(width: 8),
+                        _buildFilterChip(
+                          context: context,
+                          label: 'Last Month',
+                          icon: Icons.history_rounded,
+                          isSelected: data.activeFilter == DashboardDateFilter.lastMonth,
+                          onTap: () => ctr.onDateFilterChanged(DashboardDateFilter.lastMonth),
+                        ),
+                        const SizedBox(width: 8),
+                        _buildFilterChip(
+                          context: context,
+                          label: 'All Time',
+                          icon: Icons.all_inclusive_rounded,
+                          isSelected: data.activeFilter == DashboardDateFilter.allTime,
+                          onTap: () => ctr.onDateFilterChanged(DashboardDateFilter.allTime),
+                        ),
+                        const SizedBox(width: 8),
+                        _buildFilterChip(
+                          context: context,
+                          label: data.activeFilter == DashboardDateFilter.custom
+                              ? data.filterLabel
+                              : 'Custom 📅',
+                          icon: Icons.date_range_rounded,
+                          isSelected: data.activeFilter == DashboardDateFilter.custom,
+                          onTap: () => ctr.onDateFilterChanged(DashboardDateFilter.custom),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+
                   // 1. Hero Balance Card
                   BalanceCard(
                     totalBalance: data.totalBalance,
                     totalIncome: data.totalIncome,
                     totalExpense: data.totalExpense,
+                    filterLabel: data.filterLabel,
                   ),
                   const SizedBox(height: 20),
 
@@ -127,18 +172,68 @@ class DashboardView extends WidgetView<DashboardView, DashboardControllerState> 
                     onTransactionTap: ctr.onTransactionTap,
                     onViewAll: ctr.onViewAllTransactions,
                   ),
-                  const SizedBox(height: 80),
+                  const SizedBox(height: 24),
                 ],
               ),
             ),
           );
         },
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        heroTag: 'fab_dashboard',
-        onPressed: ctr.onAddExpense,
-        icon: const Icon(Icons.add_rounded),
-        label: const Text('Add Transaction'),
+    );
+  }
+
+  Widget _buildFilterChip({
+    required BuildContext context,
+    required String label,
+    required IconData icon,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(20),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? AppColors.primary
+              : AppColors.darkSurfaceVariant.withValues(alpha: 0.5),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: isSelected
+                ? AppColors.primary
+                : AppColors.darkBorder.withValues(alpha: 0.6),
+          ),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: AppColors.primary.withValues(alpha: 0.3),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ]
+              : null,
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              icon,
+              size: 14,
+              color: isSelected ? Colors.white : AppColors.textSecondaryDark,
+            ),
+            const SizedBox(width: 6),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                color: isSelected ? Colors.white : AppColors.textSecondaryDark,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

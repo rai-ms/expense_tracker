@@ -43,7 +43,7 @@ void main() {
         ),
       );
 
-      expect(find.text('Total Net Balance'), findsOneWidget);
+      expect(find.textContaining('Net Balance'), findsOneWidget);
       expect(find.textContaining('50,000'), findsOneWidget);
       expect(find.text('Income'), findsOneWidget);
       expect(find.text('Expense'), findsOneWidget);

@@ -34,6 +34,9 @@ watch: ## Watch mode for code generation
 ## -----------------------------------------------------------------------------
 ## 🏗️ BUILD COMMANDS (WITH TREE-SHAKE & OPTIMIZATIONS)
 ## -----------------------------------------------------------------------------
+build: build-apk-release ## Alias for build-apk-release
+build-release: build-apk-release ## Alias for build-apk-release
+
 build-apk-release: ## Build release APK with icon tree-shaking
 	@echo "🚀 Building Release APK (with Tree Shake Icons)..."
 	flutter build apk --release --tree-shake-icons

@@ -29,7 +29,9 @@ class ExportPdfView
           ),
         ],
       ),
-      body: Column(
+      body: SafeArea(
+        top: false,
+        child: Column(
         children: [
           // Period Selector Bar
           Container(
@@ -87,6 +89,7 @@ class ExportPdfView
           ),
         ],
       ),
-    );
-  }
+    ),
+  );
+}
 }

@@ -28,46 +28,49 @@ class MainNavigationView
         index: ctr.currentIndex,
         children: screens,
       ),
-      bottomNavigationBar: Container(
-        decoration: const BoxDecoration(
-          color: AppColors.darkSurface,
-          border: Border(
-            top: BorderSide(color: AppColors.darkBorder, width: 0.8),
+      bottomNavigationBar: SafeArea(
+        top: false,
+        child: Container(
+          decoration: const BoxDecoration(
+            color: AppColors.darkSurface,
+            border: Border(
+              top: BorderSide(color: AppColors.darkBorder, width: 0.8),
+            ),
           ),
-        ),
-        child: NavigationBar(
-          selectedIndex: ctr.currentIndex,
-          onDestinationSelected: ctr.onTabSelected,
-          backgroundColor: Colors.transparent,
-          indicatorColor: AppColors.primary.withValues(alpha: 0.2),
-          elevation: 0,
-          destinations: const [
-            NavigationDestination(
-              icon: Icon(Icons.dashboard_outlined),
-              selectedIcon: Icon(Icons.dashboard_rounded, color: AppColors.primary),
-              label: 'Home',
-            ),
-            NavigationDestination(
-              icon: Icon(Icons.receipt_long_outlined),
-              selectedIcon: Icon(Icons.receipt_long_rounded, color: AppColors.primary),
-              label: 'Transactions',
-            ),
-            NavigationDestination(
-              icon: Icon(Icons.menu_book_outlined),
-              selectedIcon: Icon(Icons.menu_book_rounded, color: AppColors.primary),
-              label: 'KhataBook',
-            ),
-            NavigationDestination(
-              icon: Icon(Icons.pie_chart_outline_rounded),
-              selectedIcon: Icon(Icons.pie_chart_rounded, color: AppColors.primary),
-              label: 'Analytics',
-            ),
-            NavigationDestination(
-              icon: Icon(Icons.notifications_none_rounded),
-              selectedIcon: Icon(Icons.notifications_rounded, color: AppColors.primary),
-              label: 'Reminders',
-            ),
-          ],
+          child: NavigationBar(
+            selectedIndex: ctr.currentIndex,
+            onDestinationSelected: ctr.onTabSelected,
+            backgroundColor: Colors.transparent,
+            indicatorColor: AppColors.primary.withValues(alpha: 0.2),
+            elevation: 0,
+            destinations: const [
+              NavigationDestination(
+                icon: Icon(Icons.dashboard_outlined),
+                selectedIcon: Icon(Icons.dashboard_rounded, color: AppColors.primary),
+                label: 'Home',
+              ),
+              NavigationDestination(
+                icon: Icon(Icons.receipt_long_outlined),
+                selectedIcon: Icon(Icons.receipt_long_rounded, color: AppColors.primary),
+                label: 'Transactions',
+              ),
+              NavigationDestination(
+                icon: Icon(Icons.menu_book_outlined),
+                selectedIcon: Icon(Icons.menu_book_rounded, color: AppColors.primary),
+                label: 'KhataBook',
+              ),
+              NavigationDestination(
+                icon: Icon(Icons.pie_chart_outline_rounded),
+                selectedIcon: Icon(Icons.pie_chart_rounded, color: AppColors.primary),
+                label: 'Analytics',
+              ),
+              NavigationDestination(
+                icon: Icon(Icons.notifications_none_rounded),
+                selectedIcon: Icon(Icons.notifications_rounded, color: AppColors.primary),
+                label: 'Reminders',
+              ),
+            ],
+          ),
         ),
       ),
     );

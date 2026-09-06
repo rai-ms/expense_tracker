@@ -1,15 +1,37 @@
+import 'package:intl/intl.dart';
+
 import '../../../core/base/bloc_base/base_bloc.dart';
 import '../../../core/base/bloc_base/bloc_event.dart';
 import '../../../core/services/sms_sync_service/sms_sync_service.dart';
 import '../../../data/models/transaction_entity.dart';
 import '../../../domain/repositories/i_transaction_repository.dart';
 
+enum DashboardDateFilter {
+  thisMonth,
+  lastMonth,
+  allTime,
+  custom,
+}
+
 // Dashboard Events
 abstract class DashboardEvent extends BlocEvent {
   const DashboardEvent();
 }
 
-class LoadDashboardDataEvent extends DashboardEvent {}
+class LoadDashboardDataEvent extends DashboardEvent {
+  final DashboardDateFilter filter;
+  final DateTime? customStartDate;
+  final DateTime? customEndDate;
+
+  const LoadDashboardDataEvent({
+    this.filter = DashboardDateFilter.thisMonth,
+    this.customStartDate,
+    this.customEndDate,
+  });
+
+  @override
+  List<Object?> get props => [filter, customStartDate, customEndDate];
+}
 
 class SyncSmsEvent extends DashboardEvent {
   final DateTime? fromDate;
@@ -43,6 +65,10 @@ class DashboardData {
   final double monthlyBudget;
   final List<TransactionEntity> recentTransactions;
   final Map<String, double> categoryBreakdown;
+  final DashboardDateFilter activeFilter;
+  final DateTime? filterStartDate;
+  final DateTime? filterEndDate;
+  final String filterLabel;
 
   const DashboardData({
     required this.totalBalance,
@@ -52,6 +78,10 @@ class DashboardData {
     required this.monthlyBudget,
     required this.recentTransactions,
     required this.categoryBreakdown,
+    this.activeFilter = DashboardDateFilter.thisMonth,
+    this.filterStartDate,
+    this.filterEndDate,
+    this.filterLabel = 'This Month',
   });
 
   DashboardData copyWith({
@@ -62,6 +92,10 @@ class DashboardData {
     double? monthlyBudget,
     List<TransactionEntity>? recentTransactions,
     Map<String, double>? categoryBreakdown,
+    DashboardDateFilter? activeFilter,
+    DateTime? filterStartDate,
+    DateTime? filterEndDate,
+    String? filterLabel,
   }) {
     return DashboardData(
       totalBalance: totalBalance ?? this.totalBalance,
@@ -71,6 +105,10 @@ class DashboardData {
       monthlyBudget: monthlyBudget ?? this.monthlyBudget,
       recentTransactions: recentTransactions ?? this.recentTransactions,
       categoryBreakdown: categoryBreakdown ?? this.categoryBreakdown,
+      activeFilter: activeFilter ?? this.activeFilter,
+      filterStartDate: filterStartDate ?? this.filterStartDate,
+      filterEndDate: filterEndDate ?? this.filterEndDate,
+      filterLabel: filterLabel ?? this.filterLabel,
     );
   }
 }
@@ -79,6 +117,10 @@ class DashboardData {
 class DashboardBloc extends BaseBloc<DashboardEvent, DashboardData> {
   final ITransactionRepository _transactionRepository;
   final SmsSyncService _smsSyncService;
+
+  DashboardDateFilter _currentFilter = DashboardDateFilter.thisMonth;
+  DateTime? _customStart;
+  DateTime? _customEnd;
 
   DashboardBloc(this._transactionRepository, this._smsSyncService) {
     on<LoadDashboardDataEvent>(_onLoadDashboardData);
@@ -92,16 +134,49 @@ class DashboardBloc extends BaseBloc<DashboardEvent, DashboardData> {
   ) async {
     emitLoading();
     try {
+      _currentFilter = event.filter;
+      _customStart = event.customStartDate;
+      _customEnd = event.customEndDate;
+
       final now = DateTime.now();
-      final startOfMonth = DateTime(now.year, now.month, 1);
-      final endOfMonth = DateTime(now.year, now.month + 1, 0, 23, 59, 59);
+      DateTime? startDate;
+      DateTime? endDate;
+      String filterLabel = 'This Month';
+
+      switch (event.filter) {
+        case DashboardDateFilter.thisMonth:
+          startDate = DateTime(now.year, now.month, 1);
+          endDate = DateTime(now.year, now.month + 1, 0, 23, 59, 59);
+          filterLabel = DateFormat('MMMM yyyy').format(now);
+          break;
+        case DashboardDateFilter.lastMonth:
+          startDate = DateTime(now.year, now.month - 1, 1);
+          endDate = DateTime(now.year, now.month, 0, 23, 59, 59);
+          filterLabel = DateFormat('MMMM yyyy').format(startDate);
+          break;
+        case DashboardDateFilter.allTime:
+          startDate = null;
+          endDate = null;
+          filterLabel = 'All Time';
+          break;
+        case DashboardDateFilter.custom:
+          startDate = event.customStartDate;
+          endDate = event.customEndDate;
+          if (startDate != null && endDate != null) {
+            final f = DateFormat('dd MMM');
+            filterLabel = '${f.format(startDate)} - ${f.format(endDate)}';
+          } else {
+            filterLabel = 'Custom Range';
+          }
+          break;
+      }
 
       final startOfDay = DateTime(now.year, now.month, now.day);
       final endOfDay = DateTime(now.year, now.month, now.day, 23, 59, 59);
 
-      final totalIncome = _transactionRepository.getTotalIncome(start: startOfMonth, end: endOfMonth);
-      final totalExpense = _transactionRepository.getTotalExpense(start: startOfMonth, end: endOfMonth);
-      final totalBalance = _transactionRepository.getNetBalance();
+      final totalIncome = _transactionRepository.getTotalIncome(start: startDate, end: endDate);
+      final totalExpense = _transactionRepository.getTotalExpense(start: startDate, end: endDate);
+      final totalBalance = _transactionRepository.getNetBalance(start: startDate, end: endDate);
 
       final todayTxns = _transactionRepository.getTransactionsByDateRange(startOfDay, endOfDay);
       double todaySpend = 0.0;
@@ -109,8 +184,11 @@ class DashboardBloc extends BaseBloc<DashboardEvent, DashboardData> {
         if (t.isDebit) todaySpend += t.amount;
       }
 
-      final recent = _transactionRepository.getRecentTransactions(limit: 8);
-      final categoryBreakdown = _transactionRepository.getCategoryBreakdown(start: startOfMonth, end: endOfMonth);
+      final recent = (startDate != null && endDate != null)
+          ? _transactionRepository.getTransactionsByDateRange(startDate, endDate)
+          : _transactionRepository.getRecentTransactions(limit: 8);
+
+      final categoryBreakdown = _transactionRepository.getCategoryBreakdown(start: startDate, end: endDate);
 
       emitSuccess(
         data: DashboardData(
@@ -118,9 +196,13 @@ class DashboardBloc extends BaseBloc<DashboardEvent, DashboardData> {
           totalIncome: totalIncome,
           totalExpense: totalExpense,
           todaySpend: todaySpend,
-          monthlyBudget: 50000.0, // Default configurable budget
+          monthlyBudget: 50000.0,
           recentTransactions: recent,
           categoryBreakdown: categoryBreakdown,
+          activeFilter: event.filter,
+          filterStartDate: startDate,
+          filterEndDate: endDate,
+          filterLabel: filterLabel,
         ),
       );
     } catch (e) {
@@ -138,10 +220,8 @@ class DashboardBloc extends BaseBloc<DashboardEvent, DashboardData> {
         toDate: event.toDate,
         limit: event.limit,
       );
-      int addedCount = 0;
 
       for (final parsed in parsedList) {
-        // Skip if already in DB
         if (parsed.transactionId != null &&
             _transactionRepository.hasTransactionWithTxnId(parsed.transactionId!)) {
           continue;
@@ -163,15 +243,14 @@ class DashboardBloc extends BaseBloc<DashboardEvent, DashboardData> {
         );
 
         _transactionRepository.addTransaction(entity);
-        addedCount++;
       }
 
-      if (addedCount > 0) {
-        // Log transaction sync count
-      }
-
-      // Reload dashboard stats
-      add(LoadDashboardDataEvent());
+      // Reload with active filter
+      add(LoadDashboardDataEvent(
+        filter: _currentFilter,
+        customStartDate: _customStart,
+        customEndDate: _customEnd,
+      ));
     } catch (e) {
       emitFailed(message: 'Error during SMS sync: $e');
     }
@@ -183,7 +262,11 @@ class DashboardBloc extends BaseBloc<DashboardEvent, DashboardData> {
   ) async {
     try {
       _transactionRepository.addTransaction(event.transaction);
-      add(LoadDashboardDataEvent());
+      add(LoadDashboardDataEvent(
+        filter: _currentFilter,
+        customStartDate: _customStart,
+        customEndDate: _customEnd,
+      ));
     } catch (e) {
       emitFailed(message: 'Failed to add transaction: $e');
     }
