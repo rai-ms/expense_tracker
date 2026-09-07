@@ -29,6 +29,7 @@ import '../../../presentation/modules/reminders/bloc/reminders_bloc.dart'
 import '../../../presentation/modules/settings/bloc/locale_bloc.dart' as _i834;
 import '../../../presentation/modules/transactions/bloc/transactions_bloc.dart'
     as _i900;
+import '../budget_service/budget_service.dart' as _i251;
 import '../notification_service/notification_service.dart' as _i333;
 import '../objectbox_service/objectbox_service.dart' as _i1038;
 import '../security_service/security_service.dart' as _i590;
@@ -54,6 +55,7 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.singleton<_i475.IgnoredRuleService>(() => _i475.IgnoredRuleService());
     gh.singleton<_i834.LocaleBloc>(() => _i834.LocaleBloc());
+    gh.lazySingleton<_i251.BudgetService>(() => _i251.BudgetService());
     gh.lazySingleton<_i590.SecurityService>(() => _i590.SecurityService());
     gh.lazySingleton<_i545.ITransactionRepository>(
       () => _i597.TransactionRepositoryImpl(gh<_i1038.ObjectBoxService>()),
@@ -71,6 +73,7 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i896.DashboardBloc(
         gh<_i545.ITransactionRepository>(),
         gh<_i206.SmsSyncService>(),
+        gh<_i251.BudgetService>(),
       ),
     );
     gh.factory<_i61.AnalyticsBloc>(

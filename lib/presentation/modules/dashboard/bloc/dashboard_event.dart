@@ -70,3 +70,22 @@ class UpdateMonthlyBudgetEvent extends DashboardEvent {
   @override
   List<Object?> get props => [newBudget];
 }
+
+/// Event to set or update budget for a specific category
+class SetCategoryBudgetEvent extends DashboardEvent {
+  final String category;
+  final double amount;
+  const SetCategoryBudgetEvent({required this.category, required this.amount});
+
+  @override
+  List<Object?> get props => [category, amount];
+}
+
+/// Event to remove budget limit for a category
+class DeleteCategoryBudgetEvent extends DashboardEvent {
+  final String category;
+  const DeleteCategoryBudgetEvent(this.category);
+
+  @override
+  List<Object?> get props => [category];
+}

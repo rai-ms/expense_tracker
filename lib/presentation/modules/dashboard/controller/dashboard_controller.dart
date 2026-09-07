@@ -4,7 +4,6 @@ import 'package:intl/intl.dart';
 
 import '../../../../core/constants/app_routes.dart';
 import '../../../../core/services/di/injection.dart';
-import '../../../../core/services/sms_sync_service/sms_sync_service.dart';
 import '../../../../data/models/transaction_entity.dart';
 import '../../../../domain/repositories/i_transaction_repository.dart';
 import '../bloc/dashboard_bloc.dart';
@@ -14,6 +13,7 @@ import '../../../../core/services/event_bus/app_events.dart';
 import '../../main_navigation/controller/main_navigation_controller.dart';
 import '../ui/dashboard_view.dart';
 import '../ui/widgets/adjust_budget_modal.dart';
+import '../ui/widgets/category_budgets_modal.dart';
 import '../ui/widgets/sync_sms_date_modal.dart';
 
 class DashboardController extends StatefulWidget {
@@ -30,10 +30,7 @@ class DashboardControllerState extends State<DashboardController>
   @override
   void initState() {
     super.initState();
-    bloc = DashboardBloc(
-      sl<ITransactionRepository>(),
-      sl<SmsSyncService>(),
-    );
+    bloc = sl<DashboardBloc>();
     bloc.add(LoadDashboardDataEvent());
     bloc.add(const AutoSyncSmsEvent());
     AppEvents.syncNotifier.addListener(_onSyncData);
@@ -111,6 +108,16 @@ mixin _DashboardMixin on State<DashboardController> {
           ),
         );
       },
+    );
+  }
+
+  void onManageCategoryBudgets() {
+    final data = _state.bloc.state.data;
+    if (data == null) return;
+    CategoryBudgetsModal.show(
+      context: context,
+      bloc: _state.bloc,
+      data: data,
     );
   }
 

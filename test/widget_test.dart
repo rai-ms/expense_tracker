@@ -88,6 +88,36 @@ void main() {
       expect(find.text('50% used'), findsOneWidget);
     });
 
+    testWidgets('SpendMeter renders warning badge and triggers onManageCategoryBudgets', (tester) async {
+      bool manageTapped = false;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: SpendMeter(
+              todaySpend: 1500.0,
+              totalExpense: 42000.0,
+              monthlyBudget: 50000.0,
+              warningOrExceededCount: 2,
+              onManageCategoryBudgets: () {
+                manageTapped = true;
+              },
+            ),
+          ),
+        ),
+      );
+
+      // Warning pill showing 2 alerts
+      expect(find.text('2 alerts'), findsOneWidget);
+      expect(find.text('Category Budgets'), findsOneWidget);
+
+      // Tap on Category Budgets button
+      await tester.tap(find.text('Category Budgets'));
+      await tester.pumpAndSettle();
+
+      expect(manageTapped, isTrue);
+    });
+
     testWidgets('AnimatedBottomNavBar renders all items and switches selection correctly', (tester) async {
       int selected = 0;
       await tester.pumpWidget(

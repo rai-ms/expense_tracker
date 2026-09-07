@@ -5,6 +5,8 @@ import 'package:intl/intl.dart';
 import '../../../../core/base/bloc_base/base_bloc.dart';
 import '../../../../core/base/bloc_base/bloc_event.dart';
 import '../../../../core/base/logger/app_logger.dart';
+import '../../../../core/services/budget_service/budget_service.dart';
+import '../../../../core/services/di/injection.dart';
 import '../../../../core/services/event_bus/app_events.dart';
 import '../../../../core/services/objectbox_service/objectbox_service.dart';
 import '../../../../core/services/sms_sync_service/sms_sync_service.dart';
@@ -21,17 +23,24 @@ class DashboardBloc extends BaseBloc<DashboardEvent, DashboardData> {
 
   final ITransactionRepository _transactionRepository;
   final SmsSyncService _smsSyncService;
+  final BudgetService _budgetService;
 
   DashboardDateFilter _currentFilter = DashboardDateFilter.thisMonth;
   DateTime? _customStart;
   DateTime? _customEnd;
 
-  DashboardBloc(this._transactionRepository, this._smsSyncService) {
+  DashboardBloc(
+    this._transactionRepository,
+    this._smsSyncService,
+    this._budgetService,
+  ) {
     on<LoadDashboardDataEvent>(_onLoadDashboardData);
     on<SyncSmsEvent>(_onSyncSms);
     on<AutoSyncSmsEvent>(_onAutoSyncSms);
     on<AddQuickTransactionEvent>(_onAddQuickTransaction);
     on<UpdateMonthlyBudgetEvent>(_onUpdateMonthlyBudget);
+    on<SetCategoryBudgetEvent>(_onSetCategoryBudget);
+    on<DeleteCategoryBudgetEvent>(_onDeleteCategoryBudget);
   }
 
   Future<void> _onLoadDashboardData(
@@ -97,6 +106,12 @@ class DashboardBloc extends BaseBloc<DashboardEvent, DashboardData> {
           : _transactionRepository.getRecentTransactions(limit: 8);
 
       final categoryBreakdown = _transactionRepository.getCategoryBreakdown(start: startDate, end: endDate);
+      final categoryBudgets = _budgetService.getCategoryBudgets();
+
+      // If viewing current month, evaluate overspend push alerts
+      if (event.filter == DashboardDateFilter.thisMonth) {
+        _budgetService.checkAndTriggerAlerts(categoryBreakdown);
+      }
 
       final monthlyBudget = ObjectBoxService.instance.getDoubleSetting(_prefMonthlyBudgetKey, defaultValue: 50000.0);
 
@@ -109,6 +124,7 @@ class DashboardBloc extends BaseBloc<DashboardEvent, DashboardData> {
           monthlyBudget: monthlyBudget,
           recentTransactions: recent,
           categoryBreakdown: categoryBreakdown,
+          categoryBudgets: categoryBudgets,
           activeFilter: event.filter,
           filterStartDate: startDate,
           filterEndDate: endDate,
@@ -247,6 +263,38 @@ class DashboardBloc extends BaseBloc<DashboardEvent, DashboardData> {
       ));
     } catch (e) {
       emitFailed(message: 'Failed to update monthly budget: $e');
+    }
+  }
+
+  Future<void> _onSetCategoryBudget(
+    SetCategoryBudgetEvent event,
+    dynamic emit,
+  ) async {
+    try {
+      await _budgetService.setCategoryBudget(event.category, event.amount);
+      add(LoadDashboardDataEvent(
+        filter: _currentFilter,
+        customStartDate: _customStart,
+        customEndDate: _customEnd,
+      ));
+    } catch (e) {
+      emitFailed(message: 'Failed to update category budget: $e');
+    }
+  }
+
+  Future<void> _onDeleteCategoryBudget(
+    DeleteCategoryBudgetEvent event,
+    dynamic emit,
+  ) async {
+    try {
+      await _budgetService.removeCategoryBudget(event.category);
+      add(LoadDashboardDataEvent(
+        filter: _currentFilter,
+        customStartDate: _customStart,
+        customEndDate: _customEnd,
+      ));
+    } catch (e) {
+      emitFailed(message: 'Failed to delete category budget: $e');
     }
   }
 }

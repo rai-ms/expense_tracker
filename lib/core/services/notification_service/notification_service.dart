@@ -63,4 +63,30 @@ class NotificationService extends BaseService<Future<void>, void> {
       payload: payload,
     );
   }
+
+  /// Show budget alert notification
+  Future<void> showBudgetAlertNotification({
+    required int id,
+    required String title,
+    required String body,
+    String? payload,
+  }) async {
+    const androidDetails = AndroidNotificationDetails(
+      'budget_alerts_channel',
+      'Budget Alerts',
+      channelDescription: 'Alerts when approaching or exceeding category spending limits',
+      importance: Importance.max,
+      priority: Priority.high,
+    );
+    const iosDetails = DarwinNotificationDetails();
+    const details = NotificationDetails(android: androidDetails, iOS: iosDetails);
+
+    await _notificationsPlugin.show(
+      id: id,
+      title: title,
+      body: body,
+      notificationDetails: details,
+      payload: payload,
+    );
+  }
 }

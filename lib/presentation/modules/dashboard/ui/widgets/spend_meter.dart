@@ -10,6 +10,8 @@ class SpendMeter extends StatelessWidget {
   final double totalExpense;
   final double monthlyBudget;
   final VoidCallback? onEditBudget;
+  final VoidCallback? onManageCategoryBudgets;
+  final int warningOrExceededCount;
 
   const SpendMeter({
     super.key,
@@ -17,6 +19,8 @@ class SpendMeter extends StatelessWidget {
     required this.totalExpense,
     required this.monthlyBudget,
     this.onEditBudget,
+    this.onManageCategoryBudgets,
+    this.warningOrExceededCount = 0,
   });
 
   @override
@@ -152,6 +156,68 @@ class SpendMeter extends StatelessWidget {
               ],
             ),
           ),
+          if (onManageCategoryBudgets != null) ...[
+            const SizedBox(height: 12),
+            InkWell(
+              onTap: onManageCategoryBudgets,
+              borderRadius: BorderRadius.circular(12),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                decoration: BoxDecoration(
+                  color: warningOrExceededCount > 0
+                      ? AppColors.debitRed.withValues(alpha: 0.1)
+                      : AppColors.primary.withValues(alpha: 0.08),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: warningOrExceededCount > 0
+                        ? AppColors.debitRed.withValues(alpha: 0.3)
+                        : AppColors.primary.withValues(alpha: 0.25),
+                  ),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(
+                          warningOrExceededCount > 0 ? Icons.warning_amber_rounded : Icons.pie_chart_outline_rounded,
+                          size: 16,
+                          color: warningOrExceededCount > 0 ? AppColors.debitRed : AppColors.primaryLight,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Category Budgets',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: warningOrExceededCount > 0 ? AppColors.debitRed : AppColors.primaryLight,
+                          ),
+                        ),
+                      ],
+                    ),
+                    Row(
+                      children: [
+                        if (warningOrExceededCount > 0)
+                          Container(
+                            margin: const EdgeInsets.only(right: 6),
+                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: AppColors.debitRed,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Text(
+                              '$warningOrExceededCount alert${warningOrExceededCount > 1 ? 's' : ''}',
+                              style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                        const Icon(Icons.arrow_forward_ios_rounded, size: 12, color: AppColors.textSecondaryDark),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
         ],
       ),
     );
