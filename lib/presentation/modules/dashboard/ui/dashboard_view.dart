@@ -9,6 +9,7 @@ import '../controller/dashboard_controller.dart';
 import '../../security/ui/security_settings_modal.dart';
 import '../../settings/ui/language_selection_modal.dart';
 import 'widgets/balance_card.dart';
+import 'widgets/category_spend_meters_section.dart';
 import 'widgets/quick_action_bar.dart';
 import 'widgets/recent_transactions_list.dart';
 import 'widgets/spend_meter.dart';
@@ -181,6 +182,14 @@ class DashboardView extends WidgetView<DashboardView, DashboardControllerState> 
                     warningOrExceededCount: data.warningOrExceededBudgets.length,
                     onEditBudget: () => ctr.onEditMonthlyBudget(data.monthlyBudget),
                     onManageCategoryBudgets: ctr.onManageCategoryBudgets,
+                  ),
+                  const SizedBox(height: 20),
+
+                  // 3b. Category Spend Meters & Budgets
+                  CategorySpendMetersSection(
+                    budgetStatuses: data.budgetStatuses,
+                    categoryBreakdown: data.categoryBreakdown,
+                    onManageBudgets: ctr.onManageCategoryBudgets,
                   ),
                   const SizedBox(height: 24),
 
