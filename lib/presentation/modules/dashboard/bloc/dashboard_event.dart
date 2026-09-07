@@ -44,6 +44,15 @@ class SyncSmsEvent extends DashboardEvent {
   List<Object?> get props => [fromDate, toDate, limit];
 }
 
+/// Event to silently auto-sync SMS since the last recorded sync time.
+/// Fired once when the dashboard is first opened (app launch).
+class AutoSyncSmsEvent extends DashboardEvent {
+  const AutoSyncSmsEvent();
+
+  @override
+  List<Object?> get props => [];
+}
+
 /// Event to quickly add a transaction from dashboard
 class AddQuickTransactionEvent extends DashboardEvent {
   final TransactionEntity transaction;

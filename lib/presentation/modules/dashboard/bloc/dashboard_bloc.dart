@@ -1,8 +1,10 @@
+import 'package:bot_toast/bot_toast.dart';
 import 'package:injectable/injectable.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../core/base/bloc_base/base_bloc.dart';
 import '../../../../core/base/bloc_base/bloc_event.dart';
+import '../../../../core/base/logger/app_logger.dart';
 import '../../../../core/services/event_bus/app_events.dart';
 import '../../../../core/services/objectbox_service/objectbox_service.dart';
 import '../../../../core/services/sms_sync_service/sms_sync_service.dart';
@@ -15,6 +17,7 @@ part 'dashboard_state.dart';
 @injectable
 class DashboardBloc extends BaseBloc<DashboardEvent, DashboardData> {
   static const String _prefMonthlyBudgetKey = 'user_monthly_budget_amount';
+  static const String _prefLastSyncTimeKey = 'last_sms_sync_time';
 
   final ITransactionRepository _transactionRepository;
   final SmsSyncService _smsSyncService;
@@ -26,6 +29,7 @@ class DashboardBloc extends BaseBloc<DashboardEvent, DashboardData> {
   DashboardBloc(this._transactionRepository, this._smsSyncService) {
     on<LoadDashboardDataEvent>(_onLoadDashboardData);
     on<SyncSmsEvent>(_onSyncSms);
+    on<AutoSyncSmsEvent>(_onAutoSyncSms);
     on<AddQuickTransactionEvent>(_onAddQuickTransaction);
     on<UpdateMonthlyBudgetEvent>(_onUpdateMonthlyBudget);
   }
@@ -119,41 +123,8 @@ class DashboardBloc extends BaseBloc<DashboardEvent, DashboardData> {
     dynamic emit,
   ) async {
     try {
-      final parsedList = await _smsSyncService.syncInbox(
-        fromDate: event.fromDate,
-        toDate: event.toDate,
-        limit: event.limit,
-      );
-
-      bool addedAny = false;
-      for (final parsed in parsedList) {
-        if (parsed.transactionId != null &&
-            _transactionRepository.hasTransactionWithTxnId(parsed.transactionId!)) {
-          continue;
-        }
-
-        final entity = TransactionEntity(
-          uid: parsed.uid,
-          amount: parsed.amount,
-          type: parsed.type,
-          category: parsed.category,
-          merchant: parsed.merchant,
-          platform: parsed.platform,
-          transactionId: parsed.transactionId,
-          accountOrCard: parsed.accountOrCard,
-          date: parsed.date.millisecondsSinceEpoch,
-          rawSms: parsed.rawSms,
-          balanceAfter: parsed.balanceAfter,
-          isAutomated: true,
-        );
-
-        _transactionRepository.addTransaction(entity);
-        addedAny = true;
-      }
-
-      if (addedAny) {
-        AppEvents.notifyDataChanged();
-      }
+      final toDate = event.toDate ?? DateTime.now();
+      await _syncAndPersist(fromDate: event.fromDate, toDate: toDate, limit: event.limit);
 
       // Reload with active filter
       add(LoadDashboardDataEvent(
@@ -164,6 +135,85 @@ class DashboardBloc extends BaseBloc<DashboardEvent, DashboardData> {
     } catch (e) {
       emitFailed(message: 'Error during SMS sync: $e');
     }
+  }
+
+  /// Silently syncs SMS since the last recorded sync time. Runs once when the
+  /// dashboard is first opened so the user never has to manually sync just to
+  /// see transactions that arrived since the app was last used.
+  Future<void> _onAutoSyncSms(
+    AutoSyncSmsEvent event,
+    dynamic emit,
+  ) async {
+    try {
+      final hasPermission = await _smsSyncService.hasSmsPermission();
+      if (!hasPermission) return;
+
+      final lastSyncMillis = ObjectBoxService.instance.getIntSetting(_prefLastSyncTimeKey);
+      final fromDate = lastSyncMillis != null
+          ? DateTime.fromMillisecondsSinceEpoch(lastSyncMillis)
+          : DateTime.now().subtract(const Duration(days: 30));
+      final toDate = DateTime.now();
+
+      final addedCount = await _syncAndPersist(fromDate: fromDate, toDate: toDate, limit: 1000);
+
+      if (addedCount > 0) {
+        BotToast.showText(text: '$addedCount new transaction${addedCount == 1 ? '' : 's'} synced');
+        add(LoadDashboardDataEvent(
+          filter: _currentFilter,
+          customStartDate: _customStart,
+          customEndDate: _customEnd,
+        ));
+      }
+    } catch (e) {
+      Log.e('Auto SMS sync failed: $e');
+    }
+  }
+
+  /// Parses inbox SMS in [fromDate, toDate], inserts new transactions, and
+  /// persists [toDate] as the last-sync checkpoint. Returns the number added.
+  Future<int> _syncAndPersist({
+    required DateTime? fromDate,
+    required DateTime toDate,
+    required int limit,
+  }) async {
+    final parsedList = await _smsSyncService.syncInbox(
+      fromDate: fromDate,
+      toDate: toDate,
+      limit: limit,
+    );
+
+    int addedCount = 0;
+    for (final parsed in parsedList) {
+      if (parsed.transactionId != null &&
+          _transactionRepository.hasTransactionWithTxnId(parsed.transactionId!)) {
+        continue;
+      }
+
+      final entity = TransactionEntity(
+        uid: parsed.uid,
+        amount: parsed.amount,
+        type: parsed.type,
+        category: parsed.category,
+        merchant: parsed.merchant,
+        platform: parsed.platform,
+        transactionId: parsed.transactionId,
+        accountOrCard: parsed.accountOrCard,
+        date: parsed.date.millisecondsSinceEpoch,
+        rawSms: parsed.rawSms,
+        balanceAfter: parsed.balanceAfter,
+        isAutomated: true,
+      );
+
+      _transactionRepository.addTransaction(entity);
+      addedCount++;
+    }
+
+    if (addedCount > 0) {
+      AppEvents.notifyDataChanged();
+    }
+
+    ObjectBoxService.instance.setIntSetting(_prefLastSyncTimeKey, toDate.millisecondsSinceEpoch);
+    return addedCount;
   }
 
   Future<void> _onAddQuickTransaction(

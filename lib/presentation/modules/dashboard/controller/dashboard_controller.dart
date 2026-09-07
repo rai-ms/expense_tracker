@@ -35,6 +35,7 @@ class DashboardControllerState extends State<DashboardController>
       sl<SmsSyncService>(),
     );
     bloc.add(LoadDashboardDataEvent());
+    bloc.add(const AutoSyncSmsEvent());
     AppEvents.syncNotifier.addListener(_onSyncData);
   }
 
