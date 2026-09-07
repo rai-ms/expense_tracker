@@ -81,9 +81,14 @@ run: ## Run app on connected device in debug mode
 	@echo "▶️ Launching Flutter app..."
 	flutter run
 
-run-wireless: wireless ## Auto-connect wireless device and launch Flutter app
-	@echo "▶️ Launching Flutter app wirelessly..."
-	flutter run
+run-wireless: ## Auto-connect wireless device and launch Flutter app on Android only
+	@DEVICE_ID=$$(./scripts/connect_wireless.sh $(IP) 2>&1 | tail -1); \
+	if [ -z "$$DEVICE_ID" ] || [[ "$$DEVICE_ID" != *:5555 ]]; then \
+		echo "❌ Android device not available. Connect phone to Wi-Fi and retry."; \
+		exit 1; \
+	fi; \
+	echo "▶️ Launching Flutter app on $$DEVICE_ID..."; \
+	flutter run -d "$$DEVICE_ID"
 
 run-release: ## Run app on connected device in release mode
 	@echo "▶️ Launching Flutter app in Release mode..."

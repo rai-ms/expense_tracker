@@ -63,6 +63,9 @@ class SmsParserService {
 
     // 2. Debit vs Credit Type Detection
     final type = _extractType(text);
+    if (type == null) {
+      return ParsedSmsResult.invalid(text);
+    }
 
     // 3. Platform & Bank Detection
     final platform = _extractPlatform(text, senderAddress);
@@ -120,8 +123,8 @@ class SmsParserService {
     return null;
   }
 
-  /// Detect if Debit or Credit
-  static String _extractType(String text) {
+  /// Detect if Debit or Credit. Returns null if no explicit transaction indicator is present.
+  static String? _extractType(String text) {
     final lower = text.toLowerCase();
 
     // Check credit keywords first
@@ -136,13 +139,15 @@ class SmsParserService {
     // Check debit keywords
     final debitKeywords = [
       'debited', 'paid', 'sent', 'spent', 'withdrawn', 'purchase of',
-      'transferred to', 'deducted', 'payment to', 'vpa'
+      'purchased', 'transferred to', 'deducted', 'payment to', 'payment of',
+      'txn of', 'transaction of', 'vpa', 'used at', 'charged to', 'charged on',
+      'auto-debited', 'auto debited'
     ];
     for (final kw in debitKeywords) {
       if (lower.contains(kw)) return 'debit';
     }
 
-    return 'debit'; // Default to debit for safety
+    return null; // Return null so purely informational text isn't treated as a transaction
   }
 
   /// Extract Platform or Bank
@@ -436,12 +441,19 @@ class SmsParserService {
       }
     }
 
-    // 3c. Failed, declined, or cancelled transaction alerts
+    // 3c. Failed, declined, inactive, or cancelled transaction alerts
     if (lower.contains('failed') ||
         lower.contains('declined') ||
         lower.contains('unsuccessful') ||
         lower.contains('could not be processed') ||
-        lower.contains('timed out')) {
+        lower.contains('timed out') ||
+        lower.contains('card is inactive') ||
+        lower.contains('card inactive') ||
+        lower.contains('card blocked') ||
+        lower.contains('transaction not processed') ||
+        lower.contains('transaction declined') ||
+        lower.contains('your card has been') ||
+        lower.contains('temporarily blocked')) {
       if (!lower.contains('refund') && !lower.contains('reversed') && !lower.contains('credited')) {
         return true;
       }
@@ -470,7 +482,56 @@ class SmsParserService {
       }
     }
 
-    // 6. Security advisories & ATM PIN changes
+    // 7. Subscription renewal / expiry reminders (upcoming charge, not done yet)
+    if ((lower.contains('will expire') ||
+            lower.contains('expiring') ||
+            lower.contains('will auto renew') ||
+            lower.contains('will be auto renewed') ||
+            lower.contains('auto renewed for next') ||
+            lower.contains('renewal reminder') ||
+            lower.contains('upcoming invoice') ||
+            lower.contains('will reflect in your') ||
+            lower.contains('subscription renewal') ||
+            lower.contains('to unsubscribe') ||
+            lower.contains('wish to unsubscribe')) &&
+        !lower.contains('debited') &&
+        !lower.contains('credited') &&
+        !lower.contains('paid to') &&
+        !lower.contains('spent on')) {
+      return true;
+    }
+
+    // 6. Transaction limits / Cooling period / Freeze period / Beneficiary alerts
+    if (lower.contains('freeze period') ||
+        lower.contains('cooling period') ||
+        lower.contains('cooling-off') ||
+        lower.contains('max limit') ||
+        lower.contains('maximum limit') ||
+        lower.contains('first transaction') ||
+        lower.contains('you can initiate') ||
+        lower.contains('can initiate') ||
+        lower.contains('can be performed') ||
+        lower.contains('subsequent transactions') ||
+        lower.contains('transaction limit') ||
+        lower.contains('transfer limit') ||
+        lower.contains('daily limit') ||
+        lower.contains('per day limit') ||
+        lower.contains('beneficiary added') ||
+        lower.contains('payee added') ||
+        lower.contains('beneficiary activation') ||
+        lower.contains('card activated') ||
+        lower.contains('card has been activated') ||
+        lower.contains('minimum balance')) {
+      if (!lower.contains('debited') &&
+          !lower.contains('credited') &&
+          !lower.contains('spent on') &&
+          !lower.contains('paid to') &&
+          !lower.contains('withdrawn')) {
+        return true;
+      }
+    }
+
+    // 7. Security advisories & ATM PIN changes
     if (lower.contains('pin changed') ||
         lower.contains('kyc update') ||
         lower.contains('profile password') ||

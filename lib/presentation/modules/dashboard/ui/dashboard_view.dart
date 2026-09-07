@@ -21,6 +21,8 @@ class DashboardView extends WidgetView<DashboardView, DashboardControllerState> 
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         title: Row(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Container(
               padding: const EdgeInsets.all(8),
@@ -37,6 +39,7 @@ class DashboardView extends WidgetView<DashboardView, DashboardControllerState> 
             const SizedBox(width: 12),
             const Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
                   'SpendWise',

@@ -96,7 +96,7 @@ class KhataBloc extends BaseBloc<KhataEvent, KhataData> {
         'This is a friendly reminder regarding our pending balance of ₹${event.amount.toStringAsFixed(2)}.\n\n'
         'Kindly settle at your earliest convenience.\n'
         '${event.upiId != null && event.upiId!.isNotEmpty ? "Pay via UPI: ${event.upiId}\n" : ""}'
-        'Thank you!\nSent via SpendWise Expense Tracker',
+        'Thank you!\nSent via SpendWise',
       );
 
       final url = Uri.parse(

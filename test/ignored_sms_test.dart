@@ -41,6 +41,16 @@ void main() {
       expect(result.isValidTransaction, isFalse);
     });
 
+    test('Identifies freeze period / first transaction limit advisory as Notification Only', () {
+      const freezePeriodSms =
+          'Dear Customer, You can initiate your first transaction with max limit of Rs.5000. '
+          'After the freeze period of 24 hours, subsequent transactions can be performed. -Suryoday Small Finance Bank Limited';
+      expect(SmsParserService.isNotificationOnly(freezePeriodSms), isTrue);
+
+      final result = SmsParserService.parse(freezePeriodSms);
+      expect(result.isValidTransaction, isFalse);
+    });
+
     test('Real financial debits & credits are correctly recognized as valid transactions', () {
       const debitSms = 'Dear Customer, INR 489.00 debited from A/C **4582 on 06-SEP-26 via UPI to SWIGGY. Ref No 425109283741. Avl Bal: INR 34,250.00';
       expect(SmsParserService.isNotificationOnly(debitSms), isFalse);

@@ -344,7 +344,7 @@ class PdfExportService {
       await SharePlus.instance.share(
         ShareParams(
           files: [XFile(file.path)],
-          text: '$fileName from SpendWise Expense Tracker',
+          text: '$fileName from SpendWise',
         ),
       );
     } catch (e, stack) {
