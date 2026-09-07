@@ -47,8 +47,12 @@ class SecurityService {
   final ValueNotifier<bool> isPrivacyModeNotifier = ValueNotifier<bool>(false);
 
   DateTime? _lastPausedTime;
+  DateTime? _lastUnlockTime;
+  bool _isAuthenticatingBiometric = false;
   int _failedAttempts = 0;
   DateTime? _lockoutUntil;
+
+  bool get isAuthenticatingBiometric => _isAuthenticatingBiometric;
 
   SecurityService() {
     _init();
@@ -136,7 +140,10 @@ class SecurityService {
   }
 
   Future<bool> authenticateWithBiometrics({String reason = 'Unlock SpendWise'}) async {
-    if (isLockoutActive) return false;
+    if (isLockoutActive || _isAuthenticatingBiometric) return false;
+
+    _isAuthenticatingBiometric = true;
+    _lastPausedTime = null;
 
     try {
       final authenticated = await _localAuth.authenticate(
@@ -156,6 +163,12 @@ class SecurityService {
     } on PlatformException catch (e) {
       Log.e('Biometric authentication failed: $e');
       return false;
+    } finally {
+      // Keep flag active slightly past the prompt dismissal to ignore Android lifecycle resume events
+      Future.delayed(const Duration(milliseconds: 1500), () {
+        _isAuthenticatingBiometric = false;
+        _lastPausedTime = null;
+      });
     }
   }
 
@@ -252,16 +265,27 @@ class SecurityService {
   // ===========================================================================
 
   void onAppPaused() {
-    if (!isLockEnabled) return;
+    // If lock is disabled, or biometric dialog is active, or already locked, do not track pause time
+    if (!isLockEnabled || _isAuthenticatingBiometric || isLockedNotifier.value) return;
     _lastPausedTime = DateTime.now();
     Log.d('App paused at $_lastPausedTime. Auto-lock timeout: ${autoLockTimeout.label}');
   }
 
   void onAppResumed() {
-    if (!isLockEnabled) return;
+    if (!isLockEnabled || _isAuthenticatingBiometric || isLockedNotifier.value) {
+      _lastPausedTime = null;
+      return;
+    }
 
+    // If app unlocked within the last 2.5 seconds, ignore resumed event
+    if (_lastUnlockTime != null &&
+        DateTime.now().difference(_lastUnlockTime!).inMilliseconds < 2500) {
+      _lastPausedTime = null;
+      return;
+    }
+
+    // If app wasn't paused (e.g. system window focus, notifications, dialogs), do not lock
     if (_lastPausedTime == null) {
-      lockApp();
       return;
     }
 
@@ -282,6 +306,8 @@ class SecurityService {
   }
 
   void unlockApp() {
+    _lastPausedTime = null;
+    _lastUnlockTime = DateTime.now();
     if (isLockedNotifier.value) {
       isLockedNotifier.value = false;
       Log.i('App unlocked successfully');
