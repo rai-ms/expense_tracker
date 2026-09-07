@@ -72,6 +72,7 @@ mixin _DashboardMixin on State<DashboardController> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
+      useSafeArea: true,
       backgroundColor: Theme.of(context).cardTheme.color,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
@@ -117,6 +118,7 @@ mixin _DashboardMixin on State<DashboardController> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
+      useSafeArea: true,
       backgroundColor: Theme.of(context).cardTheme.color,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
@@ -197,6 +199,7 @@ mixin _DashboardMixin on State<DashboardController> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
+      useSafeArea: true,
       backgroundColor: Colors.transparent,
       builder: (_) => TransactionDetailModal(
         transaction: txn,

@@ -19,6 +19,7 @@ class ManageCategoriesModal extends StatefulWidget {
     return showModalBottomSheet(
       context: context,
       isScrollControlled: true,
+      useSafeArea: true,
       backgroundColor: Colors.transparent,
       builder: (_) => ManageCategoriesModal(onCategoriesChanged: onCategoriesChanged),
     );
@@ -108,6 +109,7 @@ class _ManageCategoriesModalState extends State<ManageCategoriesModal> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
+      useSafeArea: true,
       backgroundColor: Colors.transparent,
       builder: (ctx) {
         return StatefulBuilder(
@@ -115,18 +117,20 @@ class _ManageCategoriesModalState extends State<ManageCategoriesModal> {
             final theme = Theme.of(context);
             final isDark = theme.brightness == Brightness.dark;
 
-            return Container(
-              padding: EdgeInsets.only(
-                bottom: MediaQuery.of(context).viewInsets.bottom + 20,
-                top: 16,
-                left: 20,
-                right: 20,
-              ),
-              decoration: BoxDecoration(
-                color: theme.scaffoldBackgroundColor,
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-              ),
-              child: SingleChildScrollView(
+            return SafeArea(
+              top: false,
+              child: Container(
+                padding: EdgeInsets.only(
+                  bottom: MediaQuery.of(context).viewInsets.bottom + 20,
+                  top: 16,
+                  left: 20,
+                  right: 20,
+                ),
+                decoration: BoxDecoration(
+                  color: theme.scaffoldBackgroundColor,
+                  borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+                ),
+                child: SingleChildScrollView(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -323,8 +327,9 @@ class _ManageCategoriesModalState extends State<ManageCategoriesModal> {
                   ],
                 ),
               ),
-            );
-          },
+            ),
+          );
+        },
         );
       },
     );
@@ -364,13 +369,15 @@ class _ManageCategoriesModalState extends State<ManageCategoriesModal> {
     final customList = _customCategories;
     final standardList = _standardCategories;
 
-    return Container(
-      height: MediaQuery.of(context).size.height * 0.82,
-      decoration: BoxDecoration(
-        color: theme.scaffoldBackgroundColor,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      child: Column(
+    return SafeArea(
+      top: false,
+      child: Container(
+        height: MediaQuery.of(context).size.height * 0.82,
+        decoration: BoxDecoration(
+          color: theme.scaffoldBackgroundColor,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        child: Column(
         children: [
           // Drag handle
           Center(
@@ -640,6 +647,7 @@ class _ManageCategoriesModalState extends State<ManageCategoriesModal> {
           ),
         ],
       ),
-    );
-  }
+    ),
+  );
+}
 }

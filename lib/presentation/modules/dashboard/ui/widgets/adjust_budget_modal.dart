@@ -23,6 +23,7 @@ class AdjustBudgetModal extends StatefulWidget {
     return showModalBottomSheet(
       context: context,
       isScrollControlled: true,
+      useSafeArea: true,
       backgroundColor: Colors.transparent,
       builder: (_) => AdjustBudgetModal(
         currentBudget: currentBudget,
@@ -74,8 +75,10 @@ class _AdjustBudgetModalState extends State<AdjustBudgetModal> {
     final isDark = theme.brightness == Brightness.dark;
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
 
-    return Container(
-      decoration: BoxDecoration(
+    return SafeArea(
+      top: false,
+      child: Container(
+        decoration: BoxDecoration(
         color: isDark ? AppColors.darkSurface : AppColors.lightSurface,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
         border: Border.all(
@@ -260,6 +263,7 @@ class _AdjustBudgetModalState extends State<AdjustBudgetModal> {
           ),
         ],
       ),
-    );
+    ),
+  );
   }
 }

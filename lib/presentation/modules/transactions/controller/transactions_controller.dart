@@ -77,6 +77,7 @@ mixin _TransactionsMixin on State<TransactionsController> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
+      useSafeArea: true,
       backgroundColor: Colors.transparent,
       builder: (_) => TransactionFilterModal(
         initialCriteria: currentCriteria,
@@ -151,6 +152,7 @@ mixin _TransactionsMixin on State<TransactionsController> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
+      useSafeArea: true,
       backgroundColor: Colors.transparent,
       builder: (_) => TransactionDetailModal(
         transaction: txn,
@@ -165,6 +167,7 @@ mixin _TransactionsMixin on State<TransactionsController> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
+      useSafeArea: true,
       backgroundColor: Colors.transparent,
       builder: (_) => ManageCategoriesModal(
         onCategoriesChanged: () {
@@ -236,6 +239,7 @@ mixin _TransactionsMixin on State<TransactionsController> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
+      useSafeArea: true,
       backgroundColor: Theme.of(context).cardTheme.color,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(28)),

@@ -14,6 +14,7 @@ class LanguageSelectionModal extends StatefulWidget {
     return showModalBottomSheet(
       context: context,
       isScrollControlled: true,
+      useSafeArea: true,
       backgroundColor: Colors.transparent,
       builder: (ctx) => const LanguageSelectionModal(),
     );
@@ -60,17 +61,19 @@ class _LanguageSelectionModalState extends State<LanguageSelectionModal> {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    return Container(
-      constraints: BoxConstraints(
-        maxHeight: MediaQuery.of(context).size.height * 0.75,
-      ),
-      padding: EdgeInsets.only(
-        left: 20,
-        right: 20,
-        top: 16,
-        bottom: MediaQuery.of(context).padding.bottom + 16,
-      ),
-      decoration: BoxDecoration(
+    return SafeArea(
+      top: false,
+      child: Container(
+        constraints: BoxConstraints(
+          maxHeight: MediaQuery.of(context).size.height * 0.75,
+        ),
+        padding: const EdgeInsets.only(
+          left: 20,
+          right: 20,
+          top: 16,
+          bottom: 16,
+        ),
+        decoration: BoxDecoration(
         color: isDark ? AppColors.darkCard : AppColors.lightCard,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
         border: Border.all(
@@ -283,6 +286,7 @@ class _LanguageSelectionModalState extends State<LanguageSelectionModal> {
           ),
         ],
       ),
-    );
-  }
+    ),
+  );
+}
 }

@@ -25,6 +25,7 @@ class ChangeCategoryModal extends StatefulWidget {
     return showModalBottomSheet(
       context: context,
       isScrollControlled: true,
+      useSafeArea: true,
       backgroundColor: Colors.transparent,
       builder: (_) => ChangeCategoryModal(transaction: transaction),
     );
@@ -134,20 +135,22 @@ class _ChangeCategoryModalState extends State<ChangeCategoryModal> {
     // Built-in categories
     final defaultCategories = AppConstants.categories;
 
-    return Container(
-      constraints: BoxConstraints(
-        maxHeight: MediaQuery.of(context).size.height * 0.82,
-      ),
-      decoration: BoxDecoration(
-        color: isDark ? AppColors.darkSurface : AppColors.lightSurface,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
-        border: Border.all(
-          color: isDark ? AppColors.darkBorder : AppColors.lightBorder,
-          width: 0.8,
+    return SafeArea(
+      top: false,
+      child: Container(
+        constraints: BoxConstraints(
+          maxHeight: MediaQuery.of(context).size.height * 0.82,
         ),
-      ),
-      padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
-      child: Column(
+        decoration: BoxDecoration(
+          color: isDark ? AppColors.darkSurface : AppColors.lightSurface,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+          border: Border.all(
+            color: isDark ? AppColors.darkBorder : AppColors.lightBorder,
+            width: 0.8,
+          ),
+        ),
+        padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
+        child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -360,6 +363,7 @@ class _ChangeCategoryModalState extends State<ChangeCategoryModal> {
           ),
         ],
       ),
-    );
-  }
+    ),
+  );
+}
 }

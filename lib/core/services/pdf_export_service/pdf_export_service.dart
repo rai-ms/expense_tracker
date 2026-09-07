@@ -297,15 +297,18 @@ class PdfExportService {
     flutter.showModalBottomSheet(
       context: context,
       isScrollControlled: true,
+      useSafeArea: true,
       backgroundColor: flutter.Colors.transparent,
       builder: (ctx) {
-        return flutter.Container(
-          height: flutter.MediaQuery.of(context).size.height * 0.88,
-          decoration: const flutter.BoxDecoration(
-            color: flutter.Colors.white,
-            borderRadius: flutter.BorderRadius.vertical(top: flutter.Radius.circular(24)),
-          ),
-          child: flutter.Column(
+        return flutter.SafeArea(
+          top: false,
+          child: flutter.Container(
+            height: flutter.MediaQuery.of(context).size.height * 0.88,
+            decoration: const flutter.BoxDecoration(
+              color: flutter.Colors.white,
+              borderRadius: flutter.BorderRadius.vertical(top: flutter.Radius.circular(24)),
+            ),
+            child: flutter.Column(
             children: [
               flutter.Container(
                 margin: const flutter.EdgeInsets.only(top: 10, bottom: 6),
@@ -328,8 +331,9 @@ class PdfExportService {
               ),
             ],
           ),
-        );
-      },
+        ),
+      );
+    },
     );
   }
 

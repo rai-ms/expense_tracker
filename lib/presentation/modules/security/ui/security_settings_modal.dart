@@ -11,6 +11,7 @@ class SecuritySettingsModal extends StatefulWidget {
     return showModalBottomSheet(
       context: context,
       isScrollControlled: true,
+      useSafeArea: true,
       backgroundColor: Theme.of(context).cardTheme.color,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
@@ -79,6 +80,7 @@ class _SecuritySettingsModalState extends State<SecuritySettingsModal> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
+      useSafeArea: true,
       backgroundColor: Theme.of(context).cardTheme.color,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
@@ -133,14 +135,16 @@ class _SecuritySettingsModalState extends State<SecuritySettingsModal> {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    return Padding(
-      padding: EdgeInsets.only(
-        left: 20,
-        right: 20,
-        top: 16,
-        bottom: MediaQuery.of(context).viewInsets.bottom + 28,
-      ),
-      child: Column(
+    return SafeArea(
+      top: false,
+      child: Padding(
+        padding: EdgeInsets.only(
+          left: 20,
+          right: 20,
+          top: 16,
+          bottom: MediaQuery.of(context).viewInsets.bottom + 16,
+        ),
+        child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -369,8 +373,9 @@ class _SecuritySettingsModalState extends State<SecuritySettingsModal> {
           ),
         ],
       ),
-    );
-  }
+    ),
+  );
+}
 }
 
 /// Sub-modal for entering & confirming a 4-digit PIN
@@ -455,9 +460,11 @@ class _SetPinModalState extends State<_SetPinModal> {
   Widget build(BuildContext context) {
     final activePin = _isConfirming ? _confirmPin : _pin;
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
-      child: Column(
+    return SafeArea(
+      top: false,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+        child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
@@ -515,8 +522,9 @@ class _SetPinModalState extends State<_SetPinModal> {
           ),
         ],
       ),
-    );
-  }
+    ),
+  );
+}
 
   Widget _buildRow(List<String> items) {
     return Row(
