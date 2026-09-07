@@ -40,6 +40,8 @@ class DashboardBloc extends BaseBloc<DashboardEvent, DashboardData> {
   ) async {
     emitLoading();
     try {
+      _transactionRepository.cleanDuplicateTransactions();
+
       _currentFilter = event.filter;
       _customStart = event.customStartDate;
       _customEnd = event.customEndDate;
@@ -184,8 +186,7 @@ class DashboardBloc extends BaseBloc<DashboardEvent, DashboardData> {
 
     int addedCount = 0;
     for (final parsed in parsedList) {
-      if (parsed.transactionId != null &&
-          _transactionRepository.hasTransactionWithTxnId(parsed.transactionId!)) {
+      if (_transactionRepository.isDuplicateParsed(parsed)) {
         continue;
       }
 

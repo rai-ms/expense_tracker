@@ -176,51 +176,64 @@ class KhataDetailView
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          netBalance > 0
-                              ? context.tr('you_will_receive')
-                              : netBalance < 0
-                                  ? context.tr('you_will_give')
-                                  : context.tr('account_settled'),
-                          style: const TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w500,
-                            color: AppColors.textSecondaryDark,
-                          ),
-                        ),
-                        const SizedBox(height: 6),
-                        Text(
-                          currency.format(netBalance.abs()),
-                          style: TextStyle(
-                            fontSize: 28,
-                            fontWeight: FontWeight.w800,
-                            letterSpacing: -0.5,
-                            color: netBalance > 0
-                                ? AppColors.creditGreen
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            netBalance > 0
+                                ? context.tr('you_will_receive')
                                 : netBalance < 0
-                                    ? AppColors.debitRed
-                                    : AppColors.textPrimaryDark,
+                                    ? context.tr('you_will_give')
+                                    : context.tr('account_settled'),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w500,
+                              color: AppColors.textSecondaryDark,
+                            ),
                           ),
-                        ),
-                      ],
+                          const SizedBox(height: 6),
+                          FittedBox(
+                            fit: BoxFit.scaleDown,
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                              currency.format(netBalance.abs()),
+                              style: TextStyle(
+                                fontSize: 28,
+                                fontWeight: FontWeight.w800,
+                                letterSpacing: -0.5,
+                                color: netBalance > 0
+                                    ? AppColors.creditGreen
+                                    : netBalance < 0
+                                        ? AppColors.debitRed
+                                        : AppColors.textPrimaryDark,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                    if (netBalance > 0)
+                    if (netBalance > 0) ...[
+                      const SizedBox(width: 8),
                       ElevatedButton.icon(
                         onPressed: () => ctr.onSendWhatsApp(netBalance),
-                        icon: const Icon(Icons.send_rounded, size: 16),
-                        label: Text(context.tr('whatsapp_reminder')),
+                        icon: const Icon(Icons.send_rounded, size: 15),
+                        label: Text(
+                          context.tr('whatsapp_reminder'),
+                          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                        ),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.creditGreen,
                           foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(14),
+                            borderRadius: BorderRadius.circular(12),
                           ),
                         ),
                       ),
+                    ],
                   ],
                 ),
                 const SizedBox(height: 16),

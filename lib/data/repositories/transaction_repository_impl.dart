@@ -1,6 +1,8 @@
 import 'package:injectable/injectable.dart' hide Order;
 import 'package:intl/intl.dart';
+import '../../core/base/logger/app_logger.dart';
 import '../../core/services/objectbox_service/objectbox_service.dart';
+import '../../core/services/sms_parser_service/sms_parser_service.dart';
 import '../../domain/repositories/i_transaction_repository.dart';
 import '../../objectbox.g.dart';
 import '../models/transaction_entity.dart';
@@ -63,6 +65,131 @@ class TransactionRepositoryImpl implements ITransactionRepository {
     final count = query.count();
     query.close();
     return count > 0;
+  }
+
+  @override
+  bool isDuplicateParsed(ParsedSmsResult parsed) {
+    // 1. Check by explicit transactionId / UTR if available
+    if (parsed.transactionId != null && parsed.transactionId!.trim().isNotEmpty) {
+      final query = _boxService.transactionBox.query(
+        TransactionEntity_.transactionId.equals(parsed.transactionId!.trim()),
+      ).build();
+      final count = query.count();
+      query.close();
+      if (count > 0) return true;
+    }
+
+    // 2. Check by deterministic UID if available
+    if (parsed.uid.isNotEmpty) {
+      final query = _boxService.transactionBox.query(
+        TransactionEntity_.uid.equals(parsed.uid),
+      ).build();
+      final count = query.count();
+      query.close();
+      if (count > 0) return true;
+    }
+
+    // 3. Check by exact rawSms & date (within 5 seconds)
+    final dateMillis = parsed.date.millisecondsSinceEpoch;
+    if (parsed.rawSms.trim().isNotEmpty) {
+      final query = _boxService.transactionBox.query(
+        TransactionEntity_.rawSms.equals(parsed.rawSms.trim()).and(
+          TransactionEntity_.date.between(dateMillis - 5000, dateMillis + 5000),
+        ),
+      ).build();
+      final count = query.count();
+      query.close();
+      if (count > 0) return true;
+    }
+
+    // 4. Check by amount, type, and date range (within 5 seconds)
+    final query = _boxService.transactionBox.query(
+      TransactionEntity_.amount.between(parsed.amount - 0.01, parsed.amount + 0.01).and(
+        TransactionEntity_.type.equals(parsed.type).and(
+          TransactionEntity_.date.between(dateMillis - 5000, dateMillis + 5000),
+        ),
+      ),
+    ).build();
+    final matching = query.find();
+    query.close();
+
+    for (final m in matching) {
+      if (m.merchant == parsed.merchant ||
+          m.platform == parsed.platform ||
+          m.rawSms == parsed.rawSms) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  @override
+  int cleanDuplicateTransactions() {
+    final all = _boxService.transactionBox.getAll();
+    if (all.length <= 1) return 0;
+
+    final Set<int> idsToDelete = {};
+    final Set<String> seenTxnIds = {};
+    final Set<String> seenUids = {};
+    final Set<String> seenSmsSignatures = {};
+    final Set<String> seenFuzzySignatures = {};
+
+    for (final txn in all) {
+      bool isDupe = false;
+
+      // 1. Txn ID deduplication
+      if (txn.transactionId != null && txn.transactionId!.trim().isNotEmpty) {
+        final key = 'tx_${txn.transactionId!.trim().toLowerCase()}';
+        if (seenTxnIds.contains(key)) {
+          isDupe = true;
+        } else {
+          seenTxnIds.add(key);
+        }
+      }
+
+      // 2. UID deduplication (if deterministic)
+      if (!isDupe && txn.uid.isNotEmpty && !txn.uid.contains('-')) {
+        if (seenUids.contains(txn.uid)) {
+          isDupe = true;
+        } else {
+          seenUids.add(txn.uid);
+        }
+      }
+
+      // 3. Exact raw SMS + Date (rounded to nearest 5 seconds)
+      if (!isDupe && txn.rawSms != null && txn.rawSms!.trim().isNotEmpty) {
+        final roundedSec = (txn.date ~/ 5000);
+        final key = 'raw_${txn.rawSms!.trim().hashCode}_$roundedSec';
+        if (seenSmsSignatures.contains(key)) {
+          isDupe = true;
+        } else {
+          seenSmsSignatures.add(key);
+        }
+      }
+
+      // 4. Amount + Type + Date (rounded to nearest 5 seconds) + Merchant/Platform
+      if (!isDupe) {
+        final roundedSec = (txn.date ~/ 5000);
+        final key = 'fuzzy_${txn.amount.toStringAsFixed(2)}_${txn.type}_${roundedSec}_${txn.merchant}_${txn.platform}';
+        if (seenFuzzySignatures.contains(key)) {
+          isDupe = true;
+        } else {
+          seenFuzzySignatures.add(key);
+        }
+      }
+
+      if (isDupe) {
+        idsToDelete.add(txn.id);
+      }
+    }
+
+    if (idsToDelete.isNotEmpty) {
+      _boxService.transactionBox.removeMany(idsToDelete.toList());
+      Log.i('Cleaned ${idsToDelete.length} duplicate transactions from database.');
+    }
+
+    return idsToDelete.length;
   }
 
   @override

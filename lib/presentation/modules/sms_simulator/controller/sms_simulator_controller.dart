@@ -76,6 +76,16 @@ mixin _SmsSimulatorMixin on State<SmsSimulatorController> {
     if (parsed == null || !parsed.isValidTransaction) return;
 
     final repo = sl<ITransactionRepository>();
+    if (repo.isDuplicateParsed(parsed)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Transaction already exists in database!'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
     final txn = TransactionEntity(
       uid: parsed.uid,
       amount: parsed.amount,
@@ -111,6 +121,9 @@ mixin _SmsSimulatorMixin on State<SmsSimulatorController> {
         senderAddress: sample['sender'],
       );
       if (parsed.isValidTransaction) {
+        if (repo.isDuplicateParsed(parsed)) {
+          continue;
+        }
         final txn = TransactionEntity(
           uid: parsed.uid,
           amount: parsed.amount,

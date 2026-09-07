@@ -45,8 +45,6 @@ class ParsedSmsResult {
 
 /// Intelligent Regex & Heuristic Parser for Indian Banking and Fintech SMS
 class SmsParserService {
-  static const _uuid = Uuid();
-
   /// Parse a single SMS text into structured financial transaction details
   static ParsedSmsResult parse(String smsBody, {DateTime? smsDate, String? senderAddress}) {
     final text = smsBody.trim();
@@ -85,8 +83,12 @@ class SmsParserService {
     // 8. Auto-Categorization
     final category = _categorize(text, merchant, platform);
 
+    final deterministicUid = (txnId != null && txnId.trim().isNotEmpty)
+        ? 'sms_tx_${txnId.trim()}'
+        : 'sms_${smsDate?.millisecondsSinceEpoch ?? 0}_${text.hashCode.abs()}_${(amount * 100).toInt()}';
+
     return ParsedSmsResult(
-      uid: _uuid.v4(),
+      uid: deterministicUid,
       amount: amount,
       type: type,
       category: category,

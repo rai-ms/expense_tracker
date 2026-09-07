@@ -1,3 +1,4 @@
+import '../../core/services/sms_parser_service/sms_parser_service.dart';
 import '../../data/models/transaction_entity.dart';
 
 abstract class ITransactionRepository {
@@ -8,6 +9,8 @@ abstract class ITransactionRepository {
   List<TransactionEntity> getRecentTransactions({int limit = 10});
   TransactionEntity? getTransactionByUid(String uid);
   bool hasTransactionWithTxnId(String txnId);
+  bool isDuplicateParsed(ParsedSmsResult parsed);
+  int cleanDuplicateTransactions();
   int addTransaction(TransactionEntity transaction);
   List<int> addTransactions(List<TransactionEntity> transactions);
   bool updateTransaction(TransactionEntity transaction);

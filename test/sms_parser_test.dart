@@ -79,6 +79,21 @@ void main() {
       expect(result.amount, 5000.00);
       expect(result.category, 'Investments');
       expect(result.merchant, 'Zerodha');
+      expect(result.uid, 'sms_tx_425112233445');
+    });
+
+    test('Deterministic UID generation prevents duplicates for non-UTR messages', () {
+      const sms = 'Cred: Paid Rs. 54,932.00 to Vi on 02-Sep-26. Bill payment successful.';
+      final date = DateTime(2026, 9, 2, 19, 29);
+
+      final parse1 = SmsParserService.parse(sms, smsDate: date, senderAddress: 'CRED');
+      final parse2 = SmsParserService.parse(sms, smsDate: date, senderAddress: 'CRED');
+
+      expect(parse1.isValidTransaction, isTrue);
+      expect(parse2.isValidTransaction, isTrue);
+      // Both parses produce the EXACT same UID!
+      expect(parse1.uid, parse2.uid);
+      expect(parse1.uid.startsWith('sms_'), isTrue);
     });
   });
 }
