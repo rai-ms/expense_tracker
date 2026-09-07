@@ -32,6 +32,7 @@ import '../../../presentation/modules/transactions/bloc/transactions_bloc.dart'
 import '../budget_service/budget_service.dart' as _i251;
 import '../notification_service/notification_service.dart' as _i333;
 import '../objectbox_service/objectbox_service.dart' as _i1038;
+import '../receipt_service/receipt_service.dart' as _i349;
 import '../security_service/security_service.dart' as _i590;
 import '../sms_parser_service/ignored_rule_service.dart' as _i475;
 import '../sms_sync_service/sms_sync_service.dart' as _i206;
@@ -57,6 +58,7 @@ extension GetItInjectableX on _i174.GetIt {
     gh.singleton<_i475.IgnoredRuleService>(() => _i475.IgnoredRuleService());
     gh.singleton<_i834.LocaleBloc>(() => _i834.LocaleBloc());
     gh.lazySingleton<_i251.BudgetService>(() => _i251.BudgetService());
+    gh.lazySingleton<_i349.ReceiptService>(() => _i349.ReceiptService());
     gh.lazySingleton<_i590.SecurityService>(() => _i590.SecurityService());
     gh.lazySingleton<_i545.ITransactionRepository>(
       () => _i597.TransactionRepositoryImpl(gh<_i1038.ObjectBoxService>()),

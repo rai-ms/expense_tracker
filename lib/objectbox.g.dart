@@ -145,7 +145,7 @@ final _entities = <obx_int.ModelEntity>[
   obx_int.ModelEntity(
     id: const obx_int.IdUid(3, 9025544644016184217),
     name: 'KhataEntryEntity',
-    lastPropertyId: const obx_int.IdUid(11, 4213167380193738433),
+    lastPropertyId: const obx_int.IdUid(12, 3969228161087996338),
     flags: 0,
     properties: <obx_int.ModelProperty>[
       obx_int.ModelProperty(
@@ -221,6 +221,12 @@ final _entities = <obx_int.ModelEntity>[
         type: 9,
         flags: 0,
       ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(12, 3969228161087996338),
+        name: 'receiptPath',
+        type: 9,
+        flags: 0,
+      ),
     ],
     relations: <obx_int.ModelRelation>[],
     backlinks: <obx_int.ModelBacklink>[],
@@ -228,7 +234,7 @@ final _entities = <obx_int.ModelEntity>[
   obx_int.ModelEntity(
     id: const obx_int.IdUid(4, 5354481342646244362),
     name: 'TransactionEntity',
-    lastPropertyId: const obx_int.IdUid(15, 3852618108970050335),
+    lastPropertyId: const obx_int.IdUid(16, 2356715509604522819),
     flags: 0,
     properties: <obx_int.ModelProperty>[
       obx_int.ModelProperty(
@@ -327,6 +333,12 @@ final _entities = <obx_int.ModelEntity>[
         type: 1,
         flags: 8,
         indexId: const obx_int.IdUid(15, 8882575473084078892),
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(16, 2356715509604522819),
+        name: 'receiptPath',
+        type: 9,
+        flags: 0,
       ),
     ],
     relations: <obx_int.ModelRelation>[],
@@ -606,7 +618,10 @@ obx_int.ModelDefinition getObjectBoxModel() {
         final platformOffset = object.platform == null
             ? null
             : fbb.writeString(object.platform!);
-        fbb.startTable(12);
+        final receiptPathOffset = object.receiptPath == null
+            ? null
+            : fbb.writeString(object.receiptPath!);
+        fbb.startTable(13);
         fbb.addInt64(0, object.id);
         fbb.addOffset(1, uidOffset);
         fbb.addFloat64(2, object.amount);
@@ -618,6 +633,7 @@ obx_int.ModelDefinition getObjectBoxModel() {
         fbb.addInt64(8, object.contact.targetId);
         fbb.addOffset(9, transactionIdOffset);
         fbb.addOffset(10, platformOffset);
+        fbb.addOffset(11, receiptPathOffset);
         fbb.finish(fbb.endTable());
         return object.id;
       },
@@ -668,6 +684,9 @@ obx_int.ModelDefinition getObjectBoxModel() {
           18,
           false,
         );
+        final receiptPathParam = const fb.StringReader(
+          asciiOptimization: true,
+        ).vTableGetNullable(buffer, rootOffset, 26);
         final object = KhataEntryEntity(
           id: idParam,
           uid: uidParam,
@@ -679,6 +698,7 @@ obx_int.ModelDefinition getObjectBoxModel() {
           platform: platformParam,
           notes: notesParam,
           isSettled: isSettledParam,
+          receiptPath: receiptPathParam,
         );
         object.contact.targetId = const fb.Int64Reader().vTableGet(
           buffer,
@@ -720,7 +740,10 @@ obx_int.ModelDefinition getObjectBoxModel() {
         final notesOffset = object.notes == null
             ? null
             : fbb.writeString(object.notes!);
-        fbb.startTable(16);
+        final receiptPathOffset = object.receiptPath == null
+            ? null
+            : fbb.writeString(object.receiptPath!);
+        fbb.startTable(17);
         fbb.addInt64(0, object.id);
         fbb.addOffset(1, uidOffset);
         fbb.addFloat64(2, object.amount);
@@ -736,6 +759,7 @@ obx_int.ModelDefinition getObjectBoxModel() {
         fbb.addOffset(12, notesOffset);
         fbb.addBool(13, object.isAutomated);
         fbb.addBool(14, object.isIgnored);
+        fbb.addOffset(15, receiptPathOffset);
         fbb.finish(fbb.endTable());
         return object.id;
       },
@@ -804,6 +828,9 @@ obx_int.ModelDefinition getObjectBoxModel() {
           32,
           false,
         );
+        final receiptPathParam = const fb.StringReader(
+          asciiOptimization: true,
+        ).vTableGetNullable(buffer, rootOffset, 34);
         final object = TransactionEntity(
           id: idParam,
           uid: uidParam,
@@ -820,6 +847,7 @@ obx_int.ModelDefinition getObjectBoxModel() {
           notes: notesParam,
           isAutomated: isAutomatedParam,
           isIgnored: isIgnoredParam,
+          receiptPath: receiptPathParam,
         );
 
         return object;
@@ -1016,6 +1044,11 @@ class KhataEntryEntity_ {
   static final platform = obx.QueryStringProperty<KhataEntryEntity>(
     _entities[2].properties[10],
   );
+
+  /// See [KhataEntryEntity.receiptPath].
+  static final receiptPath = obx.QueryStringProperty<KhataEntryEntity>(
+    _entities[2].properties[11],
+  );
 }
 
 /// [TransactionEntity] entity fields to define ObjectBox queries.
@@ -1093,6 +1126,11 @@ class TransactionEntity_ {
   /// See [TransactionEntity.isIgnored].
   static final isIgnored = obx.QueryBooleanProperty<TransactionEntity>(
     _entities[3].properties[14],
+  );
+
+  /// See [TransactionEntity.receiptPath].
+  static final receiptPath = obx.QueryStringProperty<TransactionEntity>(
+    _entities[3].properties[15],
   );
 }
 

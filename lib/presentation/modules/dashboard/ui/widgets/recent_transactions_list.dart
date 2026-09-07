@@ -156,6 +156,24 @@ class RecentTransactionsList extends StatelessWidget {
                                       color: AppColors.textTertiaryDark,
                                     ),
                                   ),
+                                  if (txn.hasReceipt) ...[
+                                    const SizedBox(width: 6),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
+                                      decoration: BoxDecoration(
+                                        color: AppColors.primary.withValues(alpha: 0.15),
+                                        borderRadius: BorderRadius.circular(5),
+                                      ),
+                                      child: const Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Icon(Icons.receipt_long_rounded, size: 10, color: AppColors.primaryLight),
+                                          SizedBox(width: 2),
+                                          Text('Bill', style: TextStyle(fontSize: 9, color: AppColors.primaryLight, fontWeight: FontWeight.bold)),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
                                 ],
                               ),
                             ],

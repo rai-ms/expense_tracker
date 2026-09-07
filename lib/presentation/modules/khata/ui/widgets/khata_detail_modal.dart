@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import '../../../../../core/constants/app_colors.dart';
 import '../../../../../core/services/pdf_export_service/pdf_export_service.dart';
 import '../../../../../data/models/khata_contact_entity.dart';
+import '../../../../widgets/receipt_lightbox_modal.dart';
 
 class KhataDetailModal extends StatelessWidget {
   final KhataContactEntity contact;
@@ -242,13 +243,52 @@ class KhataDetailModal extends StatelessWidget {
                                 ],
                               ),
                             ),
-                            Text(
-                              (isGave ? '- ' : '+ ') + currency.format(entry.amount),
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 15,
-                                color: isGave ? AppColors.debitRed : AppColors.creditGreen,
-                              ),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                Text(
+                                  (isGave ? '- ' : '+ ') + currency.format(entry.amount),
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 15,
+                                    color: isGave ? AppColors.debitRed : AppColors.creditGreen,
+                                  ),
+                                ),
+                                if (entry.hasReceipt) ...[
+                                  const SizedBox(height: 4),
+                                  GestureDetector(
+                                    onTap: () {
+                                      ReceiptLightboxModal.show(
+                                        context: context,
+                                        receiptPath: entry.receiptPath!,
+                                        title: '${contact.name} (${currency.format(entry.amount)})',
+                                      );
+                                    },
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                      decoration: BoxDecoration(
+                                        color: AppColors.primary.withValues(alpha: 0.15),
+                                        borderRadius: BorderRadius.circular(6),
+                                      ),
+                                      child: const Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Icon(Icons.attach_file_rounded, size: 12, color: AppColors.primary),
+                                          SizedBox(width: 2),
+                                          Text(
+                                            'Bill',
+                                            style: TextStyle(
+                                              fontSize: 10,
+                                              fontWeight: FontWeight.bold,
+                                              color: AppColors.primary,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ],
                             ),
                           ],
                         ),

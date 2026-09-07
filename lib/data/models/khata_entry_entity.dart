@@ -28,6 +28,8 @@ class KhataEntryEntity {
 
   bool isSettled;
 
+  String? receiptPath; // Local path to attached bill/payment receipt photo
+
   final contact = ToOne<KhataContactEntity>();
 
   KhataEntryEntity({
@@ -41,6 +43,7 @@ class KhataEntryEntity {
     this.platform,
     this.notes,
     this.isSettled = false,
+    this.receiptPath,
   });
 
   DateTime get dateTime => DateTime.fromMillisecondsSinceEpoch(date);
@@ -49,4 +52,5 @@ class KhataEntryEntity {
 
   bool get isGave => type.toLowerCase() == 'gave';
   bool get isGot => type.toLowerCase() == 'got';
+  bool get hasReceipt => receiptPath != null && receiptPath!.isNotEmpty;
 }

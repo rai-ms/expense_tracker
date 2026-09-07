@@ -40,6 +40,8 @@ class TransactionEntity {
   @Index()
   bool isIgnored; // true if marked as notification only / ignored
 
+  String? receiptPath; // Local path to attached receipt photo
+
   TransactionEntity({
     this.id = 0,
     required this.uid,
@@ -56,9 +58,11 @@ class TransactionEntity {
     this.notes,
     this.isAutomated = false,
     this.isIgnored = false,
+    this.receiptPath,
   });
 
   DateTime get dateTime => DateTime.fromMillisecondsSinceEpoch(date);
   bool get isDebit => type.toLowerCase() == 'debit';
   bool get isCredit => type.toLowerCase() == 'credit';
+  bool get hasReceipt => receiptPath != null && receiptPath!.isNotEmpty;
 }

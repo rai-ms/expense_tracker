@@ -1,10 +1,15 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../../../../core/constants/app_colors.dart';
 import '../../../../../core/constants/app_constants.dart';
 import '../../../../../core/localization/app_localizations.dart';
+import '../../../../../core/services/di/injection.dart';
+import '../../../../../core/services/receipt_service/receipt_service.dart';
 import '../../../../../data/models/transaction_entity.dart';
+import '../../../../widgets/receipt_lightbox_modal.dart';
 
 class AddTransactionModal extends StatefulWidget {
   final Function(TransactionEntity) onSave;
@@ -23,6 +28,7 @@ class _AddTransactionModalState extends State<AddTransactionModal> {
   String _type = 'debit';
   String _category = 'Food & Dining';
   String _platform = 'Google Pay';
+  String? _receiptPath;
 
   @override
   void dispose() {
@@ -30,6 +36,67 @@ class _AddTransactionModalState extends State<AddTransactionModal> {
     _merchantController.dispose();
     _notesController.dispose();
     super.dispose();
+  }
+
+  Future<void> _pickReceipt(ImageSource source) async {
+    final receiptService = sl<ReceiptService>();
+    final path = await receiptService.pickAndSaveReceipt(source: source);
+    if (path != null && mounted) {
+      setState(() {
+        _receiptPath = path;
+      });
+    }
+  }
+
+  void _showAttachmentOptions() {
+    showModalBottomSheet(
+      context: context,
+      useSafeArea: true,
+      backgroundColor: Theme.of(context).cardTheme.color,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (ctx) => SafeArea(
+        top: false,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text(
+                'Attach Receipt / Bill Photo',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 16),
+              ListTile(
+                leading: const CircleAvatar(
+                  backgroundColor: AppColors.primary,
+                  child: Icon(Icons.camera_alt_rounded, color: Colors.white),
+                ),
+                title: const Text('Take Photo with Camera'),
+                subtitle: const Text('Snap paper bill or receipt slip'),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  _pickReceipt(ImageSource.camera);
+                },
+              ),
+              ListTile(
+                leading: const CircleAvatar(
+                  backgroundColor: AppColors.secondary,
+                  child: Icon(Icons.photo_library_rounded, color: Colors.white),
+                ),
+                title: const Text('Choose from Gallery'),
+                subtitle: const Text('Upload bill photo or screenshot'),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  _pickReceipt(ImageSource.gallery);
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   void _submit() {
@@ -53,6 +120,7 @@ class _AddTransactionModalState extends State<AddTransactionModal> {
           ? _notesController.text.trim()
           : null,
       isAutomated: false,
+      receiptPath: _receiptPath,
     );
 
     widget.onSave(txn);
@@ -195,6 +263,102 @@ class _AddTransactionModalState extends State<AddTransactionModal> {
                 hintText: 'Dinner with team, groceries, etc.',
               ),
             ),
+            const SizedBox(height: 18),
+
+            // Receipt Attachment Section
+            const Text(
+              'Bill / Receipt Photo',
+              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+            ),
+            const SizedBox(height: 8),
+            if (_receiptPath != null) ...[
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
+                ),
+                child: Row(
+                  children: [
+                    GestureDetector(
+                      onTap: () {
+                        ReceiptLightboxModal.show(
+                          context: context,
+                          receiptPath: _receiptPath!,
+                          title: _merchantController.text.trim().isNotEmpty
+                              ? _merchantController.text.trim()
+                              : 'Attached Receipt',
+                          onDelete: () {
+                            setState(() => _receiptPath = null);
+                          },
+                        );
+                      },
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(10),
+                        child: Image.file(
+                          File(_receiptPath!),
+                          width: 48,
+                          height: 48,
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () {
+                          ReceiptLightboxModal.show(
+                            context: context,
+                            receiptPath: _receiptPath!,
+                            title: _merchantController.text.trim().isNotEmpty
+                                ? _merchantController.text.trim()
+                                : 'Attached Receipt',
+                            onDelete: () {
+                              setState(() => _receiptPath = null);
+                            },
+                          );
+                        },
+                        child: const Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Receipt Attached 📎',
+                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                            ),
+                            SizedBox(height: 2),
+                            Text(
+                              'Tap to preview or pinch-to-zoom',
+                              style: TextStyle(fontSize: 11, color: AppColors.textSecondaryDark),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.delete_outline_rounded, color: AppColors.debitRed, size: 20),
+                      tooltip: 'Remove',
+                      onPressed: () {
+                        setState(() => _receiptPath = null);
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            ] else ...[
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  onPressed: _showAttachmentOptions,
+                  icon: const Icon(Icons.camera_alt_outlined, size: 18),
+                  label: const Text('Attach Bill / Receipt Photo'),
+                  style: OutlinedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                  ),
+                ),
+              ),
+            ],
             const SizedBox(height: 24),
 
             // Save Button
