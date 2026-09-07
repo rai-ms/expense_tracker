@@ -35,6 +35,7 @@ import '../objectbox_service/objectbox_service.dart' as _i1038;
 import '../security_service/security_service.dart' as _i590;
 import '../sms_parser_service/ignored_rule_service.dart' as _i475;
 import '../sms_sync_service/sms_sync_service.dart' as _i206;
+import '../split_bill_service/split_bill_service.dart' as _i830;
 import 'register_module.dart' as _i291;
 
 extension GetItInjectableX on _i174.GetIt {
@@ -74,6 +75,12 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i545.ITransactionRepository>(),
         gh<_i206.SmsSyncService>(),
         gh<_i251.BudgetService>(),
+      ),
+    );
+    gh.lazySingleton<_i830.SplitBillService>(
+      () => _i830.SplitBillService(
+        gh<_i904.IKhataRepository>(),
+        gh<_i545.ITransactionRepository>(),
       ),
     );
     gh.factory<_i61.AnalyticsBloc>(

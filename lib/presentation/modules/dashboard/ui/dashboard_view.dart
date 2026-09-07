@@ -168,6 +168,7 @@ class DashboardView extends WidgetView<DashboardView, DashboardControllerState> 
                   QuickActionBar(
                     onSyncSms: ctr.onSyncSms,
                     onAddExpense: ctr.onAddExpense,
+                    onSplitBill: ctr.onSplitBill,
                     onAddKhata: ctr.onAddKhata,
                     onExportPdf: ctr.onExportPdf,
                     onSmsSimulator: ctr.onSmsSimulator,

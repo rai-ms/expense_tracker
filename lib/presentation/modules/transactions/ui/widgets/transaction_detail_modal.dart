@@ -10,6 +10,7 @@ import '../../../../../data/models/transaction_entity.dart';
 import '../../../../../domain/repositories/i_transaction_repository.dart';
 import 'change_category_modal.dart';
 import 'move_to_khata_modal.dart';
+import '../../../khata/ui/widgets/split_bill_modal.dart';
 
 class TransactionDetailModal extends StatelessWidget {
   final TransactionEntity transaction;
@@ -247,6 +248,36 @@ class TransactionDetailModal extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 10),
+
+            if (transaction.isDebit) ...[
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: () {
+                    Navigator.pop(context);
+                    SplitBillModal.show(
+                      context: context,
+                      initialAmount: transaction.amount,
+                      initialTitle: transaction.merchant ?? transaction.notes ?? 'Expense',
+                      initialCategory: transaction.category,
+                      existingTransactionId: transaction.id,
+                    );
+                  },
+                  icon: const Icon(Icons.call_split_rounded, size: 18),
+                  label: const Text('Split this Bill with Friends'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.secondary,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 13),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    elevation: 0,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 10),
+            ],
 
             // Action: Mark as Notification / Ignore SMS
             SizedBox(

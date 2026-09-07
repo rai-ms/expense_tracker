@@ -8,6 +8,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../bloc/khata_bloc.dart';
 import '../controller/khata_controller.dart';
 import '../../settings/ui/language_selection_modal.dart';
+import 'widgets/split_bill_modal.dart';
 
 import '../../../../core/localization/app_localizations.dart';
 
@@ -26,6 +27,11 @@ class KhataView extends WidgetView<KhataView, KhataControllerState> {
           style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
         ),
         actions: [
+          IconButton(
+            onPressed: () => SplitBillModal.show(context: context),
+            icon: const Icon(Icons.call_split_rounded, color: AppColors.secondary),
+            tooltip: 'Split Bill with Friends',
+          ),
           IconButton(
             onPressed: () => LanguageSelectionModal.show(context),
             icon: const Icon(Icons.translate_rounded, color: AppColors.primaryLight),
@@ -118,6 +124,26 @@ class KhataView extends WidgetView<KhataView, KhataControllerState> {
                   ),
                 ),
               ),
+
+              // Quick Action: Split a Bill
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton.icon(
+                    onPressed: () => SplitBillModal.show(context: context),
+                    icon: const Icon(Icons.call_split_rounded, size: 18, color: AppColors.secondary),
+                    label: const Text('Split a Bill with Friends 👥', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: AppColors.secondary,
+                      side: const BorderSide(color: AppColors.secondary, width: 0.8),
+                      padding: const EdgeInsets.symmetric(vertical: 10),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 10),
 
               // Contacts List
               Expanded(

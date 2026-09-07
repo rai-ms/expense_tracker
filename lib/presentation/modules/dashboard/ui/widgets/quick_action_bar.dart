@@ -7,6 +7,7 @@ import '../../../../../core/localization/app_localizations.dart';
 class QuickActionBar extends StatelessWidget {
   final VoidCallback onSyncSms;
   final VoidCallback onAddExpense;
+  final VoidCallback? onSplitBill;
   final VoidCallback onAddKhata;
   final VoidCallback onExportPdf;
   final VoidCallback onSmsSimulator;
@@ -15,6 +16,7 @@ class QuickActionBar extends StatelessWidget {
     super.key,
     required this.onSyncSms,
     required this.onAddExpense,
+    this.onSplitBill,
     required this.onAddKhata,
     required this.onExportPdf,
     required this.onSmsSimulator,
@@ -40,6 +42,15 @@ class QuickActionBar extends StatelessWidget {
             color: AppColors.debitRed,
             onTap: onAddExpense,
           ),
+          if (onSplitBill != null) ...[
+            const SizedBox(width: 10),
+            _buildActionPill(
+              icon: Icons.call_split_rounded,
+              label: 'Split Bill',
+              color: AppColors.secondary,
+              onTap: onSplitBill!,
+            ),
+          ],
           const SizedBox(width: 10),
           _buildActionPill(
             icon: Icons.menu_book_rounded,

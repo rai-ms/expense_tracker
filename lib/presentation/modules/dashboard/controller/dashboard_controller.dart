@@ -12,6 +12,7 @@ import '../../transactions/ui/widgets/transaction_detail_modal.dart';
 import '../../../../core/services/event_bus/app_events.dart';
 import '../../main_navigation/controller/main_navigation_controller.dart';
 import '../ui/dashboard_view.dart';
+import '../../khata/ui/widgets/split_bill_modal.dart';
 import '../ui/widgets/adjust_budget_modal.dart';
 import '../ui/widgets/category_budgets_modal.dart';
 import '../ui/widgets/sync_sms_date_modal.dart';
@@ -136,6 +137,10 @@ mixin _DashboardMixin on State<DashboardController> {
         },
       ),
     );
+  }
+
+  void onSplitBill() {
+    SplitBillModal.show(context: context);
   }
 
   void onAddKhata() {
