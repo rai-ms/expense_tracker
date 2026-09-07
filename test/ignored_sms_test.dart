@@ -25,6 +25,12 @@ void main() {
 
       final result = SmsParserService.parse(mandateSms);
       expect(result.isValidTransaction, isFalse);
+
+      const paytmAutopaySms = 'Congratulations! Automatic payment of Rs.15,000 for Suryoday Small Finance Bank... has been setup successfully - Paytm';
+      expect(SmsParserService.isNotificationOnly(paytmAutopaySms), isTrue);
+
+      final result2 = SmsParserService.parse(paytmAutopaySms);
+      expect(result2.isValidTransaction, isFalse);
     });
 
     test('Identifies promotional loan & credit limit enhancement as Notification Only', () {

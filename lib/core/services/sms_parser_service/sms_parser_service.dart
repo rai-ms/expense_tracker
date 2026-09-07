@@ -393,14 +393,58 @@ class SmsParserService {
       return true;
     }
 
-    // 3. Mandate / Auto-pay setup or reminder (not an actual debit)
+    // 3. Mandate / Auto-pay / Standing Instruction setup or reminder (not an actual debit)
     if (lower.contains('e-mandate') ||
-        lower.contains('mandate registered') ||
-        lower.contains('mandate created') ||
-        lower.contains('autopay set up') ||
-        lower.contains('autopay scheduled') ||
-        lower.contains('standing instruction setup')) {
-      return true;
+        lower.contains('mandate') ||
+        lower.contains('autopay') ||
+        lower.contains('automatic payment') ||
+        lower.contains('auto debit') ||
+        lower.contains('auto-debit') ||
+        lower.contains('standing instruction') ||
+        lower.contains('recurring payment') ||
+        lower.contains('nach')) {
+      if (lower.contains('setup') ||
+          lower.contains('set up') ||
+          lower.contains('registered') ||
+          lower.contains('created') ||
+          lower.contains('scheduled') ||
+          lower.contains('initiated') ||
+          lower.contains('modified') ||
+          lower.contains('cancelled') ||
+          lower.contains('canceled') ||
+          lower.contains('approved') ||
+          lower.contains('active') ||
+          lower.contains('configured') ||
+          lower.contains('enabled')) {
+        return true;
+      }
+    }
+
+    // 3b. Setup confirmation notices without completed debit
+    if (lower.contains('setup successfully') ||
+        lower.contains('set up successfully') ||
+        lower.contains('has been setup') ||
+        lower.contains('has been set up') ||
+        lower.contains('successfully setup') ||
+        lower.contains('successfully set up') ||
+        lower.contains('registered successfully') ||
+        lower.contains('successfully registered')) {
+      if (!lower.contains('debited') &&
+          !lower.contains('spent on') &&
+          !lower.contains('paid to')) {
+        return true;
+      }
+    }
+
+    // 3c. Failed, declined, or cancelled transaction alerts
+    if (lower.contains('failed') ||
+        lower.contains('declined') ||
+        lower.contains('unsuccessful') ||
+        lower.contains('could not be processed') ||
+        lower.contains('timed out')) {
+      if (!lower.contains('refund') && !lower.contains('reversed') && !lower.contains('credited')) {
+        return true;
+      }
     }
 
     // 4. Credit limit enhancement & Promotional offers

@@ -1,4 +1,4 @@
-.PHONY: help get clean codegen build-apk-release build-apk-split build-appbundle build-ios build-macos test analyze format run install-apk fresh-start
+.PHONY: help get clean codegen build-apk-release build-apk-split build-appbundle build-ios build-macos test analyze format run install-apk fresh-start wireless connect-wireless run-wireless mirror
 
 # Default target
 all: help
@@ -68,6 +68,11 @@ build-macos: ## Build macOS desktop release application
 ## -----------------------------------------------------------------------------
 ## 📲 EMULATOR / DEVICE ACTIONS
 ## -----------------------------------------------------------------------------
+wireless: ## Auto-connect to Android device wirelessly (or specify: make wireless IP=192.168.x.x)
+	@./scripts/connect_wireless.sh $(IP)
+
+connect-wireless: wireless ## Alias for wireless
+
 install-apk: ## Install latest release APK on connected Android device/emulator
 	@echo "📲 Installing release APK onto device via ADB..."
 	adb install -r build/app/outputs/flutter-apk/app-release.apk
@@ -76,9 +81,26 @@ run: ## Run app on connected device in debug mode
 	@echo "▶️ Launching Flutter app..."
 	flutter run
 
+run-wireless: wireless ## Auto-connect wireless device and launch Flutter app
+	@echo "▶️ Launching Flutter app wirelessly..."
+	flutter run
+
 run-release: ## Run app on connected device in release mode
 	@echo "▶️ Launching Flutter app in Release mode..."
 	flutter run --release
+
+mirror: ## Mirror Android screen using scrcpy (handles multi-device automatically)
+	@DEVICE=$$(adb devices | grep -v "List of devices" | grep -v "^$$" | grep "device$$" | grep -E '^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+:5555' | head -n 1 | awk '{print $$1}'); \
+	if [ -z "$$DEVICE" ]; then \
+		DEVICE=$$(adb devices | grep -v "List of devices" | grep -v "^$$" | grep "device$$" | head -n 1 | awk '{print $$1}'); \
+	fi; \
+	if [ -z "$$DEVICE" ]; then \
+		echo "⚠️ No ADB device found. Run 'make wireless' first."; \
+		exit 1; \
+	fi; \
+	echo "🪞 Mirroring device: $$DEVICE..."; \
+	scrcpy -s "$$DEVICE" --max-size=1024 --window-title="SpendWise Expense Tracker"
+
 
 ## -----------------------------------------------------------------------------
 ## 🧹 CLEANING & REBUILD
