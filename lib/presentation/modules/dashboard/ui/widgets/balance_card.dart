@@ -5,6 +5,9 @@ import '../../../../../core/constants/app_colors.dart';
 
 import '../../../../../core/localization/app_localizations.dart';
 
+import '../../../../../core/services/di/injection.dart';
+import '../../../../../core/services/security_service/security_service.dart';
+
 class BalanceCard extends StatelessWidget {
   final double totalBalance;
   final double totalIncome;
@@ -22,68 +25,89 @@ class BalanceCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final currency = NumberFormat.currency(locale: 'en_IN', symbol: '₹');
+    final securityService = sl.isRegistered<SecurityService>() ? sl<SecurityService>() : null;
+    final privacyNotifier = securityService?.isPrivacyModeNotifier ?? ValueNotifier<bool>(false);
 
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        gradient: AppColors.primaryGradient,
-        borderRadius: BorderRadius.circular(28),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.primary.withValues(alpha: 0.35),
-            blurRadius: 24,
-            offset: const Offset(0, 10),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                '${context.tr('total_balance')} ($filterLabel)',
-                style: const TextStyle(
-                  color: Colors.white70,
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Row(
-                  children: [
-                    const Icon(Icons.sync_rounded, color: Colors.white, size: 14),
-                    const SizedBox(width: 4),
-                    Text(
-                      context.tr('sync_sms'),
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 11,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ],
-                ),
+    return ValueListenableBuilder<bool>(
+      valueListenable: privacyNotifier,
+      builder: (context, isPrivacy, _) {
+        final balanceText = isPrivacy ? '₹ ••••••' : currency.format(totalBalance);
+        final incomeText = isPrivacy ? '₹ ••••••' : currency.format(totalIncome);
+        final expenseText = isPrivacy ? '₹ ••••••' : currency.format(totalExpense);
+
+        return Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            gradient: AppColors.primaryGradient,
+            borderRadius: BorderRadius.circular(28),
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.primary.withValues(alpha: 0.35),
+                blurRadius: 24,
+                offset: const Offset(0, 10),
               ),
             ],
           ),
-          const SizedBox(height: 8),
-          Text(
-            currency.format(totalBalance),
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 34,
-              fontWeight: FontWeight.w800,
-              letterSpacing: -0.5,
-            ),
-          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Text(
+                      '${context.tr('total_balance')} ($filterLabel)',
+                      style: const TextStyle(
+                        color: Colors.white70,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  InkWell(
+                    onTap: () => securityService?.togglePrivacyMode(),
+                    borderRadius: BorderRadius.circular(20),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.2),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            isPrivacy ? Icons.visibility_off_rounded : Icons.visibility_rounded,
+                            color: Colors.white,
+                            size: 14,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            isPrivacy ? 'Hidden' : 'Hide',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Text(
+                balanceText,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 34,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: -0.5,
+                ),
+              ),
           const SizedBox(height: 24),
           Row(
             children: [
@@ -124,7 +148,7 @@ class BalanceCard extends StatelessWidget {
                             ),
                             const SizedBox(height: 2),
                             Text(
-                              currency.format(totalIncome),
+                              incomeText,
                               style: const TextStyle(
                                 color: Colors.white,
                                 fontSize: 14,
@@ -178,7 +202,7 @@ class BalanceCard extends StatelessWidget {
                             ),
                             const SizedBox(height: 2),
                             Text(
-                              currency.format(totalExpense),
+                              expenseText,
                               style: const TextStyle(
                                 color: Colors.white,
                                 fontSize: 14,
@@ -199,5 +223,7 @@ class BalanceCard extends StatelessWidget {
         ],
       ),
     );
+  },
+);
   }
 }

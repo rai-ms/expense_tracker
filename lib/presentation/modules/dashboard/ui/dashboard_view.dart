@@ -6,6 +6,7 @@ import '../../../../core/base/bloc_base/bloc_event_state.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../bloc/dashboard_bloc.dart';
 import '../controller/dashboard_controller.dart';
+import '../../security/ui/security_settings_modal.dart';
 import '../../settings/ui/language_selection_modal.dart';
 import 'widgets/balance_card.dart';
 import 'widgets/quick_action_bar.dart';
@@ -61,6 +62,11 @@ class DashboardView extends WidgetView<DashboardView, DashboardControllerState> 
           ],
         ),
         actions: [
+          IconButton(
+            onPressed: () => SecuritySettingsModal.show(context),
+            icon: const Icon(Icons.shield_outlined, color: AppColors.primaryLight),
+            tooltip: 'Security & App Lock',
+          ),
           IconButton(
             onPressed: () => LanguageSelectionModal.show(context),
             icon: const Icon(Icons.translate_rounded, color: AppColors.primaryLight),

@@ -3,6 +3,9 @@
     <!-- SMS Reading Permission for Expense Scanning -->
     <uses-permission android:name="android.permission.READ_SMS" />
 
+    <!-- Biometric Authentication Permission -->
+    <uses-permission android:name="android.permission.USE_BIOMETRIC" />
+
     <!-- Notification and Alarm Permissions -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.VIBRATE" />

@@ -102,6 +102,16 @@ class ObjectBoxService extends BaseService<Future<void>, void> {
     setSetting(key, value.toString());
   }
 
+  bool getBoolSetting(String key, {bool defaultValue = false}) {
+    final str = getSetting(key);
+    if (str == null) return defaultValue;
+    return str == 'true';
+  }
+
+  void setBoolSetting(String key, bool value) {
+    setSetting(key, value.toString());
+  }
+
   List<String> getStringListSetting(String key) {
     final str = getSetting(key);
     if (str == null || str.isEmpty) return [];

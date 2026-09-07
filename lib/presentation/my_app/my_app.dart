@@ -9,6 +9,7 @@ import '../../core/localization/app_localizations.dart';
 import '../../core/services/di/injection.dart';
 import '../../core/services/route_service/app_router.dart';
 import '../../core/theme/app_theme.dart';
+import '../modules/security/ui/security_gate.dart';
 import '../modules/settings/bloc/locale_bloc.dart';
 
 class MyApp extends StatelessWidget {
@@ -47,7 +48,7 @@ class MyApp extends StatelessWidget {
               child = botToastBuilder(context, child);
               return Directionality(
                 textDirection: isRtl ? TextDirection.rtl : TextDirection.ltr,
-                child: child,
+                child: SecurityGate(child: child),
               );
             },
           );
