@@ -172,6 +172,7 @@ class DashboardView extends WidgetView<DashboardView, DashboardControllerState> 
                     onAddKhata: ctr.onAddKhata,
                     onExportPdf: ctr.onExportPdf,
                     onSmsSimulator: ctr.onSmsSimulator,
+                    onMyDocuments: ctr.onMyDocuments,
                   ),
                   const SizedBox(height: 24),
 

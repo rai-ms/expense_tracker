@@ -3,6 +3,7 @@ import 'package:path_provider/path_provider.dart';
 
 import '../../../data/models/app_setting_entity.dart';
 import '../../../data/models/bill_reminder_entity.dart';
+import '../../../data/models/document_entity.dart';
 import '../../../data/models/khata_contact_entity.dart';
 import '../../../data/models/khata_entry_entity.dart';
 import '../../../data/models/transaction_entity.dart';
@@ -58,6 +59,7 @@ class ObjectBoxService extends BaseService<Future<void>, void> {
   Box<KhataEntryEntity> get khataEntryBox => store.box<KhataEntryEntity>();
   Box<BillReminderEntity> get billReminderBox => store.box<BillReminderEntity>();
   Box<AppSettingEntity> get settingBox => store.box<AppSettingEntity>();
+  Box<DocumentEntity> get documentBox => store.box<DocumentEntity>();
 
   // ===========================================================================
   // ⚡ Synchronous Key-Value Preferences stored natively in ObjectBox

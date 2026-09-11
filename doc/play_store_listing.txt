@@ -1,0 +1,51 @@
+# SpendWise Play Store Listing Details
+
+## App Name (27/30 chars):
+SpendWise - Expense Tracker
+
+## Short Description (73/80 chars):
+Track daily expenses, manage Khata ledger & set budgets with 100% privacy.
+
+## Full Description:
+Take complete control of your personal finances with SpendWise — a fast, modern, and 100% offline personal expense manager, budget planner, and digital Khata ledger. 
+
+SpendWise keeps all your financial records safely on your phone without selling your data, showing intrusive ads, or requiring cloud logins.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🌟 KEY FEATURES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📊 SMART EXPENSE & INCOME TRACKING
+• Log expenses and incomes in seconds with customized categories.
+• Visual spending breakdowns, daily trends, and interactive monthly charts.
+• Filter transactions instantly by date range, category, payment mode (UPI, Card, Cash), or search by merchant.
+
+🎯 MONTHLY CATEGORY BUDGETS & ALERTS
+• Set custom spending limits for Food, Groceries, Shopping, Travel, and more.
+• Dynamic Spend-O-Meter gauge warns you before you exceed your budget.
+• Real-time notifications when you reach 80% or 100% of your limit.
+
+📒 DIGITAL KHATA BOOK (UDHAR / LEDGER)
+• Keep track of money given (Aapko milenge) and money received (Aapko dene hain) with friends, family, and local merchants.
+• Clear balance breakdown per contact with full transaction history.
+• Export professional PDF ledger statements in one tap.
+
+👥 1-TAP BILL SPLITTING & WHATSAPP REMINDERS
+• Split restaurant dinners, trip bills, or flat rent equally, by exact amount, or percentage.
+• Automatically logs your share as an expense and records your friends' portions directly in Khata.
+• Send friendly WhatsApp payment reminders with automatic UPI deep links for instant settlement.
+
+📸 RECEIPT VAULT & BILL ATTACHMENTS
+• Snap photos of paper bills, restaurant slips, warranty cards, or UPI screenshots.
+• Compressed offline storage saves phone space while preserving crisp clarity.
+• Full-screen pinch-to-zoom viewer and instant document sharing.
+
+🔒 BIOMETRIC SECURITY & PRIVACY
+• Lock the app with Fingerprint, Face Unlock, or encrypted 4-digit PIN.
+• Privacy Mode hides balances and account numbers on the dashboard with 1 tap.
+• 100% local database — your financial data never leaves your device.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📌 DISCLAIMER
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SpendWise is a personal finance management, record-keeping, and budgeting tool. SpendWise is not a bank, non-banking financial company (NBFC), or money service business, and does not provide loans, lines of credit, or monetary transaction processing.

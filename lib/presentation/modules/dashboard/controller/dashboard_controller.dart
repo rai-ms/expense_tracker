@@ -155,6 +155,10 @@ mixin _DashboardMixin on State<DashboardController> {
     context.push(AppRoutes.exportPdf);
   }
 
+  void onMyDocuments() {
+    context.push(AppRoutes.documents);
+  }
+
   void onSmsSimulator() {
     context.push(AppRoutes.smsSimulator).then((_) {
       AppEvents.notifyDataChanged();

@@ -1,6 +1,7 @@
 import 'package:go_router/go_router.dart';
 
 import '../../../presentation/modules/analytics/controller/analytics_controller.dart';
+import '../../../presentation/modules/documents/controller/documents_controller.dart';
 import '../../../presentation/modules/export_pdf/controller/export_pdf_controller.dart';
 import '../../../presentation/modules/khata/controller/khata_controller.dart';
 import '../../../presentation/modules/khata_detail/controller/khata_detail_controller.dart';
@@ -60,6 +61,10 @@ class AppRouter {
       GoRoute(
         path: AppRoutes.exportPdf,
         builder: (context, state) => const ExportPdfController(),
+      ),
+      GoRoute(
+        path: AppRoutes.documents,
+        builder: (context, state) => const DocumentsController(),
       ),
     ],
   );

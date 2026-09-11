@@ -16,6 +16,7 @@ import 'package:objectbox_flutter_libs/objectbox_flutter_libs.dart';
 
 import 'data/models/app_setting_entity.dart';
 import 'data/models/bill_reminder_entity.dart';
+import 'data/models/document_entity.dart';
 import 'data/models/khata_contact_entity.dart';
 import 'data/models/khata_entry_entity.dart';
 import 'data/models/transaction_entity.dart';
@@ -373,6 +374,67 @@ final _entities = <obx_int.ModelEntity>[
     relations: <obx_int.ModelRelation>[],
     backlinks: <obx_int.ModelBacklink>[],
   ),
+  obx_int.ModelEntity(
+    id: const obx_int.IdUid(6, 2512339788901839155),
+    name: 'DocumentEntity',
+    lastPropertyId: const obx_int.IdUid(8, 561047805073808619),
+    flags: 0,
+    properties: <obx_int.ModelProperty>[
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(1, 8887067355670183448),
+        name: 'id',
+        type: 6,
+        flags: 1,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(2, 6112151661344988402),
+        name: 'uid',
+        type: 9,
+        flags: 2048,
+        indexId: const obx_int.IdUid(17, 107883566780481597),
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(3, 7492022427689989311),
+        name: 'name',
+        type: 9,
+        flags: 0,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(4, 7186694786330601560),
+        name: 'category',
+        type: 9,
+        flags: 2048,
+        indexId: const obx_int.IdUid(18, 6096807512573649812),
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(5, 5228920966798084959),
+        name: 'filePath',
+        type: 9,
+        flags: 0,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(6, 3211808655069166828),
+        name: 'fileType',
+        type: 9,
+        flags: 0,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(7, 1308313329401828346),
+        name: 'addedAt',
+        type: 6,
+        flags: 8,
+        indexId: const obx_int.IdUid(19, 3719793382108730410),
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(8, 561047805073808619),
+        name: 'notes',
+        type: 9,
+        flags: 0,
+      ),
+    ],
+    relations: <obx_int.ModelRelation>[],
+    backlinks: <obx_int.ModelBacklink>[],
+  ),
 ];
 
 /// Shortcut for [obx.Store.new] that passes [getObjectBoxModel] and for Flutter
@@ -418,8 +480,8 @@ obx_int.ModelDefinition getObjectBoxModel() {
     // Typically, this is done with `dart run build_runner build`.
     generatorVersion: obx_int.GeneratorVersion.v2025_12_16,
     entities: _entities,
-    lastEntityId: const obx_int.IdUid(5, 4428729137688253300),
-    lastIndexId: const obx_int.IdUid(16, 8174359078345522723),
+    lastEntityId: const obx_int.IdUid(6, 2512339788901839155),
+    lastIndexId: const obx_int.IdUid(19, 3719793382108730410),
     lastRelationId: const obx_int.IdUid(0, 0),
     lastSequenceId: const obx_int.IdUid(0, 0),
     retiredEntityUids: const [],
@@ -895,6 +957,82 @@ obx_int.ModelDefinition getObjectBoxModel() {
         return object;
       },
     ),
+    DocumentEntity: obx_int.EntityDefinition<DocumentEntity>(
+      model: _entities[5],
+      toOneRelations: (DocumentEntity object) => [],
+      toManyRelations: (DocumentEntity object) => {},
+      getId: (DocumentEntity object) => object.id,
+      setId: (DocumentEntity object, int id) {
+        object.id = id;
+      },
+      objectToFB: (DocumentEntity object, fb.Builder fbb) {
+        final uidOffset = fbb.writeString(object.uid);
+        final nameOffset = fbb.writeString(object.name);
+        final categoryOffset = fbb.writeString(object.category);
+        final filePathOffset = fbb.writeString(object.filePath);
+        final fileTypeOffset = fbb.writeString(object.fileType);
+        final notesOffset = object.notes == null
+            ? null
+            : fbb.writeString(object.notes!);
+        fbb.startTable(9);
+        fbb.addInt64(0, object.id);
+        fbb.addOffset(1, uidOffset);
+        fbb.addOffset(2, nameOffset);
+        fbb.addOffset(3, categoryOffset);
+        fbb.addOffset(4, filePathOffset);
+        fbb.addOffset(5, fileTypeOffset);
+        fbb.addInt64(6, object.addedAt);
+        fbb.addOffset(7, notesOffset);
+        fbb.finish(fbb.endTable());
+        return object.id;
+      },
+      objectFromFB: (obx.Store store, ByteData fbData) {
+        final buffer = fb.BufferContext(fbData);
+        final rootOffset = buffer.derefObject(0);
+        final idParam = const fb.Int64Reader().vTableGet(
+          buffer,
+          rootOffset,
+          4,
+          0,
+        );
+        final uidParam = const fb.StringReader(
+          asciiOptimization: true,
+        ).vTableGet(buffer, rootOffset, 6, '');
+        final nameParam = const fb.StringReader(
+          asciiOptimization: true,
+        ).vTableGet(buffer, rootOffset, 8, '');
+        final categoryParam = const fb.StringReader(
+          asciiOptimization: true,
+        ).vTableGet(buffer, rootOffset, 10, '');
+        final filePathParam = const fb.StringReader(
+          asciiOptimization: true,
+        ).vTableGet(buffer, rootOffset, 12, '');
+        final fileTypeParam = const fb.StringReader(
+          asciiOptimization: true,
+        ).vTableGet(buffer, rootOffset, 14, '');
+        final addedAtParam = const fb.Int64Reader().vTableGet(
+          buffer,
+          rootOffset,
+          16,
+          0,
+        );
+        final notesParam = const fb.StringReader(
+          asciiOptimization: true,
+        ).vTableGetNullable(buffer, rootOffset, 18);
+        final object = DocumentEntity(
+          id: idParam,
+          uid: uidParam,
+          name: nameParam,
+          category: categoryParam,
+          filePath: filePathParam,
+          fileType: fileTypeParam,
+          addedAt: addedAtParam,
+          notes: notesParam,
+        );
+
+        return object;
+      },
+    ),
   };
 
   return obx_int.ModelDefinition(model, bindings);
@@ -1149,5 +1287,48 @@ class AppSettingEntity_ {
   /// See [AppSettingEntity.value].
   static final value = obx.QueryStringProperty<AppSettingEntity>(
     _entities[4].properties[2],
+  );
+}
+
+/// [DocumentEntity] entity fields to define ObjectBox queries.
+class DocumentEntity_ {
+  /// See [DocumentEntity.id].
+  static final id = obx.QueryIntegerProperty<DocumentEntity>(
+    _entities[5].properties[0],
+  );
+
+  /// See [DocumentEntity.uid].
+  static final uid = obx.QueryStringProperty<DocumentEntity>(
+    _entities[5].properties[1],
+  );
+
+  /// See [DocumentEntity.name].
+  static final name = obx.QueryStringProperty<DocumentEntity>(
+    _entities[5].properties[2],
+  );
+
+  /// See [DocumentEntity.category].
+  static final category = obx.QueryStringProperty<DocumentEntity>(
+    _entities[5].properties[3],
+  );
+
+  /// See [DocumentEntity.filePath].
+  static final filePath = obx.QueryStringProperty<DocumentEntity>(
+    _entities[5].properties[4],
+  );
+
+  /// See [DocumentEntity.fileType].
+  static final fileType = obx.QueryStringProperty<DocumentEntity>(
+    _entities[5].properties[5],
+  );
+
+  /// See [DocumentEntity.addedAt].
+  static final addedAt = obx.QueryIntegerProperty<DocumentEntity>(
+    _entities[5].properties[6],
+  );
+
+  /// See [DocumentEntity.notes].
+  static final notes = obx.QueryStringProperty<DocumentEntity>(
+    _entities[5].properties[7],
   );
 }

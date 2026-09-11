@@ -11,6 +11,7 @@ class QuickActionBar extends StatelessWidget {
   final VoidCallback onAddKhata;
   final VoidCallback onExportPdf;
   final VoidCallback onSmsSimulator;
+  final VoidCallback onMyDocuments;
 
   const QuickActionBar({
     super.key,
@@ -20,6 +21,7 @@ class QuickActionBar extends StatelessWidget {
     required this.onAddKhata,
     required this.onExportPdf,
     required this.onSmsSimulator,
+    required this.onMyDocuments,
   });
 
   @override
@@ -27,50 +29,68 @@ class QuickActionBar extends StatelessWidget {
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       physics: const BouncingScrollPhysics(),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildActionPill(
-            icon: Icons.sync_rounded,
-            label: context.tr('sync_sms'),
-            color: AppColors.primary,
-            onTap: onSyncSms,
+          // Row 1: Primary Quick Actions
+          Row(
+            children: [
+              _buildActionPill(
+                icon: Icons.folder_special_rounded,
+                label: 'My Documents',
+                color: const Color(0xFF0EA5E9),
+                onTap: onMyDocuments,
+              ),
+              const SizedBox(width: 10),
+              _buildActionPill(
+                icon: Icons.sync_rounded,
+                label: context.tr('sync_sms'),
+                color: AppColors.primary,
+                onTap: onSyncSms,
+              ),
+              const SizedBox(width: 10),
+              _buildActionPill(
+                icon: Icons.add_circle_outline_rounded,
+                label: context.tr('add_expense'),
+                color: AppColors.debitRed,
+                onTap: onAddExpense,
+              ),
+              const SizedBox(width: 10),
+              _buildActionPill(
+                icon: Icons.picture_as_pdf_rounded,
+                label: context.tr('export_pdf'),
+                color: AppColors.bills,
+                onTap: onExportPdf,
+              ),
+            ],
           ),
-          const SizedBox(width: 10),
-          _buildActionPill(
-            icon: Icons.add_circle_outline_rounded,
-            label: context.tr('add_expense'),
-            color: AppColors.debitRed,
-            onTap: onAddExpense,
-          ),
-          if (onSplitBill != null) ...[
-            const SizedBox(width: 10),
-            _buildActionPill(
-              icon: Icons.call_split_rounded,
-              label: 'Split Bill',
-              color: AppColors.secondary,
-              onTap: onSplitBill!,
-            ),
-          ],
-          const SizedBox(width: 10),
-          _buildActionPill(
-            icon: Icons.menu_book_rounded,
-            label: context.tr('khata'),
-            color: AppColors.creditGreen,
-            onTap: onAddKhata,
-          ),
-          const SizedBox(width: 10),
-          _buildActionPill(
-            icon: Icons.picture_as_pdf_rounded,
-            label: context.tr('export_pdf'),
-            color: AppColors.bills,
-            onTap: onExportPdf,
-          ),
-          const SizedBox(width: 10),
-          _buildActionPill(
-            icon: Icons.sms_outlined,
-            label: 'SMS Simulator',
-            color: AppColors.warningAmber,
-            onTap: onSmsSimulator,
+          const SizedBox(height: 10),
+          // Row 2: Secondary Quick Actions
+          Row(
+            children: [
+              _buildActionPill(
+                icon: Icons.menu_book_rounded,
+                label: context.tr('khata'),
+                color: AppColors.creditGreen,
+                onTap: onAddKhata,
+              ),
+              if (onSplitBill != null) ...[
+                const SizedBox(width: 10),
+                _buildActionPill(
+                  icon: Icons.call_split_rounded,
+                  label: 'Split Bill',
+                  color: AppColors.secondary,
+                  onTap: onSplitBill!,
+                ),
+              ],
+              const SizedBox(width: 10),
+              _buildActionPill(
+                icon: Icons.sms_outlined,
+                label: 'SMS Simulator',
+                color: AppColors.warningAmber,
+                onTap: onSmsSimulator,
+              ),
+            ],
           ),
         ],
       ),

@@ -13,9 +13,11 @@
 import 'package:get_it/get_it.dart' as _i174;
 import 'package:injectable/injectable.dart' as _i526;
 
+import '../../../data/repositories/document_repository_impl.dart' as _i615;
 import '../../../data/repositories/khata_repository_impl.dart' as _i497;
 import '../../../data/repositories/reminder_repository_impl.dart' as _i36;
 import '../../../data/repositories/transaction_repository_impl.dart' as _i597;
+import '../../../domain/repositories/i_document_repository.dart' as _i747;
 import '../../../domain/repositories/i_khata_repository.dart' as _i904;
 import '../../../domain/repositories/i_reminder_repository.dart' as _i654;
 import '../../../domain/repositories/i_transaction_repository.dart' as _i545;
@@ -71,6 +73,9 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i904.IKhataRepository>(
       () => _i497.KhataRepositoryImpl(gh<_i1038.ObjectBoxService>()),
+    );
+    gh.lazySingleton<_i747.IDocumentRepository>(
+      () => _i615.DocumentRepositoryImpl(gh<_i1038.ObjectBoxService>()),
     );
     gh.factory<_i896.DashboardBloc>(
       () => _i896.DashboardBloc(

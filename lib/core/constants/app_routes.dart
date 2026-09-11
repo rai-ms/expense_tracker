@@ -17,4 +17,5 @@ class AppRoutes {
   static const String addReminder = '/add-reminder';
   static const String exportPdf = '/export-pdf';
   static const String smsSimulator = '/sms-simulator';
+  static const String documents = '/documents';
 }

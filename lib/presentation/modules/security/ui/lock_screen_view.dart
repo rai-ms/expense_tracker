@@ -1,4 +1,5 @@
 import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -14,7 +15,8 @@ class LockScreenView extends StatefulWidget {
   State<LockScreenView> createState() => _LockScreenViewState();
 }
 
-class _LockScreenViewState extends State<LockScreenView> with SingleTickerProviderStateMixin {
+class _LockScreenViewState extends State<LockScreenView>
+    with SingleTickerProviderStateMixin {
   final SecurityService _securityService = sl<SecurityService>();
 
   String _enteredPin = '';
@@ -33,18 +35,21 @@ class _LockScreenViewState extends State<LockScreenView> with SingleTickerProvid
       vsync: this,
       duration: const Duration(milliseconds: 400),
     );
-    _shakeAnimation = Tween<double>(begin: 0, end: 16)
-        .chain(CurveTween(curve: Curves.elasticIn))
-        .animate(_shakeController)
-      ..addStatusListener((status) {
-        if (status == AnimationStatus.completed) {
-          _shakeController.reverse();
-        }
-      });
+    _shakeAnimation =
+        Tween<double>(
+            begin: 0,
+            end: 16,
+          ).chain(CurveTween(curve: Curves.elasticIn)).animate(_shakeController)
+          ..addStatusListener((status) {
+            if (status == AnimationStatus.completed) {
+              _shakeController.reverse();
+            }
+          });
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _checkLockout();
-      if (_securityService.isBiometricEnabled && !_securityService.isLockoutActive) {
+      if (_securityService.isBiometricEnabled &&
+          !_securityService.isLockoutActive) {
         _promptBiometric();
       }
     });
@@ -104,7 +109,11 @@ class _LockScreenViewState extends State<LockScreenView> with SingleTickerProvid
   }
 
   void _onDigitPress(String digit) {
-    if (_isChecking || _securityService.isLockoutActive || _enteredPin.length >= 4) return;
+    if (_isChecking ||
+        _securityService.isLockoutActive ||
+        _enteredPin.length >= 4) {
+      return;
+    }
     HapticFeedback.selectionClick();
 
     setState(() {
@@ -143,7 +152,8 @@ class _LockScreenViewState extends State<LockScreenView> with SingleTickerProvid
         _enteredPin = '';
         if (_securityService.isLockoutActive) {
           _remainingCooldown = _securityService.remainingLockoutSeconds;
-          _errorMessage = 'Too many failed attempts. Wait $_remainingCooldown s';
+          _errorMessage =
+              'Too many failed attempts. Wait $_remainingCooldown s';
           _startCooldownTimer();
         } else {
           final attemptsLeft = 5 - _securityService.failedAttempts;
@@ -160,175 +170,204 @@ class _LockScreenViewState extends State<LockScreenView> with SingleTickerProvid
       child: Scaffold(
         backgroundColor: AppColors.darkBackground,
         body: SafeArea(
-          child: Column(
-            children: [
-              const Spacer(flex: 2),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final isCompact = constraints.maxHeight < 700;
+              final buttonSize = isCompact ? 60.0 : 68.0;
+              final rowSpacing = isCompact ? 12.0 : 16.0;
 
-              // Shield Icon & Brand
-              Container(
-                padding: const EdgeInsets.all(18),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      AppColors.primary.withValues(alpha: 0.2),
-                      AppColors.creditGreen.withValues(alpha: 0.1),
-                    ],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: AppColors.primary.withValues(alpha: 0.4),
-                    width: 1.5,
-                  ),
-                ),
-                child: const Icon(
-                  Icons.shield_rounded,
-                  size: 44,
-                  color: AppColors.primaryLight,
-                ),
-              ),
-              const SizedBox(height: 18),
-              const Text(
-                'SpendWise',
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.w800,
-                  color: AppColors.textPrimaryDark,
-                  letterSpacing: -0.5,
-                ),
-              ),
-              const SizedBox(height: 6),
-              const Text(
-                'App is locked for your security',
-                style: TextStyle(
-                  fontSize: 13,
-                  color: AppColors.textSecondaryDark,
-                ),
-              ),
-
-              const Spacer(flex: 2),
-
-              // PIN Dots with Shake Animation
-              AnimatedBuilder(
-                animation: _shakeAnimation,
-                builder: (context, child) {
-                  return Transform.translate(
-                    offset: Offset(_shakeAnimation.value, 0),
-                    child: child,
-                  );
-                },
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: List.generate(4, (index) {
-                    final isFilled = index < _enteredPin.length;
-                    return AnimatedContainer(
-                      duration: const Duration(milliseconds: 200),
-                      margin: const EdgeInsets.symmetric(horizontal: 10),
-                      width: 16,
-                      height: 16,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: isFilled ? AppColors.primary : Colors.transparent,
-                        border: Border.all(
-                          color: isFilled
-                              ? AppColors.primary
-                              : AppColors.textSecondaryDark.withValues(alpha: 0.4),
-                          width: 2,
-                        ),
-                        boxShadow: isFilled
-                            ? [
-                                BoxShadow(
-                                  color: AppColors.primary.withValues(alpha: 0.5),
-                                  blurRadius: 8,
-                                  spreadRadius: 1,
-                                ),
-                              ]
-                            : null,
-                      ),
-                    );
-                  }),
-                ),
-              ),
-
-              const SizedBox(height: 16),
-
-              // Error / Status Message
-              AnimatedOpacity(
-                opacity: _errorMessage != null ? 1.0 : 0.0,
-                duration: const Duration(milliseconds: 250),
-                child: Text(
-                  _errorMessage ?? '',
-                  style: const TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.debitRed,
-                  ),
-                ),
-              ),
-
-              const Spacer(flex: 3),
-
-              // Keypad
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 40),
-                child: Column(
-                  children: [
-                    _buildKeypadRow(['1', '2', '3']),
-                    const SizedBox(height: 18),
-                    _buildKeypadRow(['4', '5', '6']),
-                    const SizedBox(height: 18),
-                    _buildKeypadRow(['7', '8', '9']),
-                    const SizedBox(height: 18),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              return SingleChildScrollView(
+                physics: const ClampingScrollPhysics(),
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                  child: IntrinsicHeight(
+                    child: Column(
                       children: [
-                        // Left: Biometric button (if available)
-                        _securityService.isBiometricEnabled
-                            ? _buildActionButton(
-                                icon: Icons.fingerprint_rounded,
-                                onTap: _promptBiometric,
-                                label: 'Scan',
-                              )
-                            : const SizedBox(width: 68, height: 68),
-                        // Center: 0
-                        _buildDigitButton('0'),
-                        // Right: Backspace
-                        _buildActionButton(
-                          icon: Icons.backspace_outlined,
-                          onTap: _onDeletePress,
-                          label: 'Delete',
+                        const Spacer(flex: 2),
+
+                        // Shield Icon & Brand
+                        Container(
+                          padding: EdgeInsets.all(isCompact ? 14 : 18),
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [
+                                AppColors.primary.withValues(alpha: 0.2),
+                                AppColors.creditGreen.withValues(alpha: 0.1),
+                              ],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            ),
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: AppColors.primary.withValues(alpha: 0.4),
+                              width: 1.5,
+                            ),
+                          ),
+                          child: Icon(
+                            Icons.shield_rounded,
+                            size: isCompact ? 36 : 44,
+                            color: AppColors.primaryLight,
+                          ),
                         ),
+                        SizedBox(height: isCompact ? 12 : 18),
+                        Text(
+                          'SpendWise',
+                          style: TextStyle(
+                            fontSize: isCompact ? 22 : 24,
+                            fontWeight: FontWeight.w800,
+                            color: AppColors.textPrimaryDark,
+                            letterSpacing: -0.5,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        const Text(
+                          'App is locked for your security',
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: AppColors.textSecondaryDark,
+                          ),
+                        ),
+
+                        const Spacer(flex: 2),
+
+                        // PIN Dots with Shake Animation
+                        AnimatedBuilder(
+                          animation: _shakeAnimation,
+                          builder: (context, child) {
+                            return Transform.translate(
+                              offset: Offset(_shakeAnimation.value, 0),
+                              child: child,
+                            );
+                          },
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: List.generate(4, (index) {
+                              final isFilled = index < _enteredPin.length;
+                              return AnimatedContainer(
+                                duration: const Duration(milliseconds: 200),
+                                margin: const EdgeInsets.symmetric(
+                                  horizontal: 10,
+                                ),
+                                width: 14,
+                                height: 14,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: isFilled
+                                      ? AppColors.primary
+                                      : Colors.transparent,
+                                  border: Border.all(
+                                    color: isFilled
+                                        ? AppColors.primary
+                                        : AppColors.textSecondaryDark
+                                              .withValues(alpha: 0.4),
+                                    width: 2,
+                                  ),
+                                  boxShadow: isFilled
+                                      ? [
+                                          BoxShadow(
+                                            color: AppColors.primary.withValues(
+                                              alpha: 0.5,
+                                            ),
+                                            blurRadius: 8,
+                                            spreadRadius: 1,
+                                          ),
+                                        ]
+                                      : null,
+                                ),
+                              );
+                            }),
+                          ),
+                        ),
+
+                        const SizedBox(height: 12),
+
+                        // Error / Status Message
+                        AnimatedOpacity(
+                          opacity: _errorMessage != null ? 1.0 : 0.0,
+                          duration: const Duration(milliseconds: 250),
+                          child: Text(
+                            _errorMessage ?? '',
+                            style: const TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.debitRed,
+                            ),
+                          ),
+                        ),
+
+                        const Spacer(flex: 3),
+
+                        // Keypad
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 40),
+                          child: Column(
+                            children: [
+                              _buildKeypadRow(['1', '2', '3'], buttonSize),
+                              SizedBox(height: rowSpacing),
+                              _buildKeypadRow(['4', '5', '6'], buttonSize),
+                              SizedBox(height: rowSpacing),
+                              _buildKeypadRow(['7', '8', '9'], buttonSize),
+                              SizedBox(height: rowSpacing),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  // Left: Biometric button (if available)
+                                  _securityService.isBiometricEnabled
+                                      ? _buildActionButton(
+                                          icon: Icons.fingerprint_rounded,
+                                          onTap: _promptBiometric,
+                                          label: 'Scan',
+                                          buttonSize: buttonSize,
+                                        )
+                                      : SizedBox(
+                                          width: buttonSize,
+                                          height: buttonSize,
+                                        ),
+                                  // Center: 0
+                                  _buildDigitButton('0', buttonSize),
+                                  // Right: Backspace
+                                  _buildActionButton(
+                                    icon: Icons.backspace_outlined,
+                                    onTap: _onDeletePress,
+                                    label: 'Delete',
+                                    buttonSize: buttonSize,
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+
+                        const Spacer(flex: 2),
                       ],
                     ),
-                  ],
+                  ),
                 ),
-              ),
-
-              const Spacer(flex: 2),
-            ],
+              );
+            },
           ),
         ),
       ),
     );
   }
 
-  Widget _buildKeypadRow(List<String> digits) {
+  Widget _buildKeypadRow(List<String> digits, double buttonSize) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: digits.map((d) => _buildDigitButton(d)).toList(),
+      children: digits.map((d) => _buildDigitButton(d, buttonSize)).toList(),
     );
   }
 
-  Widget _buildDigitButton(String digit) {
+  Widget _buildDigitButton(String digit, double buttonSize) {
     final isDisabled = _securityService.isLockoutActive;
 
     return InkWell(
       onTap: isDisabled ? null : () => _onDigitPress(digit),
-      borderRadius: BorderRadius.circular(36),
+      borderRadius: BorderRadius.circular(buttonSize / 2),
       child: Container(
-        width: 68,
-        height: 68,
+        width: buttonSize,
+        height: buttonSize,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           color: AppColors.darkSurfaceVariant.withValues(alpha: 0.6),
@@ -340,9 +379,11 @@ class _LockScreenViewState extends State<LockScreenView> with SingleTickerProvid
           child: Text(
             digit,
             style: TextStyle(
-              fontSize: 26,
+              fontSize: buttonSize > 60 ? 26 : 22,
               fontWeight: FontWeight.w700,
-              color: isDisabled ? AppColors.textTertiaryDark : AppColors.textPrimaryDark,
+              color: isDisabled
+                  ? AppColors.textTertiaryDark
+                  : AppColors.textPrimaryDark,
             ),
           ),
         ),
@@ -354,18 +395,19 @@ class _LockScreenViewState extends State<LockScreenView> with SingleTickerProvid
     required IconData icon,
     required VoidCallback onTap,
     required String label,
+    required double buttonSize,
   }) {
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(36),
+      borderRadius: BorderRadius.circular(buttonSize / 2),
       child: Container(
-        width: 68,
-        height: 68,
+        width: buttonSize,
+        height: buttonSize,
         decoration: const BoxDecoration(shape: BoxShape.circle),
         child: Center(
           child: Icon(
             icon,
-            size: 26,
+            size: buttonSize > 60 ? 26 : 22,
             color: AppColors.textSecondaryDark,
           ),
         ),
